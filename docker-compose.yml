@@ -13,6 +13,12 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - backend
+      - monitoring
+    labels:
+      - "service=mysql-db"
+      - "environment=backend"
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -26,17 +32,56 @@ services:
       PMA_PASSWORD: 1234
     ports:
       - "8081:80"
+    networks:
+      - backend
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.phpmyadmin.rule=Host(`phpmyadmin.localhost`)"
+      - "traefik.http.routers.phpmyadmin.entrypoints=web"
+      - "traefik.http.services.phpmyadmin.loadbalancer.server.port=80"
+      - "service=phpmyadmin"
+      - "environment=backend"
 
   backend:
     build: .
     container_name: digischool-backend
     restart: always
     depends_on:
-      - mysql-db
+      mysql-db:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
     ports:
       - "8080:8080"
+    networks:
+      - backend
+      - traefik
+      - monitoring
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.digischool-backend.rule=Host(`api.helpdigischool.localhost`)"
+      - "traefik.http.routers.digischool-backend.entrypoints=web"
+      - "traefik.http.services.digischool-backend.loadbalancer.server.port=8080"
+      - "service=digischool-backend"
+      - "environment=backend"
+
+networks:
+  backend:
+    driver: bridge
+    name: digischool-backend-network
+  traefik:
+    external: true
+    name: traefik-dev
+  monitoring:
+    external: true
+    name: helpdigischool-monitoring
 
 volumes:
   mysql_data:

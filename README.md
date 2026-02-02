@@ -94,26 +94,14 @@ src/main/java/com/digiSchool/digiSchool/
 
 ---
 
-## 🚀 Démarrage rapide
-
-### 1. Cloner le projet
+## 🚀 Démarrage rapide (backend seul)
 
 ```bash
-git clone <URL_DU_DEPOT>
 cd digischool_backend
-```
-
-### 2. Builder le JAR
-
-```bash
-./mvnw clean package -DskipTests
-```
-
-### 3. Lancer les services
-
-```bash
 docker compose up --build -d
 ```
+
+> Le Dockerfile utilise un **build multi-stage Maven** : plus besoin de `mvn package` en local.
 
 Docker Compose démarre automatiquement **3 conteneurs** :
 
@@ -127,13 +115,133 @@ Docker Compose démarre automatiquement **3 conteneurs** :
 
 ---
 
-## 🌐 Accès aux services
+## 🔗 Démarrage complet (avec Monitoring, Traefik & Frontend)
+
+Le backend s'intègre dans l'écosystème complet via des réseaux Docker partagés. Les stacks doivent être lancées **dans cet ordre** car chaque stack crée un réseau dont la suivante dépend.
+
+### Architecture réseau
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────────┐
+│   Frontend   │     │   Traefik    │     │   Monitoring    │
+│  (Next.js)   │     │ (reverse     │     │ (Prometheus,    │
+│  :3000       │     │  proxy)      │     │  Grafana, Loki) │
+└──────┬───────┘     └──────┬───────┘     └────────┬────────┘
+       │                    │                      │
+       │  digischool-       │  traefik-dev         │  helpdigischool-
+       │  backend-network   │                      │  monitoring
+       │                    │                      │
+┌──────┴────────────────────┴──────────────────────┴────────┐
+│                    Backend Stack                           │
+│  ┌────────────┐  ┌──────────────┐  ┌───────────────┐     │
+│  │  MySQL 8.0 │  │  Spring Boot │  │  PhpMyAdmin   │     │
+│  │  :3306     │  │  :8080       │  │  :8081        │     │
+│  └────────────┘  └──────────────┘  └───────────────┘     │
+└───────────────────────────────────────────────────────────┘
+```
+
+### Étape 1 -- Monitoring
+
+Crée le réseau `helpdigischool-monitoring` (Prometheus, Grafana, Loki, Promtail).
+
+```bash
+cd helpdigischool/infrastructure/monitoring
+docker compose up -d
+```
+
+Vérification :
 
 | Service | URL | Identifiants |
 |:---|:---|:---|
-| **API Backend** | [http://localhost:8080](http://localhost:8080) | -- |
-| **phpMyAdmin** | [http://localhost:8081](http://localhost:8081) | `root` / `1234` |
-| **MySQL** | `localhost:3306` | `root` / `1234` |
+| Prometheus | http://localhost:9090 | -- |
+| Grafana | http://localhost:3001 | `admin` / `admin` |
+| Loki | http://localhost:3100/ready | -- |
+
+### Étape 2 -- Traefik
+
+Crée le réseau `traefik-dev` (reverse proxy + dashboard).
+
+```bash
+cd helpdigischool/infrastructure/traefik
+docker compose -f docker-compose.dev.yml up -d
+```
+
+Vérification :
+
+| Service | URL |
+|:---|:---|
+| Dashboard Traefik | http://localhost:8083 |
+| Via hostname | http://traefik.localhost:8180 |
+
+### Étape 3 -- Backend
+
+Crée le réseau `digischool-backend-network` et rejoint les réseaux des étapes précédentes.
+
+```bash
+cd digischool_backend
+docker compose up --build -d
+```
+
+Vérification :
+```bash
+# Santé
+curl http://localhost:8080/actuator/health
+
+# Métriques Prometheus
+curl http://localhost:8080/actuator/prometheus
+
+# Accès via Traefik
+curl http://api.helpdigischool.localhost:8180/actuator/health
+```
+
+### Étape 4 -- Frontend
+
+Rejoint tous les réseaux.
+
+```bash
+cd helpdigischool/docker/compose
+docker compose -f docker-compose.dev.yml up -d
+```
+
+Vérification :
+
+| Service | URL |
+|:---|:---|
+| Frontend direct | http://localhost:3000 |
+| Via Traefik | http://helpdigischool.localhost:8180 |
+
+### Tout lancer d'un coup
+
+```bash
+# Depuis la racine du projet
+docker compose -f helpdigischool/infrastructure/monitoring/docker-compose.yml up -d
+docker compose -f helpdigischool/infrastructure/traefik/docker-compose.dev.yml up -d
+docker compose -f digischool_backend/docker-compose.yml up -d --build
+docker compose -f helpdigischool/docker/compose/docker-compose.dev.yml up -d
+```
+
+### Tout arrêter
+
+```bash
+docker compose -f helpdigischool/docker/compose/docker-compose.dev.yml down
+docker compose -f digischool_backend/docker-compose.yml down
+docker compose -f helpdigischool/infrastructure/traefik/docker-compose.dev.yml down
+docker compose -f helpdigischool/infrastructure/monitoring/docker-compose.yml down
+```
+
+---
+
+## 🌐 Accès aux services
+
+| Service | URL directe | URL via Traefik | Identifiants |
+|:---|:---|:---|:---|
+| **API Backend** | http://localhost:8080 | http://api.helpdigischool.localhost:8180 | -- |
+| **phpMyAdmin** | http://localhost:8081 | http://phpmyadmin.localhost:8180 | `root` / `1234` |
+| **MySQL** | `localhost:3306` | -- | `root` / `1234` |
+| **Frontend** | http://localhost:3000 | http://helpdigischool.localhost:8180 | -- |
+| **Traefik Dashboard** | http://localhost:8083 | http://traefik.localhost:8180 | -- |
+| **Prometheus** | http://localhost:9090 | -- | -- |
+| **Grafana** | http://localhost:3001 | -- | `admin` / `admin` |
 
 ---
 
@@ -205,6 +313,7 @@ Les endpoints suivants sont accessibles **sans authentification** :
 /api/**
 /swagger-ui/**
 /v3/api-docs/**
+/actuator/**
 ```
 
 ---
@@ -268,6 +377,43 @@ curl -H "X-Tenant-ID: school-001" http://localhost:8080/api/regions
 
 ---
 
+## 📈 Monitoring du backend
+
+### Endpoints Actuator
+
+| Endpoint | Description |
+|:---|:---|
+| `/actuator/health` | État de santé (UP/DOWN) avec détails |
+| `/actuator/prometheus` | Métriques au format Prometheus |
+| `/actuator/info` | Informations sur l'application |
+
+### Dashboard Grafana
+
+Un dashboard **DigiSchool Backend** est automatiquement provisionné dans Grafana avec :
+
+| Panel | Description |
+|:---|:---|
+| Mémoire JVM | Heap et non-heap |
+| Requêtes HTTP | Taux de requêtes par seconde |
+| Temps de réponse | Percentile 95 |
+| Threads JVM | Threads actifs et daemon |
+| Connexions DB | Pool HikariCP (active, idle, pending) |
+| Garbage Collector | Durée des pauses GC |
+| CPU | Utilisation processeur |
+| Uptime | Temps depuis le dernier démarrage |
+
+Accès : http://localhost:3001 → Dashboards → **DigiSchool Backend**
+
+### Vérifier les targets Prometheus
+
+Ouvrir http://localhost:9090/targets et vérifier que le target `digischool-backend` est en état **UP**.
+
+### Logs dans Grafana
+
+Les logs du backend sont collectés automatiquement par Promtail et consultables dans Grafana → Explore → Loki (filtrer par `service="digischool-backend"`).
+
+---
+
 ## 💻 Commandes utiles
 
 ```bash
@@ -283,8 +429,8 @@ docker compose down
 # Arrêter et supprimer les volumes (reset complet de la BDD)
 docker compose down -v
 
-# Reconstruire uniquement le backend
-./mvnw clean package -DskipTests && docker compose up --build -d backend
+# Reconstruire après modification du code Java
+docker compose up -d --build
 
 # Accéder au shell MySQL
 docker exec -it mysql-db mysql -uroot -p1234 school_db

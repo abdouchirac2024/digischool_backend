@@ -23,7 +23,7 @@ public class SecurityConfig {
         )
         .authorizeHttpRequests(auth -> auth
             // Tout ce qui commence par /api/ est ouvert
-            .requestMatchers("/api/**", "/swagger-ui/**", "/v3/api-docs/**")
+            .requestMatchers("/api/**", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/**")
             .permitAll()
             // Tout le reste nécessite authentification
             .anyRequest().authenticated()
