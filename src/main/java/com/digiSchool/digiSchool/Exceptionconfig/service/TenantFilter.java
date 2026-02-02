@@ -22,11 +22,16 @@ public class TenantFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+        // Laisser passer les preflight CORS
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String tenant = request.getHeader(tenantHeader);
 
         if (tenant == null) {
-            throw new RuntimeException("Tenant manquant"); // en prod
-//        	  tenant = "default"; // tenant par défaut en Dev
+            tenant = "default"; // tenant par défaut en Dev
         }
 
         TenantContext.setTenant(tenant);
