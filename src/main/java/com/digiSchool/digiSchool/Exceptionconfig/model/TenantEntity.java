@@ -14,4 +14,12 @@ public abstract class TenantEntity {
 
 	 @Column(name = "tenant", nullable = false)
    protected String tenant;
+
+    public String getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(String tenant) {
+        this.tenant = tenant;
+    }
 }

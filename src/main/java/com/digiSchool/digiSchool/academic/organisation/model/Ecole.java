@@ -112,4 +112,20 @@ public class Ecole extends TenantEntity{
 			this.classes = classes;
 		}
 
+		public Quartier getQuartier() {
+			return quartier;
+		}
+
+		public void setQuartier(Quartier quartier) {
+			this.quartier = quartier;
+		}
+
+		public String getCodeEcole() {
+			return codeEcole;
+		}
+
+		public void setCodeEcole(String codeEcole) {
+			this.codeEcole = codeEcole;
+		}
+
 }
