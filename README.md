@@ -309,7 +309,7 @@ Docker Compose demarre automatiquement **5 conteneurs** :
 | Conteneur | Service | Port |
 |:---|:---|:---:|
 | `mysql-db` | Base de donnees MySQL 8 | `3306` |
-| `redis` | Cache Redis 7 | `6379` |
+| `redis` | Cache Redis 7 | `6380` |
 | `phpmyadmin` | Interface admin BDD | `8081` |
 | `redis-commander` | Interface admin Redis | `8084` |
 | `digischool-backend` | API Spring Boot | `8080` |
@@ -326,7 +326,7 @@ Docker Compose demarre automatiquement **5 conteneurs** :
 | **phpMyAdmin** | http://localhost:8081 | Interface BDD (`root` / `1234`) |
 | **Redis Commander** | http://localhost:8084 | Interface Redis |
 | **MySQL** | `localhost:3306` | Connexion directe (`root` / `1234`) |
-| **Redis** | `localhost:6379` | Connexion directe |
+| **Redis** | `localhost:6380` | Connexion directe |
 
 ---
 
