@@ -15,23 +15,23 @@
 
 ## Table des matieres
 
-- [Stack technique](#-stack-technique)
-- [Architecture du projet](#-architecture-du-projet)
-- [Prerequis](#-prerequis)
-- [Demarrage rapide](#-demarrage-rapide)
-- [Acces aux services](#-acces-aux-services)
-- [Documentation API](#-documentation-api)
-- [Authentification](#-authentification)
-- [Comptes de test](#-comptes-de-test)
-- [Configuration](#%EF%B8%8F-configuration)
-- [Multi-tenancy](#-multi-tenancy)
-- [Securite](#-securite)
-- [Modele de donnees](#-modele-de-donnees)
-- [Tester l'API](#-tester-lapi)
-- [Monitoring](#-monitoring)
-- [Commandes utiles](#-commandes-utiles)
-- [Travail en equipe](#-travail-en-equipe)
-- [Evolutions prevues](#-evolutions-prevues)
+- [Stack technique](#stack-technique)
+- [Architecture du projet](#architecture-du-projet)
+- [Data Seeders](#data-seeders)
+- [Prerequis](#prerequis)
+- [Demarrage rapide](#demarrage-rapide)
+- [Acces aux services](#acces-aux-services)
+- [Documentation API](#documentation-api)
+- [Authentification](#authentification)
+- [Comptes de test](#comptes-de-test)
+- [Configuration](#configuration)
+- [Multi-tenancy](#multi-tenancy)
+- [Securite](#securite)
+- [Modele de donnees](#modele-de-donnees)
+- [Tester l'API](#tester-lapi)
+- [Monitoring](#monitoring)
+- [Commandes utiles](#commandes-utiles)
+- [Evolutions prevues](#evolutions-prevues)
 
 ---
 
@@ -55,44 +55,223 @@
 
 ## Architecture du projet
 
+### Vue d'ensemble
+
+```
+digischool_backend/
+│
+├── src/main/java/...              Code source Java
+├── src/main/resources/            Configuration (application.properties)
+├── docs/                          Documentation API (Postman, OpenAPI)
+├── docker-compose.yml             Orchestration des conteneurs
+├── Dockerfile                     Image Docker du backend
+├── pom.xml                        Dependances Maven
+├── ARCHITECTURE.md                Guide detaille de l'architecture
+└── README.md                      Ce fichier
+```
+
+### Structure du code source
+
 ```
 src/main/java/com/digiSchool/digiSchool/
 │
-├── DigiSchoolApplication.java              Point d'entree
+├── DigiSchoolApplication.java        # Point d'entree de l'application
 │
-├── config/
-│   └── OpenApiConfig.java                  Configuration Swagger/OpenAPI
-│
-├── academic/
-│   ├── evaluation/
-│   │   └── model/                          Evaluation, Note
+├── config/                           # CONFIGURATION
+│   ├── SecurityConfig.java           # Securite Spring (routes, CORS, etc.)
+│   ├── OpenApiConfig.java            # Configuration Swagger UI
 │   │
-│   ├── organisation/
-│   │   ├── controller/                     RegionController, ClasseController
-│   │   ├── dto/                            RegionDto, ClasseDto
-│   │   ├── model/                          Ecole, Classe, Inscription,
-│   │   │                                   EmploiDuTemps, Anneescolaire
-│   │   ├── repository/                     RegionRepository, ClasseRepository
-│   │   ├── service/                        RegionService, ClasseService
-│   │   └── serviceimp/                     RegionServiceImpl, ClasseServiceImpl
+│   └── seeder/                       # DONNEES DE TEST (voir section suivante)
+│       ├── DataSeeder.java           # Orchestrateur principal
+│       ├── RoleSeeder.java           # Roles (ADMIN, DIRECTEUR, etc.)
+│       ├── RegionSeeder.java         # Geographie du Cameroun
+│       ├── EcoleSeeder.java          # Ecoles de demonstration
+│       ├── AnneeScolaireSeeder.java  # Annees scolaires
+│       ├── UtilisateurSeeder.java    # Utilisateurs de test
+│       └── ClasseSeeder.java         # Classes
+│
+├── auth/                             # AUTHENTIFICATION
+│   ├── controller/
+│   │   └── AuthController.java       # POST /api/auth/login, GET /me
+│   ├── dto/
+│   │   ├── LoginRequest.java         # { identifier, password }
+│   │   ├── LoginResponse.java        # { token, refreshToken, user }
+│   │   └── UserDto.java              # Representation utilisateur
+│   ├── service/
+│   │   ├── AuthService.java          # Logique d'authentification
+│   │   ├── JwtService.java           # Creation/validation tokens JWT
+│   │   └── UserContextService.java   # Recupere l'utilisateur courant
+│   ├── filter/
+│   │   └── JwtAuthenticationFilter.java  # Verifie le token a chaque requete
+│   └── exception/
+│       └── AuthenticationException.java  # Erreurs d'authentification
+│
+├── user/                             # UTILISATEURS
+│   ├── controller/
+│   │   └── RoleController.java       # GET /api/roles
+│   ├── model/
+│   │   ├── Utilisateur.java          # Entite utilisateur
+│   │   ├── Role.java                 # Enum des roles
+│   │   ├── StatutUtilisateur.java    # ACTIF, INACTIF, EN_ATTENTE
+│   │   ├── Eleve.java                # Entite eleve
+│   │   └── StatutEleve.java          # Statuts des eleves
+│   └── repository/
+│       ├── UtilisateurRepository.java
+│       └── RoleRepository.java
+│
+├── academic/                         # GESTION SCOLAIRE
 │   │
-│   └── pedagogique/
-│       └── model/                          Bulletin, Discipline, Periode,
-│                                           AppreciationBulletin
+│   ├── organisation/                 # Ecoles, Classes, Inscriptions
+│   │   ├── controller/
+│   │   │   ├── RegionController.java
+│   │   │   └── ClasseController.java
+│   │   ├── dto/
+│   │   │   ├── RegionDto.java
+│   │   │   └── ClasseDto.java
+│   │   ├── model/
+│   │   │   ├── Ecole.java
+│   │   │   ├── Classe.java
+│   │   │   ├── Inscription.java
+│   │   │   ├── Anneescolaire.java
+│   │   │   ├── EmploiDuTemps.java
+│   │   │   ├── Niveau.java           # MATERNELLE, PRIMAIRE, COLLEGE, LYCEE
+│   │   │   ├── SousSysteme.java      # FRANCOPHONE, ANGLOPHONE
+│   │   │   └── StatutClasse.java     # ACTIVE, INACTIVE, ARCHIVEE
+│   │   ├── service/
+│   │   │   ├── RegionService.java
+│   │   │   └── ClasseService.java
+│   │   ├── serviceimp/
+│   │   │   ├── RegionServiceImpl.java
+│   │   │   └── ClasseServiceImpl.java
+│   │   └── repository/
+│   │       ├── RegionRepository.java
+│   │       ├── EcoleRepository.java
+│   │       ├── ClasseRepository.java
+│   │       └── AnneescolaireRepository.java
+│   │
+│   ├── evaluation/                   # Notes et Evaluations
+│   │   └── model/
+│   │       ├── Evaluation.java
+│   │       └── Note.java
+│   │
+│   └── pedagogique/                  # Bulletins et Disciplines
+│       └── model/
+│           ├── Discipline.java
+│           ├── Periode.java
+│           ├── Bulletin.java
+│           └── AppreciationBulletin.java
 │
-├── Exceptionconfig/
-│   ├── model/                              Region, Departement, Arrondissement,
-│   │                                       Ville, Quartier, TenantEntity
-│   └── service/                            SecurityConfig, JwtService,
-│                                           JwtAuthenticationFilter, TenantFilter,
-│                                           TenantContext, HibernateTenantInterceptor
+└── Exceptionconfig/                  # GEOGRAPHIE CAMEROUN
+    ├── model/
+    │   ├── Region.java               # 10 regions du Cameroun
+    │   ├── Departement.java          # 58 departements
+    │   ├── Arrondissement.java
+    │   ├── Ville.java
+    │   ├── Quartier.java
+    │   └── TenantEntity.java         # Classe de base multi-tenant
+    └── repository/
+        ├── DepartementRepository.java
+        ├── ArrondissementRepository.java
+        ├── VilleRepository.java
+        └── QuartierRepository.java
+```
+
+### Pattern MVC
+
+Le projet suit le pattern **Model-View-Controller** :
+
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Client    │───>│  Controller │───>│   Service   │───>│ Repository  │
+│ (Frontend)  │<───│   (API)     │<───│  (Logique)  │<───│   (BDD)     │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+```
+
+| Couche | Role | Exemple |
+|:-------|:-----|:--------|
+| **Controller** | Recoit les requetes HTTP, valide les entrees | `AuthController.java` |
+| **Service** | Contient la logique metier | `AuthService.java` |
+| **Repository** | Communique avec la base de donnees | `UtilisateurRepository.java` |
+| **Model** | Represente les tables de la BDD (entites JPA) | `Utilisateur.java` |
+| **DTO** | Donnees transferees via l'API (input/output) | `LoginRequest.java` |
+
+---
+
+## Data Seeders
+
+Les **seeders** creent automatiquement des donnees de demonstration au demarrage de l'application.
+
+### Structure des seeders
+
+```
+config/seeder/
 │
-└── user/
-    ├── controller/                         AuthController, RoleController
-    ├── dto/                                LoginRequest, AuthResponse
-    ├── model/                              Utilisateur, Eleve, Role, StatutEleve
-    ├── repository/                         UtilisateurRepository, RoleRepository
-    └── service/                            AuthService
+├── DataSeeder.java           # Orchestrateur - appelle les autres dans l'ordre
+├── RoleSeeder.java           # Cree les 5 roles
+├── RegionSeeder.java         # Cree les 10 regions du Cameroun + villes + quartiers
+├── EcoleSeeder.java          # Cree 3 ecoles de demonstration
+├── AnneeScolaireSeeder.java  # Cree les annees scolaires
+├── UtilisateurSeeder.java    # Cree 14 utilisateurs de test
+└── ClasseSeeder.java         # Cree 20 classes
+```
+
+### Ordre d'execution
+
+Les seeders sont appeles dans un ordre precis pour respecter les dependances :
+
+```
+1. RoleSeeder           Cree: ADMIN, DIRECTEUR, ENSEIGNANT, SECRETAIRE, PARENT
+        │
+        ▼
+2. RegionSeeder         Cree: 10 regions, departements, villes, quartiers
+        │
+        ▼
+3. EcoleSeeder          Cree: 3 ecoles (Yaounde, Douala, Bafoussam)
+        │
+        ▼
+4. AnneeScolaireSeeder  Cree: 2024-2025 (archivee), 2025-2026 (active)
+        │
+        ▼
+5. UtilisateurSeeder    Cree: 14 utilisateurs avec differents roles
+        │
+        ▼
+6. ClasseSeeder         Cree: 20 classes (maternelle au lycee)
+```
+
+### Donnees creees
+
+| Seeder | Nombre | Details |
+|:-------|:------:|:--------|
+| **RoleSeeder** | 5 | ADMIN, DIRECTEUR, ENSEIGNANT, SECRETAIRE, PARENT |
+| **RegionSeeder** | ~200 | 10 regions, 58 departements, villes, quartiers |
+| **EcoleSeeder** | 3 | Ecoles a Yaounde, Douala, Bafoussam |
+| **AnneeScolaireSeeder** | 2 | 2024-2025 (archivee), 2025-2026 (active) |
+| **UtilisateurSeeder** | 14 | Admin, directeurs, enseignants, parents, etc. |
+| **ClasseSeeder** | 20 | Maternelle, primaire, college, lycee |
+
+### Comportement
+
+- Les seeders verifient si les donnees existent deja avant de les creer
+- Pas de doublons si on redemarre l'application
+- Pour reinitialiser : `docker compose down -v` (supprime les volumes)
+
+### Logs au demarrage
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║              DIGISCHOOL - INITIALISATION DES DONNEES         ║
+╚══════════════════════════════════════════════════════════════╝
+
+  -> Roles : 5 roles crees (ADMIN, DIRECTEUR, ENSEIGNANT, SECRETAIRE, PARENT)
+  -> Geographie : 10 regions du Cameroun creees
+  -> Ecoles : 3 ecoles creees
+  -> Annees scolaires : 2 annees creees
+  -> Utilisateurs : 14 utilisateurs crees
+  -> Classes : 20 classes creees (19 actives + 1 archivee)
+
+╔══════════════════════════════════════════════════════════════╗
+║                    INITIALISATION TERMINEE                   ║
+╚══════════════════════════════════════════════════════════════╝
 ```
 
 ---
@@ -103,15 +282,22 @@ src/main/java/com/digiSchool/digiSchool/
 |:---|:---|
 | **Docker** | >= 20.x |
 | **Docker Compose** | >= 2.x |
-| **Java 17** | Uniquement pour le build Maven |
+| **Java 17** | Uniquement pour le build Maven (optionnel avec Docker) |
 
 ---
 
-## Demarrage rapide (backend seul)
+## Demarrage rapide
 
 ```bash
+# 1. Cloner le projet
+git clone <URL_DU_DEPOT>
 cd digischool_backend
+
+# 2. Lancer avec Docker
 docker compose up --build -d
+
+# 3. Verifier que tout fonctionne
+curl http://localhost:8080/actuator/health
 ```
 
 > Le Dockerfile utilise un **build multi-stage Maven** : plus besoin de `mvn package` en local.
@@ -123,8 +309,6 @@ Docker Compose demarre automatiquement **3 conteneurs** :
 | `mysql-db` | Base de donnees MySQL 8 | `3306` |
 | `phpmyadmin` | Interface admin BDD | `8081` |
 | `digischool-backend` | API Spring Boot | `8080` |
-
-> La base de donnees `school_db` est creee automatiquement au premier demarrage de MySQL.
 
 ---
 
@@ -150,29 +334,19 @@ Accedez a l'interface interactive Swagger UI :
 http://localhost:8080/swagger-ui.html
 ```
 
-**Comment utiliser Swagger UI :**
+**Comment utiliser :**
 
-1. **Se connecter :**
-   - Cliquez sur `POST /api/auth/login`
-   - Cliquez sur "Try it out"
-   - Entrez vos identifiants (voir [Comptes de test](#-comptes-de-test))
-   - Cliquez "Execute"
-   - Copiez le `token` de la reponse
-
-2. **Autoriser :**
-   - Cliquez sur le bouton "Authorize" (cadenas en haut a droite)
-   - Entrez : `Bearer <votre_token>`
-   - Cliquez "Authorize"
-
-3. **Tester les endpoints :**
-   - Tous les endpoints sont maintenant accessibles
-   - Cliquez sur un endpoint, puis "Try it out"
+1. Cliquez sur `POST /api/auth/login` → "Try it out"
+2. Entrez : `{"identifier": "admin@digischool.cm", "password": "Admin@2025"}`
+3. Copiez le `token` de la reponse
+4. Cliquez sur "Authorize" (cadenas) → Entrez : `Bearer <token>`
+5. Testez tous les endpoints
 
 ### Postman
 
 Une collection Postman complete est disponible dans `docs/` :
 
-```bash
+```
 docs/
 ├── DigiSchool_API.postman_collection.json    # Collection complete
 ├── DigiSchool_Local.postman_environment.json # Variables d'environnement
@@ -180,20 +354,11 @@ docs/
 └── README.md                                  # Guide d'utilisation
 ```
 
-**Importer dans Postman :**
-
-1. Ouvrez Postman
-2. Cliquez sur "Import"
-3. Selectionnez les fichiers `.json`
-4. Les tokens sont geres automatiquement apres login
-
 ---
 
 ## Authentification
 
 ### Login avec Email OU Telephone
-
-L'API supporte l'authentification avec **email** ou **numero de telephone** :
 
 ```bash
 # Login avec email
@@ -207,16 +372,16 @@ curl -X POST http://localhost:8080/api/auth/login \
   -d '{"identifier": "+237600000000", "password": "Admin@2025"}'
 ```
 
-### Reponse d'authentification
+### Reponse
 
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
   "user": {
     "id": 1,
     "nom": "Admin",
-    "prenom": "System",
+    "prenom": "Super",
     "email": "admin@digischool.cm",
     "telephone": "+237600000000",
     "role": "ADMIN",
@@ -226,20 +391,12 @@ curl -X POST http://localhost:8080/api/auth/login \
 }
 ```
 
-### Statuts utilisateur
-
-| Statut | Description | Connexion |
-|:---|:---|:---:|
-| `ACTIF` | Compte actif et valide | Autorise |
-| `EN_ATTENTE` | En attente de validation | Refuse |
-| `INACTIF` | Compte desactive | Refuse |
-
-### Endpoints d'authentification
+### Endpoints
 
 | Methode | Endpoint | Description | Auth |
 |:---|:---|:---|:---:|
-| POST | `/api/auth/login` | Connexion (email ou telephone) | Non |
-| GET | `/api/auth/me` | Profil utilisateur connecte | Oui |
+| POST | `/api/auth/login` | Connexion | Non |
+| GET | `/api/auth/me` | Profil utilisateur | Oui |
 | POST | `/api/auth/refresh` | Rafraichir le token | Non |
 | POST | `/api/auth/logout` | Deconnexion | Oui |
 
@@ -247,19 +404,19 @@ curl -X POST http://localhost:8080/api/auth/login \
 
 ## Comptes de test
 
-Les comptes suivants sont crees automatiquement au demarrage (via DataSeeder) :
+Les comptes suivants sont crees automatiquement par les seeders :
 
-| Role | Email | Telephone | Password | ecoleId |
-|:---|:---|:---|:---|:---:|
-| **Admin SaaS** | admin@digischool.cm | +237600000000 | `Admin@2025` | null |
-| **Directeur** | smbarga@lavictoire.cm | +237677123456 | `Directeur@2025` | 1 |
-| **Enseignant** | jpkamga@lavictoire.cm | +237670111222 | `Enseignant@2025` | 1 |
-| **Secretaire** | catangana@lavictoire.cm | +237660555666 | `Secretaire@2025` | 1 |
-| **Parent** | fnkoulou@gmail.com | +237691666777 | `Parent@2025` | 1 |
-| **En Attente** | enattente@test.cm | +237699000111 | `Test@2025` | 1 |
-| **Inactif** | inactif@test.cm | +237699000222 | `Test@2025` | 1 |
+| Role | Email | Telephone | Password |
+|:---|:---|:---|:---|
+| **Admin SaaS** | admin@digischool.cm | +237600000000 | `Admin@2025` |
+| **Directeur** | smbarga@lavictoire.cm | +237677123456 | `Directeur@2025` |
+| **Enseignant** | jpkamga@lavictoire.cm | +237670111222 | `Enseignant@2025` |
+| **Secretaire** | catangana@lavictoire.cm | +237660555666 | `Secretaire@2025` |
+| **Parent** | fnkoulou@gmail.com | +237691666777 | `Parent@2025` |
+| **En Attente** | enattente@test.cm | +237699000111 | `Test@2025` |
+| **Inactif** | inactif@test.cm | +237699000222 | `Test@2025` |
 
-> **Note :** L'Admin SaaS (`ecoleId = null`) peut acceder a toutes les ressources de toutes les ecoles.
+> **Note :** L'Admin SaaS peut acceder a toutes les ressources de toutes les ecoles.
 
 ---
 
@@ -267,76 +424,68 @@ Les comptes suivants sont crees automatiquement au demarrage (via DataSeeder) :
 
 ### Profils Spring
 
-| Profil | Fichier | Hote BDD |
+| Profil | Fichier | Utilisation |
 |:---|:---|:---|
-| **default** (local) | `application.properties` | `localhost:3306` |
-| **docker** | `application-docker.properties` | `mysql-db:3306` |
+| **default** | `application.properties` | Developpement local |
+| **docker** | `application-docker.properties` | Docker Compose |
 
-Le profil `docker` est active automatiquement via la variable d'environnement dans `docker-compose.yml` :
-
-```yaml
-environment:
-  SPRING_PROFILES_ACTIVE: docker
-```
-
-### Proprietes principales
+### Variables d'environnement
 
 ```properties
-# Connexion BDD
-spring.datasource.url=jdbc:mysql://<hote>:3306/school_db
+# Base de donnees
+spring.datasource.url=jdbc:mysql://mysql-db:3306/school_db
 spring.datasource.username=root
 spring.datasource.password=1234
 
-# Hibernate
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-
 # JWT
 jwt.secret=<votre_secret_256_bits>
-jwt.expiration=86400000
-jwt.refresh-expiration=604800000
+jwt.expiration=86400000          # 24h
+jwt.refresh-expiration=604800000 # 7 jours
 
 # Swagger
-springdoc.api-docs.enabled=true
-springdoc.swagger-ui.enabled=true
 springdoc.swagger-ui.path=/swagger-ui.html
-
-# Serveur
-server.port=8080
 ```
 
 ---
 
 ## Multi-tenancy
 
-Le projet implemente une architecture **multi-tenant** basee sur le **JWT token** :
+Chaque utilisateur appartient a une ecole (`ecoleId` dans le JWT).
 
-| Composant | Role |
-|:---|:---|
-| `UserContextService` | Extrait l'ecoleId depuis les claims JWT |
-| `JwtService` | Decode et valide le token JWT |
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Ecole 1   │     │   Ecole 2   │     │   Ecole 3   │
+│  La Victoire│     │ Progressive │     │ Champions   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ Directeur   │     │ Directeur   │     │ Directeur   │
+│ Enseignants │     │ Enseignants │     │ Enseignants │
+│ Classes     │     │ Classes     │     │ Classes     │
+│ Eleves      │     │ Eleves      │     │ Eleves      │
+└─────────────┘     └─────────────┘     └─────────────┘
+        │                   │                   │
+        └───────────────────┼───────────────────┘
+                            │
+                    ┌───────────────┐
+                    │  Admin SaaS   │
+                    │ (Acces total) │
+                    └───────────────┘
+```
 
-### Securite du multi-tenant
-
-- L'ecoleId est extrait **uniquement** du JWT token (signe cryptographiquement)
-- Le client ne peut **pas** manipuler le tenant
-- Chaque utilisateur accede uniquement aux donnees de son ecole
-- L'Admin SaaS (`ecoleId = null`) peut voir toutes les ressources
+- L'`ecoleId` est extrait du JWT (non manipulable)
+- Chaque utilisateur voit uniquement les donnees de son ecole
+- L'Admin SaaS (`ecoleId = null`) voit tout
 
 ---
 
 ## Securite
 
-| Fonctionnalite | Detail |
+| Fonctionnalite | Implementation |
 |:---|:---|
-| **Mode** | Stateless (pas de session cote serveur) |
-| **Authentification** | JWT via `JwtService` + `JwtAuthenticationFilter` |
-| **Framework** | Spring Security |
-| **Hashage mots de passe** | BCrypt |
+| Authentification | JWT + Spring Security |
+| Hashage mots de passe | BCrypt |
+| Mode | Stateless (pas de session) |
 
 ### Routes publiques
-
-Les endpoints suivants sont accessibles **sans authentification** :
 
 ```
 POST /api/auth/login
@@ -344,241 +493,111 @@ POST /api/auth/refresh
 /swagger-ui/**
 /v3/api-docs/**
 /actuator/health
-/actuator/prometheus
 ```
 
 ### Routes protegees
 
-Toutes les autres routes necessitent un token JWT valide dans le header :
-
+Toutes les autres routes necessitent :
 ```
-Authorization: Bearer <votre_token>
+Authorization: Bearer <token>
 ```
 
 ---
 
 ## Modele de donnees
 
-### Organisation geographique & scolaire
+### Hierarchie geographique
 
 ```
-Region → Departement → Arrondissement → Ville → Quartier
-                                                    └── Ecole → Classe
+Region (10)
+  └── Departement (58)
+        └── Arrondissement
+              └── Ville
+                    └── Quartier
+                          └── Ecole
+                                └── Classe
 ```
 
-| Entite | Description |
+### Entites principales
+
+| Domaine | Entites |
 |:---|:---|
-| `Ecole` | Etablissement scolaire |
-| `Classe` | Classe au sein d'une ecole |
-| `Anneescolaire` | Annee scolaire en cours |
-| `Inscription` | Inscription d'un eleve dans une classe |
-| `EmploiDuTemps` | Emploi du temps d'une classe |
-
-### Utilisateurs
-
-| Entite | Description |
-|:---|:---|
-| `Utilisateur` | Compte utilisateur (tous roles) |
-| `Role` | ADMIN, DIRECTEUR, ENSEIGNANT, SECRETAIRE, PARENT |
-| `Eleve` | Profil eleve avec statut |
-| `StatutEleve` | Actif, Transfere, Exclu, etc. |
-
-### Statuts utilisateur
-
-| Statut | Description |
-|:---|:---|
-| `ACTIF` | Compte actif, connexion autorisee |
-| `EN_ATTENTE` | En attente de validation admin |
-| `INACTIF` | Compte desactive |
-
-### Pedagogie & evaluations
-
-| Entite | Description |
-|:---|:---|
-| `Discipline` | Matiere enseignee (Maths, Francais, etc.) |
-| `Periode` | Trimestre / Sequence |
-| `Evaluation` | Controle ou examen |
-| `Note` | Note obtenue par un eleve |
-| `Bulletin` | Bulletin de notes par periode |
-| `AppreciationBulletin` | Appreciations de l'enseignant / directeur |
+| **Geographie** | Region, Departement, Arrondissement, Ville, Quartier |
+| **Organisation** | Ecole, Classe, Anneescolaire, Inscription |
+| **Utilisateurs** | Utilisateur, Role, Eleve |
+| **Pedagogie** | Discipline, Periode, Evaluation, Note, Bulletin |
 
 ---
 
 ## Tester l'API
 
-### Avec cURL
-
 ```bash
-# 1. Login
+# 1. Login et recuperer le token
 TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"identifier": "admin@digischool.cm", "password": "Admin@2025"}' \
   | jq -r '.token')
 
-# 2. Obtenir le profil utilisateur
+# 2. Appeler les endpoints
 curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/auth/me
-
-# 3. Lister les roles
 curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/roles
-
-# 4. Lister les classes
 curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/classes
-
-# 5. Lister les regions
 curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/regions
 ```
-
-### Avec Swagger UI
-
-1. Ouvrir http://localhost:8080/swagger-ui.html
-2. Executer `POST /api/auth/login` avec les identifiants de test
-3. Copier le token et cliquer "Authorize"
-4. Tester tous les endpoints
-
-### Avec Postman
-
-1. Importer la collection depuis `docs/DigiSchool_API.postman_collection.json`
-2. Importer l'environnement depuis `docs/DigiSchool_Local.postman_environment.json`
-3. Executer "Login (Email)" - le token est sauvegarde automatiquement
-4. Toutes les requetes utilisent ce token
 
 ---
 
 ## Monitoring
 
-### Endpoints Actuator
-
 | Endpoint | Description |
 |:---|:---|
-| `/actuator/health` | Etat de sante (UP/DOWN) avec details |
-| `/actuator/prometheus` | Metriques au format Prometheus |
-| `/actuator/info` | Informations sur l'application |
+| `/actuator/health` | Etat de sante |
+| `/actuator/prometheus` | Metriques Prometheus |
+| `/actuator/info` | Informations application |
 
-### Dashboard Grafana
-
-Un dashboard **DigiSchool Backend** est automatiquement provisionne dans Grafana avec :
-
-| Panel | Description |
-|:---|:---|
-| Memoire JVM | Heap et non-heap |
-| Requetes HTTP | Taux de requetes par seconde |
-| Temps de reponse | Percentile 95 |
-| Threads JVM | Threads actifs et daemon |
-| Connexions DB | Pool HikariCP (active, idle, pending) |
-| Garbage Collector | Duree des pauses GC |
-| CPU | Utilisation processeur |
-| Uptime | Temps depuis le dernier demarrage |
-
-Acces : http://localhost:3001 → Dashboards → **DigiSchool Backend**
-
-### Verifier les targets Prometheus
-
-Ouvrir http://localhost:9090/targets et verifier que le target `digischool-backend` est en etat **UP**.
-
-### Logs dans Grafana
-
-Les logs du backend sont collectes automatiquement par Promtail et consultables dans Grafana → Explore → Loki (filtrer par `service="digischool-backend"`).
-
----
-
-## Demarrage complet (avec Monitoring, Traefik & Frontend)
-
-Le backend s'integre dans l'ecosysteme complet via des reseaux Docker partages.
-
-### Architecture reseau
+### Architecture complete (avec Monitoring)
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────────────┐
-│   Frontend   │     │   Traefik    │     │   Monitoring    │
-│  (Next.js)   │     │ (reverse     │     │ (Prometheus,    │
-│  :3000       │     │  proxy)      │     │  Grafana, Loki) │
-└──────┬───────┘     └──────┬───────┘     └────────┬────────┘
-       │                    │                      │
-       │  digischool-       │  traefik-dev         │  helpdigischool-
-       │  backend-network   │                      │  monitoring
-       │                    │                      │
-┌──────┴────────────────────┴──────────────────────┴────────┐
-│                    Backend Stack                           │
-│  ┌────────────┐  ┌──────────────┐  ┌───────────────┐     │
-│  │  MySQL 8.0 │  │  Spring Boot │  │  PhpMyAdmin   │     │
-│  │  :3306     │  │  :8080       │  │  :8081        │     │
-│  └────────────┘  └──────────────┘  └───────────────┘     │
-└───────────────────────────────────────────────────────────┘
+│   Frontend  │     │   Traefik    │     │   Monitoring    │
+│  (Next.js)  │     │   (proxy)    │     │ (Prometheus,    │
+│  :3000      │     │   :8180      │     │  Grafana, Loki) │
+└──────┬──────┘     └──────┬───────┘     └────────┬────────┘
+       │                   │                      │
+       └───────────────────┼──────────────────────┘
+                           │
+              ┌────────────┴────────────┐
+              │     Backend Stack       │
+              │  ┌────────┐ ┌────────┐  │
+              │  │ MySQL  │ │ Spring │  │
+              │  │ :3306  │ │ :8080  │  │
+              │  └────────┘ └────────┘  │
+              └─────────────────────────┘
 ```
-
-### Lancement par etapes
-
-```bash
-# 1. Monitoring (cree le reseau helpdigischool-monitoring)
-cd helpdigischool/infrastructure/monitoring
-docker compose up -d
-
-# 2. Traefik (cree le reseau traefik-dev)
-cd helpdigischool/infrastructure/traefik
-docker compose -f docker-compose.dev.yml up -d
-
-# 3. Backend (cree digischool-backend-network, rejoint les autres)
-cd digischool_backend
-docker compose up --build -d
-
-# 4. Frontend (rejoint tous les reseaux)
-cd helpdigischool/docker/compose
-docker compose -f docker-compose.dev.yml up -d
-```
-
-### URLs via Traefik
-
-| Service | URL via Traefik |
-|:---|:---|
-| API Backend | http://api.helpdigischool.localhost:8180 |
-| Frontend | http://helpdigischool.localhost:8180 |
-| phpMyAdmin | http://phpmyadmin.localhost:8180 |
-| Traefik Dashboard | http://traefik.localhost:8180 |
 
 ---
 
 ## Commandes utiles
 
 ```bash
-# Demarrer tous les services
+# Demarrer
 docker compose up --build -d
 
-# Voir les logs du backend en temps reel
+# Logs en temps reel
 docker logs -f digischool-backend
 
-# Arreter tous les services
+# Arreter
 docker compose down
 
-# Arreter et supprimer les volumes (reset complet de la BDD)
+# Reset complet (supprime la BDD)
 docker compose down -v
 
-# Reconstruire apres modification du code Java
-docker compose up -d --build
-
-# Acceder au shell MySQL
+# Acceder a MySQL
 docker exec -it mysql-db mysql -uroot -p1234 school_db
 
-# Tester la sante de l'API
+# Verifier la sante
 curl http://localhost:8080/actuator/health
-
-# Verifier que Swagger est accessible
-curl -I http://localhost:8080/swagger-ui.html
 ```
-
----
-
-## Travail en equipe
-
-```bash
-# 1. Cloner le depot
-git clone <URL_DU_DEPOT>
-
-# 2. Builder et lancer
-cd digischool_backend
-docker compose up --build -d
-```
-
-Chaque developpeur dispose du **meme environnement** grace a Docker. Aucune installation locale de MySQL n'est necessaire.
 
 ---
 
@@ -586,43 +605,35 @@ Chaque developpeur dispose du **meme environnement** grace a Docker. Aucune inst
 
 ### Termine
 
-- [x] Authentification JWT complete (login / refresh token / logout)
+- [x] Authentification JWT (login / refresh / logout)
 - [x] Login avec email OU telephone
 - [x] Gestion des statuts utilisateur (ACTIF, EN_ATTENTE, INACTIF)
 - [x] Documentation Swagger / OpenAPI
 - [x] Collection Postman complete
-- [x] Multi-tenancy base sur JWT (ecoleId)
-- [x] Monitoring avec Prometheus/Grafana
+- [x] Multi-tenancy base sur JWT
+- [x] Monitoring Prometheus/Grafana
+- [x] Seeders modulaires et organises
 
 ### En cours
 
 - [ ] Gestion fine des roles et permissions (RBAC)
-- [ ] Endpoints CRUD pour Utilisateurs
+- [ ] CRUD Utilisateurs
 - [ ] Gestion des eleves et inscriptions
 
 ### A venir
 
-- [ ] Profils Spring avances (dev, staging, prod)
-- [ ] Migrations de schema avec Flyway ou Liquibase
-- [ ] CI/CD GitLab (build + tests + deploiement)
-- [ ] Tests unitaires et d'integration
-- [ ] Gestion des fichiers (bulletins PDF, photos)
-- [ ] Notifications en temps reel (WebSocket)
+- [ ] Migrations avec Flyway
+- [ ] CI/CD GitLab
+- [ ] Tests unitaires et integration
+- [ ] Gestion des fichiers (bulletins PDF)
+- [ ] Notifications WebSocket
 
 ---
 
-## Codes de statut HTTP
+## Documentation supplementaire
 
-| Code | Description |
-|:---|:---|
-| 200 | Succes |
-| 201 | Cree avec succes |
-| 204 | Supprime avec succes (pas de contenu) |
-| 400 | Requete invalide |
-| 401 | Non authentifie (token manquant/invalide) |
-| 403 | Acces refuse (permissions insuffisantes) |
-| 404 | Ressource non trouvee |
-| 500 | Erreur serveur |
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Guide detaille de l'architecture du projet
+- **[docs/README.md](./docs/README.md)** - Guide d'utilisation de l'API
 
 ---
 

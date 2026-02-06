@@ -37,16 +37,35 @@ public class ClasseServiceImpl implements ClasseService {
         this.utilisateurRepository = utilisateurRepository;
     }
 
+    /**
+     * Créer une classe (ancien - utilise ecoleId du DTO)
+     * @deprecated Utiliser create(dto, ecoleIdOverride) avec le contexte utilisateur
+     */
     @Override
+    @Deprecated
     public ClasseDto create(ClasseDto dto) {
-        if (dto.getEcoleId() == null) {
+        return create(dto, null);
+    }
+
+    /**
+     * Créer une classe avec ecoleId automatique depuis le contexte utilisateur.
+     * Si ecoleIdOverride est fourni (depuis JWT/header), il est utilisé à la place de dto.ecoleId.
+     * @param dto Les données de la classe
+     * @param ecoleIdOverride L'ecoleId de l'utilisateur connecté (peut être null en mode dev)
+     */
+    @Override
+    public ClasseDto create(ClasseDto dto, Long ecoleIdOverride) {
+        // Utiliser l'ecoleId du contexte utilisateur si disponible, sinon celui du DTO
+        Long ecoleId = ecoleIdOverride != null ? ecoleIdOverride : dto.getEcoleId();
+
+        if (ecoleId == null) {
             throw new RuntimeException("L'identifiant de l'école est obligatoire");
         }
 
-        Ecole ecole = ecoleRepository.findById(dto.getEcoleId())
+        Ecole ecole = ecoleRepository.findById(ecoleId)
                 .orElseThrow(() -> new RuntimeException("École introuvable"));
 
-        if (classeRepository.existsByNomClasseAndEcoleIdEcole(dto.getNomClasse(), dto.getEcoleId())) {
+        if (classeRepository.existsByNomClasseAndEcoleIdEcole(dto.getNomClasse(), ecoleId)) {
             throw new RuntimeException("Une classe avec ce nom existe déjà dans cette école");
         }
 
@@ -74,10 +93,34 @@ public class ClasseServiceImpl implements ClasseService {
         return toDto(saved);
     }
 
+    /**
+     * Modifier une classe (ancien - sans validation d'accès)
+     * @deprecated Utiliser update(id, dto, userEcoleId) avec le contexte utilisateur
+     */
     @Override
+    @Deprecated
     public ClasseDto update(Long id, ClasseDto dto) {
+        return update(id, dto, null);
+    }
+
+    /**
+     * Modifier une classe avec validation d'accès.
+     * L'utilisateur ne peut modifier que les classes de son école.
+     * @param id L'ID de la classe
+     * @param dto Les nouvelles données
+     * @param userEcoleId L'ecoleId de l'utilisateur pour validation (null = pas de validation, mode dev)
+     */
+    @Override
+    public ClasseDto update(Long id, ClasseDto dto, Long userEcoleId) {
         Classe classe = classeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Classe introuvable"));
+
+        // Validation d'accès : l'utilisateur ne peut modifier que les classes de son école
+        if (userEcoleId != null && classe.getEcole() != null) {
+            if (!userEcoleId.equals(classe.getEcole().getIdEcole())) {
+                throw new RuntimeException("Accès non autorisé: vous ne pouvez pas modifier les classes d'une autre école");
+            }
+        }
 
         classe.setNomClasse(dto.getNomClasse());
         classe.setNiveau(dto.getNiveau());
@@ -102,11 +145,8 @@ public class ClasseServiceImpl implements ClasseService {
             }
         }
 
-        if (dto.getEcoleId() != null) {
-            Ecole ecole = ecoleRepository.findById(dto.getEcoleId())
-                    .orElseThrow(() -> new RuntimeException("École introuvable"));
-            classe.setEcole(ecole);
-        }
+        // Note: On ne permet plus de changer l'école d'une classe existante
+        // L'ecoleId du DTO est ignoré lors de la mise à jour
 
         if (dto.getAnneeScolaireId() != null) {
             Anneescolaire annee = anneescolaireRepository.findById(dto.getAnneeScolaireId())
@@ -146,10 +186,33 @@ public class ClasseServiceImpl implements ClasseService {
                 .toList();
     }
 
+    /**
+     * Supprimer une classe (ancien - sans validation d'accès)
+     * @deprecated Utiliser delete(id, userEcoleId) avec le contexte utilisateur
+     */
     @Override
+    @Deprecated
     public void delete(Long id) {
+        delete(id, null);
+    }
+
+    /**
+     * Supprimer une classe avec validation d'accès.
+     * L'utilisateur ne peut supprimer que les classes de son école.
+     * @param id L'ID de la classe
+     * @param userEcoleId L'ecoleId de l'utilisateur pour validation (null = pas de validation, mode dev)
+     */
+    @Override
+    public void delete(Long id, Long userEcoleId) {
         Classe classe = classeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Classe introuvable"));
+
+        // Validation d'accès : l'utilisateur ne peut supprimer que les classes de son école
+        if (userEcoleId != null && classe.getEcole() != null) {
+            if (!userEcoleId.equals(classe.getEcole().getIdEcole())) {
+                throw new RuntimeException("Accès non autorisé: vous ne pouvez pas supprimer les classes d'une autre école");
+            }
+        }
 
         long effectif = classeRepository.countInscriptionsByClasseId(id);
         if (effectif > 0) {
