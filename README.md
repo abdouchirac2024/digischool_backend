@@ -286,6 +286,44 @@ Les seeders sont appeles dans un ordre precis pour respecter les dependances :
 | **Docker Compose** | >= 2.x |
 | **Java 17** | Uniquement pour le build Maven (optionnel avec Docker) |
 
+### Installation de Redis en local (optionnel)
+
+> **Note**: Redis est inclus dans Docker Compose. Cette installation n'est necessaire que pour le developpement local sans Docker.
+
+**Ubuntu / Debian:**
+```bash
+sudo apt update
+sudo apt install redis-server
+sudo systemctl start redis-server
+sudo systemctl enable redis-server
+
+# Verifier l'installation
+redis-cli ping  # Doit retourner PONG
+```
+
+**macOS (Homebrew):**
+```bash
+brew install redis
+brew services start redis
+
+# Verifier l'installation
+redis-cli ping  # Doit retourner PONG
+```
+
+**Windows:**
+```bash
+# Option 1: WSL2 (recommande)
+wsl --install
+# Puis suivre les instructions Ubuntu ci-dessus
+
+# Option 2: Chocolatey
+choco install redis-64
+redis-server
+
+# Verifier l'installation
+redis-cli ping  # Doit retourner PONG
+```
+
 ---
 
 ## Demarrage rapide
