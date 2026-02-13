@@ -45,9 +45,9 @@ public class OpenApiConfig {
                     2. Cliquez sur le bouton **Authorize** ci-dessus et entrez votre token
 
                     ## Multi-tenancy
-                    Le systeme est multi-tenant base sur l'ecole. \
-                    L'`ecoleId` est automatiquement extrait du token JWT. \
-                    Format du tenant: `CM-{REGION}-ECOLE-{ID}`
+                    Le systeme est multi-tenant base sur le **tenant** (identifiant unique de l'ecole). \
+                    Le tenant est automatiquement extrait du token JWT. \
+                    Format: `CM-{REGION}-ECOLE-{ID}` (ex: `CM-CENTRE-ECOLE-001`)
 
                     ## Comptes de test
                     | Role | Email | Telephone | Mot de passe |
