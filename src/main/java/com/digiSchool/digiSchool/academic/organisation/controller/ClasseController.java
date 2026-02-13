@@ -17,14 +17,16 @@ import com.digiSchool.digiSchool.academic.organisation.dto.ClasseDto;
 import com.digiSchool.digiSchool.academic.organisation.service.ClasseService;
 import com.digiSchool.digiSchool.auth.service.UserContextService;
 
-/**
- * Contrôleur REST pour la gestion des classes.
- * L'ecoleId est automatiquement déterminé depuis le JWT token.
- * L'utilisateur ne peut créer/modifier/supprimer que les classes de SA propre école.
- */
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/classes")
 @CrossOrigin
+@Tag(name = "Classes")
 public class ClasseController {
 
     private final ClasseService classeService;
@@ -35,46 +37,52 @@ public class ClasseController {
         this.userContextService = userContextService;
     }
 
-    /**
-     * Créer une nouvelle classe.
-     * L'ecoleId est automatiquement défini depuis le contexte utilisateur.
-     * Si ecoleId est fourni dans le DTO, il est ignoré et remplacé par celui de l'utilisateur.
-     */
+    @Operation(summary = "Creer une classe", description = "Cree une nouvelle classe. L'ecoleId est automatiquement defini depuis le JWT de l'utilisateur.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Classe creee"),
+        @ApiResponse(responseCode = "400", description = "Donnees invalides"),
+        @ApiResponse(responseCode = "401", description = "Non authentifie")
+    })
     @PostMapping
     public ResponseEntity<ClasseDto> create(@RequestBody ClasseDto dto) {
         Long userEcoleId = userContextService.getCurrentUserEcoleId();
         return ResponseEntity.ok(classeService.create(dto, userEcoleId));
     }
 
-    /**
-     * Modifier une classe existante.
-     * Vérifie que la classe appartient à l'école de l'utilisateur.
-     */
+    @Operation(summary = "Modifier une classe", description = "Met a jour une classe existante. Verifie que la classe appartient a l'ecole de l'utilisateur.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Classe modifiee"),
+        @ApiResponse(responseCode = "403", description = "Classe hors ecole"),
+        @ApiResponse(responseCode = "404", description = "Classe introuvable")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<ClasseDto> update(
-            @PathVariable Long id,
+            @Parameter(description = "ID de la classe") @PathVariable Long id,
             @RequestBody ClasseDto dto
     ) {
         Long userEcoleId = userContextService.getCurrentUserEcoleId();
         return ResponseEntity.ok(classeService.update(id, dto, userEcoleId));
     }
 
-    /**
-     * Récupérer une classe par ID.
-     * Vérifie que la classe appartient à l'école de l'utilisateur.
-     */
+    @Operation(summary = "Obtenir une classe par ID", description = "Retourne le detail d'une classe. Verifie l'acces a l'ecole.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Detail de la classe"),
+        @ApiResponse(responseCode = "403", description = "Acces interdit"),
+        @ApiResponse(responseCode = "404", description = "Classe introuvable")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<ClasseDto> getById(@PathVariable Long id) {
+    public ResponseEntity<ClasseDto> getById(
+            @Parameter(description = "ID de la classe") @PathVariable Long id) {
         ClasseDto classe = classeService.getById(id);
         // Vérifier l'accès
         userContextService.checkAccessToEcole(classe.getEcoleId());
         return ResponseEntity.ok(classe);
     }
 
-    /**
-     * Récupérer toutes les classes de l'école de l'utilisateur.
-     * Si pas d'ecoleId dans le contexte (mode dev), retourne toutes les classes.
-     */
+    @Operation(summary = "Lister les classes", description = "Retourne toutes les classes de l'ecole de l'utilisateur connecte.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Liste des classes")
+    })
     @GetMapping
     public ResponseEntity<List<ClasseDto>> getAll() {
         Long userEcoleId = userContextService.getCurrentUserEcoleId();
@@ -84,22 +92,27 @@ public class ClasseController {
         return ResponseEntity.ok(classeService.getAll());
     }
 
-    /**
-     * Récupérer les classes d'une école spécifique.
-     * Vérifie que l'utilisateur a accès à cette école.
-     */
+    @Operation(summary = "Lister les classes d'une ecole", description = "Retourne les classes d'une ecole specifique. Verifie que l'utilisateur a acces a cette ecole.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Liste des classes de l'ecole"),
+        @ApiResponse(responseCode = "403", description = "Acces interdit a cette ecole")
+    })
     @GetMapping("/ecole/{ecoleId}")
-    public ResponseEntity<List<ClasseDto>> getByEcoleId(@PathVariable Long ecoleId) {
+    public ResponseEntity<List<ClasseDto>> getByEcoleId(
+            @Parameter(description = "ID de l'ecole") @PathVariable Long ecoleId) {
         userContextService.checkAccessToEcole(ecoleId);
         return ResponseEntity.ok(classeService.getByEcoleId(ecoleId));
     }
 
-    /**
-     * Supprimer une classe.
-     * Vérifie que la classe appartient à l'école de l'utilisateur.
-     */
+    @Operation(summary = "Supprimer une classe", description = "Supprime une classe. Verifie qu'elle appartient a l'ecole de l'utilisateur.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Classe supprimee"),
+        @ApiResponse(responseCode = "403", description = "Classe hors ecole"),
+        @ApiResponse(responseCode = "404", description = "Classe introuvable")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(
+            @Parameter(description = "ID de la classe") @PathVariable Long id) {
         Long userEcoleId = userContextService.getCurrentUserEcoleId();
         classeService.delete(id, userEcoleId);
         return ResponseEntity.noContent().build();

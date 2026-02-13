@@ -3,15 +3,36 @@ package com.digiSchool.digiSchool.user.dto;
 import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Eleve inscrit dans une ecole")
 public class EleveDto {
+
+    @Schema(description = "ID unique de l'eleve", example = "1")
     private Long idEleve;
+
+    @Schema(description = "Matricule genere automatiquement", example = "ECB-2025-0001")
     private String matricule;
+
+    @Schema(description = "Nom de famille", example = "Talla")
     private String nom;
+
+    @Schema(description = "Prenom", example = "Amina")
     private String prenom;
+
+    @Schema(description = "Date de naissance", example = "2012-05-15")
     private LocalDate dateNaissance;
+
+    @Schema(description = "Tenant ID de l'ecole", example = "CM-CENTRE-ECOLE-001")
     private String tenant;
+
+    @Schema(description = "Lieu de naissance", example = "Yaounde")
     private String lieuNaissance;
+
+    @Schema(description = "Sexe (M ou F)", example = "F")
     private String sexe;
+
+    @Schema(description = "Nom du quartier de residence")
     private String quartierNom;
 
     // Getters and Setters

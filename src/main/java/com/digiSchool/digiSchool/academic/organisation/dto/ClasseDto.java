@@ -4,25 +4,58 @@ import com.digiSchool.digiSchool.academic.organisation.model.Niveau;
 import com.digiSchool.digiSchool.academic.organisation.model.SousSysteme;
 import com.digiSchool.digiSchool.academic.organisation.model.StatutClasse;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Classe scolaire")
 public class ClasseDto {
 
+    @Schema(description = "ID unique de la classe", example = "1")
     private Long id;
+
+    @Schema(description = "Nom de la classe", example = "CM2-A")
     private String nomClasse;
+
+    @Schema(description = "Niveau scolaire", example = "CM2")
     private Niveau niveau;
+
+    @Schema(description = "Sous-systeme educatif", example = "FRANCOPHONE")
     private SousSysteme sousSysteme;
+
+    @Schema(description = "Section (A, B, C...)", example = "A")
     private String section;
+
+    @Schema(description = "Capacite maximale", example = "45")
     private Integer capacite;
+
+    @Schema(description = "Statut de la classe", example = "ACTIVE")
     private StatutClasse statut;
+
+    @Schema(description = "Nombre d'eleves actuellement inscrits", example = "38")
     private Integer effectifActuel;
+
+    @Schema(description = "Frais de scolarite annuels en FCFA", example = "75000.0")
     private Double fraisScolarite;
+
+    @Schema(description = "Description de la classe")
     private String description;
 
     // Relations (IDs + noms pour l'affichage)
+    @Schema(description = "ID de l'ecole (auto-defini depuis le JWT)")
     private Long ecoleId;
+
+    @Schema(description = "Nom de l'ecole", accessMode = Schema.AccessMode.READ_ONLY)
     private String ecoleNom;
+
+    @Schema(description = "ID de l'annee scolaire", example = "1")
     private Long anneeScolaireId;
+
+    @Schema(description = "Libelle de l'annee scolaire", example = "2025-2026", accessMode = Schema.AccessMode.READ_ONLY)
     private String anneeScolaireLibelle;
+
+    @Schema(description = "ID de l'enseignant titulaire")
     private Long titulaireId;
+
+    @Schema(description = "Nom de l'enseignant titulaire", accessMode = Schema.AccessMode.READ_ONLY)
     private String titulaireNom;
 
     // ===== Getters & Setters =====

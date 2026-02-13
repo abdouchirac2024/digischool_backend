@@ -2,12 +2,24 @@ package com.digiSchool.digiSchool.auth.dto;
 
 import com.digiSchool.digiSchool.auth.model.RoleType;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Reponse d'authentification contenant les tokens JWT et les informations utilisateur")
 public class AuthResponse {
 
+    @Schema(description = "Token d'acces JWT", example = "eyJhbGciOiJIUzI1NiJ9...")
     private String accessToken;
+
+    @Schema(description = "Token de rafraichissement", example = "dGhpcyBpcyBhIHJlZnJlc2g...")
     private String refreshToken;
+
+    @Schema(description = "Type du token", example = "Bearer")
     private String tokenType = "Bearer";
+
+    @Schema(description = "Duree de validite en millisecondes", example = "86400000")
     private Long expiresIn;
+
+    @Schema(description = "Informations de l'utilisateur connecte")
     private UserInfo user;
 
     public AuthResponse() {}
@@ -59,16 +71,36 @@ public class AuthResponse {
         this.user = user;
     }
 
+    @Schema(description = "Informations detaillees de l'utilisateur")
     public static class UserInfo {
+        @Schema(description = "ID unique", example = "1")
         private Long id;
+
+        @Schema(description = "Adresse email", example = "admin@digischool.cm")
         private String email;
+
+        @Schema(description = "Nom de famille", example = "Dupont")
         private String nom;
+
+        @Schema(description = "Prenom", example = "Jean")
         private String prenom;
+
+        @Schema(description = "Numero de telephone", example = "+237677123456")
         private String telephone;
+
+        @Schema(description = "Role de l'utilisateur", example = "ADMIN_ECOLE")
         private RoleType role;
+
+        @Schema(description = "Identifiant du tenant", example = "CM-CENTRE-ECOLE-001")
         private String tenantId;
+
+        @Schema(description = "ID de l'ecole", example = "1")
         private Long ecoleId;
+
+        @Schema(description = "Nom de l'ecole", example = "Ecole Bilingue La Victoire")
         private String ecoleNom;
+
+        @Schema(description = "Code unique de l'ecole", example = "ECB-001")
         private String codeEcole;
 
         public UserInfo() {}

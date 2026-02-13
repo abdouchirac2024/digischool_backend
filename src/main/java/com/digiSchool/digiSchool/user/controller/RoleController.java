@@ -12,13 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.digiSchool.digiSchool.user.model.Role;
 import com.digiSchool.digiSchool.user.repository.RoleRepository;
 
-/**
- * Contrôleur pour la gestion des rôles.
- * Permet de récupérer dynamiquement les rôles disponibles.
- */
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/roles")
 @CrossOrigin
+@Tag(name = "Roles")
 public class RoleController {
 
     private final RoleRepository roleRepository;
@@ -27,11 +28,8 @@ public class RoleController {
         this.roleRepository = roleRepository;
     }
 
-    /**
-     * Récupérer tous les rôles disponibles.
-     *
-     * @return Liste des rôles avec id et nom
-     */
+    @Operation(summary = "Lister les roles disponibles", description = "Retourne tous les roles definis dans le systeme (SUPER_ADMIN, ADMIN_ECOLE, ENSEIGNANT, etc.).")
+    @ApiResponse(responseCode = "200", description = "Liste des roles")
     @GetMapping
     public ResponseEntity<List<RoleDto>> getAllRoles() {
         List<Role> roles = roleRepository.findAll();
@@ -43,9 +41,6 @@ public class RoleController {
         return ResponseEntity.ok(roleDtos);
     }
 
-    /**
-     * DTO pour les rôles.
-     */
     public static class RoleDto {
         private Long id;
         private String name;

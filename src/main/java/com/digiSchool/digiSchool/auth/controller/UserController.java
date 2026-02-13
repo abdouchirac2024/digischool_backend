@@ -23,10 +23,16 @@ import com.digiSchool.digiSchool.auth.security.CurrentUser;
 import com.digiSchool.digiSchool.auth.security.RequireRole;
 import com.digiSchool.digiSchool.auth.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "Utilisateurs")
 public class UserController {
 
     private final UserService userService;
@@ -35,11 +41,17 @@ public class UserController {
         this.userService = userService;
     }
 
+    @Operation(summary = "Creer un utilisateur", description = "Cree un nouveau compte utilisateur. Les Admin Ecole ne peuvent creer que des utilisateurs pour leur propre tenant.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Utilisateur cree"),
+        @ApiResponse(responseCode = "400", description = "Donnees invalides ou role non autorise"),
+        @ApiResponse(responseCode = "403", description = "Role insuffisant")
+    })
     @PostMapping
     @RequireRole({RoleType.SUPER_ADMIN, RoleType.ADMIN_ECOLE})
     public ResponseEntity<UserInfo> createUser(
             @Valid @RequestBody RegisterRequest request,
-            @CurrentUser User currentUser) {
+            @Parameter(hidden = true) @CurrentUser User currentUser) {
 
         // Les ADMIN_ECOLE ne peuvent créer que des utilisateurs pour leur tenant
         if (currentUser.getRole() == RoleType.ADMIN_ECOLE) {
@@ -54,12 +66,18 @@ public class UserController {
         return ResponseEntity.ok(toUserInfo(user));
     }
 
+    @Operation(summary = "Lister les utilisateurs", description = "Retourne les utilisateurs filtres par tenant et/ou role. Les Admin Ecole ne voient que leur propre tenant.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Liste des utilisateurs"),
+        @ApiResponse(responseCode = "400", description = "Parametres manquants"),
+        @ApiResponse(responseCode = "403", description = "Role insuffisant")
+    })
     @GetMapping
     @RequireRole({RoleType.SUPER_ADMIN, RoleType.ADMIN_ECOLE})
     public ResponseEntity<List<UserInfo>> getUsers(
-            @RequestParam(required = false) String tenantId,
-            @RequestParam(required = false) RoleType role,
-            @CurrentUser User currentUser) {
+            @Parameter(description = "Filtrer par tenant ID") @RequestParam(required = false) String tenantId,
+            @Parameter(description = "Filtrer par role") @RequestParam(required = false) RoleType role,
+            @Parameter(hidden = true) @CurrentUser User currentUser) {
 
         String effectiveTenantId = tenantId;
 
@@ -84,11 +102,16 @@ public class UserController {
         return ResponseEntity.ok(userInfos);
     }
 
+    @Operation(summary = "Obtenir un utilisateur par ID", description = "Retourne le detail d'un utilisateur. Les Admin Ecole ne voient que les utilisateurs de leur tenant.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Detail de l'utilisateur"),
+        @ApiResponse(responseCode = "404", description = "Utilisateur introuvable ou hors tenant")
+    })
     @GetMapping("/{id}")
     @RequireRole({RoleType.SUPER_ADMIN, RoleType.ADMIN_ECOLE})
     public ResponseEntity<UserInfo> getUser(
-            @PathVariable Long id,
-            @CurrentUser User currentUser) {
+            @Parameter(description = "ID de l'utilisateur") @PathVariable Long id,
+            @Parameter(hidden = true) @CurrentUser User currentUser) {
 
         User user = userService.getUserById(id);
 
@@ -101,12 +124,18 @@ public class UserController {
         return ResponseEntity.ok(toUserInfo(user));
     }
 
+    @Operation(summary = "Modifier le statut d'un utilisateur", description = "Active, desactive ou suspend un compte utilisateur. Un admin ne peut pas modifier son propre statut.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Statut mis a jour"),
+        @ApiResponse(responseCode = "400", description = "Tentative de modification de son propre statut"),
+        @ApiResponse(responseCode = "404", description = "Utilisateur introuvable ou hors tenant")
+    })
     @PutMapping("/{id}/status")
     @RequireRole({RoleType.SUPER_ADMIN, RoleType.ADMIN_ECOLE})
     public ResponseEntity<UserInfo> updateUserStatus(
-            @PathVariable Long id,
-            @RequestParam UserStatus status,
-            @CurrentUser User currentUser) {
+            @Parameter(description = "ID de l'utilisateur") @PathVariable Long id,
+            @Parameter(description = "Nouveau statut") @RequestParam UserStatus status,
+            @Parameter(hidden = true) @CurrentUser User currentUser) {
 
         User user = userService.getUserById(id);
 
@@ -125,11 +154,17 @@ public class UserController {
         return ResponseEntity.ok(toUserInfo(updated));
     }
 
+    @Operation(summary = "Supprimer un utilisateur", description = "Supprime definitivement un compte utilisateur. Un admin ne peut pas se supprimer lui-meme.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Utilisateur supprime"),
+        @ApiResponse(responseCode = "400", description = "Tentative de suppression de soi-meme"),
+        @ApiResponse(responseCode = "404", description = "Utilisateur introuvable ou hors tenant")
+    })
     @DeleteMapping("/{id}")
     @RequireRole({RoleType.SUPER_ADMIN, RoleType.ADMIN_ECOLE})
     public ResponseEntity<Void> deleteUser(
-            @PathVariable Long id,
-            @CurrentUser User currentUser) {
+            @Parameter(description = "ID de l'utilisateur") @PathVariable Long id,
+            @Parameter(hidden = true) @CurrentUser User currentUser) {
 
         User user = userService.getUserById(id);
 
