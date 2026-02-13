@@ -1,214 +1,296 @@
 package com.digiSchool.digiSchool.auth.service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.digiSchool.digiSchool.auth.dto.AuthResponse;
+import com.digiSchool.digiSchool.auth.dto.ForgotPasswordRequest;
 import com.digiSchool.digiSchool.auth.dto.LoginRequest;
-import com.digiSchool.digiSchool.auth.dto.LoginResponse;
-import com.digiSchool.digiSchool.auth.dto.UserDto;
+import com.digiSchool.digiSchool.auth.dto.RefreshTokenRequest;
+import com.digiSchool.digiSchool.auth.dto.ResetPasswordRequest;
 import com.digiSchool.digiSchool.auth.exception.AuthenticationException;
-import com.digiSchool.digiSchool.user.model.StatutUtilisateur;
-import com.digiSchool.digiSchool.user.model.Utilisateur;
-import com.digiSchool.digiSchool.user.repository.UtilisateurRepository;
+import com.digiSchool.digiSchool.auth.model.LoginAttempt;
+import com.digiSchool.digiSchool.auth.model.RefreshToken;
+import com.digiSchool.digiSchool.auth.model.User;
+import com.digiSchool.digiSchool.auth.model.UserStatus;
+import com.digiSchool.digiSchool.auth.repository.LoginAttemptRepository;
+import com.digiSchool.digiSchool.auth.repository.RefreshTokenRepository;
+import com.digiSchool.digiSchool.auth.repository.UserRepository;
+import com.digiSchool.digiSchool.notification.service.EmailService;
 
-/**
- * Service d'authentification.
- * Gère la logique métier de connexion, déconnexion et validation des utilisateurs.
- * Supporte le login via email OU téléphone.
- */
 @Service
+@Transactional
 public class AuthService {
 
-    private final UtilisateurRepository utilisateurRepository;
+    private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final LoginAttemptRepository loginAttemptRepository;
+    private final JwtTokenService jwtTokenService;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+    private final EmailService emailService;
 
-    public AuthService(UtilisateurRepository utilisateurRepository,
-                      PasswordEncoder passwordEncoder,
-                      JwtService jwtService) {
-        this.utilisateurRepository = utilisateurRepository;
+    @Value("${auth.max-login-attempts:5}")
+    private int maxLoginAttempts;
+
+    @Value("${auth.lockout-duration-minutes:15}")
+    private int lockoutDurationMinutes;
+
+    @Value("${auth.rate-limit-window-minutes:5}")
+    private int rateLimitWindowMinutes;
+
+    @Value("${jwt.refresh-token-expiration:604800000}")
+    private Long refreshTokenExpiration;
+
+    public AuthService(UserRepository userRepository,
+            RefreshTokenRepository refreshTokenRepository,
+            LoginAttemptRepository loginAttemptRepository,
+            JwtTokenService jwtTokenService,
+            PasswordEncoder passwordEncoder,
+            EmailService emailService) {
+        this.userRepository = userRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.loginAttemptRepository = loginAttemptRepository;
+        this.jwtTokenService = jwtTokenService;
         this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
+        this.emailService = emailService;
     }
 
-    /**
-     * Authentifie un utilisateur avec email/téléphone et mot de passe.
-     *
-     * @param request Requête de connexion contenant identifier (email ou téléphone) et mot de passe
-     * @return Réponse contenant le token JWT et les infos utilisateur
-     * @throws AuthenticationException si l'authentification échoue
-     */
-    public LoginResponse authenticate(LoginRequest request) {
-        String identifier = request.getIdentifier();
-        if (identifier == null || identifier.trim().isEmpty()) {
-            throw new AuthenticationException("Email ou téléphone requis");
+    public AuthResponse login(LoginRequest request, String ipAddress) {
+        String email = request.getEmail().toLowerCase().trim();
+
+        // Vérifier le rate limiting
+        checkRateLimit(email, ipAddress);
+
+        // Trouver l'utilisateur
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    logFailedAttempt(email, ipAddress, "Utilisateur non trouvé");
+                    return new AuthenticationException("Email ou mot de passe incorrect");
+                });
+
+        // Vérifier si le compte est verrouillé
+        if (user.getStatus() == UserStatus.LOCKED) {
+            if (user.getLockedUntil() != null && LocalDateTime.now().isAfter(user.getLockedUntil())) {
+                // Déverrouiller le compte si la période de verrouillage est terminée
+                user.setStatus(UserStatus.ACTIVE);
+                user.setFailedLoginAttempts(0);
+                user.setLockedUntil(null);
+                userRepository.save(user);
+            } else {
+                logFailedAttempt(email, ipAddress, "Compte verrouillé");
+                throw new AuthenticationException("Compte verrouillé. Réessayez plus tard.");
+            }
         }
 
-        // Rechercher l'utilisateur par email OU téléphone
-        Utilisateur user = utilisateurRepository.findByEmailOrTelephone(identifier.trim())
-                .orElseThrow(() -> new AuthenticationException("Identifiant ou mot de passe incorrect"));
+        // Vérifier si le compte est actif
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            logFailedAttempt(email, ipAddress, "Compte inactif");
+            throw new AuthenticationException("Compte inactif. Contactez l'administrateur.");
+        }
 
         // Vérifier le mot de passe
-        if (!isPasswordValid(request.getPassword(), user.getMotDePasse())) {
-            throw new AuthenticationException("Identifiant ou mot de passe incorrect");
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            handleFailedLogin(user, ipAddress);
+            throw new AuthenticationException("Email ou mot de passe incorrect");
         }
 
-        // Vérifier que le compte est actif
-        if (user.getStatut() == null || user.getStatut() == StatutUtilisateur.INACTIF) {
-            throw new AuthenticationException("Compte désactivé. Contactez l'administrateur.", 403);
+        // Connexion réussie
+        return handleSuccessfulLogin(user, ipAddress);
+    }
+
+    private void checkRateLimit(String email, String ipAddress) {
+        LocalDateTime since = LocalDateTime.now().minusMinutes(rateLimitWindowMinutes);
+
+        long failedAttemptsByEmail = loginAttemptRepository.countRecentFailedAttempts(email, since);
+        long failedAttemptsByIp = loginAttemptRepository.countRecentFailedAttemptsByIp(ipAddress, since);
+
+        if (failedAttemptsByEmail >= maxLoginAttempts || failedAttemptsByIp >= maxLoginAttempts * 2) {
+            throw new AuthenticationException(
+                    "Trop de tentatives de connexion. Réessayez dans " + rateLimitWindowMinutes + " minutes.");
+        }
+    }
+
+    private void handleFailedLogin(User user, String ipAddress) {
+        int attempts = user.getFailedLoginAttempts() + 1;
+        user.setFailedLoginAttempts(attempts);
+
+        if (attempts >= maxLoginAttempts) {
+            user.setStatus(UserStatus.LOCKED);
+            user.setLockedUntil(LocalDateTime.now().plusMinutes(lockoutDurationMinutes));
+            logFailedAttempt(user.getEmail(), ipAddress, "Compte verrouillé après " + attempts + " tentatives");
+        } else {
+            logFailedAttempt(user.getEmail(), ipAddress, "Mot de passe incorrect (tentative " + attempts + ")");
         }
 
-        if (user.getStatut() == StatutUtilisateur.EN_ATTENTE) {
-            throw new AuthenticationException("Compte en attente de validation", 403);
-        }
+        userRepository.save(user);
+    }
 
-        // Mettre à jour la dernière connexion
-        user.setDerniereConnexion(LocalDateTime.now());
-        utilisateurRepository.save(user);
+    private AuthResponse handleSuccessfulLogin(User user, String ipAddress) {
+        // Réinitialiser les tentatives échouées
+        user.setFailedLoginAttempts(0);
+        user.setLastLogin(LocalDateTime.now());
+        userRepository.save(user);
 
-        // Générer le token JWT
-        Long ecoleId = user.getEcole() != null ? user.getEcole().getIdEcole() : null;
-        String roleName = user.getRole() != null ? user.getRole().getNomRole() : null;
-        String token = jwtService.generateToken(user.getEmail(), ecoleId, roleName);
-        String refreshToken = jwtService.generateRefreshToken(user.getEmail());
+        // Logger la tentative réussie
+        logSuccessfulAttempt(user.getEmail(), ipAddress);
+
+        // Générer les tokens
+        String accessToken = jwtTokenService.generateAccessToken(user);
+        String refreshToken = jwtTokenService.generateRefreshToken(user);
+
+        // Sauvegarder le refresh token
+        RefreshToken refreshTokenEntity = new RefreshToken(
+                refreshToken,
+                user,
+                LocalDateTime.now().plusSeconds(refreshTokenExpiration / 1000));
+        refreshTokenRepository.save(refreshTokenEntity);
 
         // Construire la réponse
-        LoginResponse response = new LoginResponse();
-        response.setToken(token);
-        response.setRefreshToken(refreshToken);
-        response.setUser(toUserDto(user));
-        response.setMessage("Connexion réussie");
-        response.setExpiresIn(jwtService.getExpirationTime());
+        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
+                user.getId(),
+                user.getEmail(),
+                user.getNom(),
+                user.getPrenom(),
+                user.getRole(),
+                user.getTenantId());
 
-        return response;
+        return new AuthResponse(
+                accessToken,
+                refreshToken,
+                jwtTokenService.getAccessTokenExpiration(),
+                userInfo);
     }
 
-    /**
-     * Récupère l'utilisateur à partir du token JWT.
-     *
-     * @param token Token JWT (sans le préfixe "Bearer ")
-     * @return DTO de l'utilisateur
-     * @throws AuthenticationException si le token est invalide
-     */
-    public UserDto getUserFromToken(String token) {
-        if (!jwtService.isTokenValid(token)) {
-            throw new AuthenticationException("Token invalide ou expiré");
+    public AuthResponse refreshToken(RefreshTokenRequest request) {
+        String token = request.getRefreshToken();
+
+        // Vérifier si le token est valide
+        if (!jwtTokenService.validateToken(token) || !jwtTokenService.isRefreshToken(token)) {
+            throw new AuthenticationException("Refresh token invalide");
         }
 
-        String email = jwtService.extractUsername(token);
-        Utilisateur user = utilisateurRepository.findByEmail(email)
-                .orElseThrow(() -> new AuthenticationException("Utilisateur non trouvé", 404));
+        // Vérifier si le token existe en base et n'est pas révoqué
+        RefreshToken refreshTokenEntity = refreshTokenRepository.findByToken(token)
+                .orElseThrow(() -> new AuthenticationException("Refresh token non trouvé"));
 
-        return toUserDto(user);
-    }
-
-    /**
-     * Rafraîchit le token JWT.
-     *
-     * @param refreshToken Le refresh token
-     * @return Nouvelle réponse avec nouveaux tokens
-     * @throws AuthenticationException si le refresh token est invalide
-     */
-    public LoginResponse refreshToken(String refreshToken) {
-        if (!jwtService.isTokenValid(refreshToken)) {
-            throw new AuthenticationException("Refresh token invalide ou expiré");
+        if (!refreshTokenEntity.isValid()) {
+            throw new AuthenticationException("Refresh token expiré ou révoqué");
         }
 
-        String email = jwtService.extractUsername(refreshToken);
-        Utilisateur user = utilisateurRepository.findByEmail(email)
-                .orElseThrow(() -> new AuthenticationException("Utilisateur non trouvé"));
+        User user = refreshTokenEntity.getUser();
 
-        // Vérifier que le compte est toujours actif
-        if (user.getStatut() != StatutUtilisateur.ACTIF) {
-            throw new AuthenticationException("Compte non actif", 403);
+        // Vérifier si l'utilisateur est toujours actif
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new AuthenticationException("Compte utilisateur inactif");
         }
+
+        // Révoquer l'ancien refresh token
+        refreshTokenEntity.setRevoked(true);
+        refreshTokenRepository.save(refreshTokenEntity);
 
         // Générer de nouveaux tokens
-        Long ecoleId = user.getEcole() != null ? user.getEcole().getIdEcole() : null;
-        String roleName = user.getRole() != null ? user.getRole().getNomRole() : null;
-        String newToken = jwtService.generateToken(user.getEmail(), ecoleId, roleName);
-        String newRefreshToken = jwtService.generateRefreshToken(user.getEmail());
+        String newAccessToken = jwtTokenService.generateAccessToken(user);
+        String newRefreshToken = jwtTokenService.generateRefreshToken(user);
 
-        LoginResponse response = new LoginResponse();
-        response.setToken(newToken);
-        response.setRefreshToken(newRefreshToken);
-        response.setUser(toUserDto(user));
-        response.setMessage("Token rafraîchi avec succès");
-        response.setExpiresIn(jwtService.getExpirationTime());
+        // Sauvegarder le nouveau refresh token
+        RefreshToken newRefreshTokenEntity = new RefreshToken(
+                newRefreshToken,
+                user,
+                LocalDateTime.now().plusSeconds(refreshTokenExpiration / 1000));
+        refreshTokenRepository.save(newRefreshTokenEntity);
 
-        return response;
+        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
+                user.getId(),
+                user.getEmail(),
+                user.getNom(),
+                user.getPrenom(),
+                user.getRole(),
+                user.getTenantId());
+
+        return new AuthResponse(
+                newAccessToken,
+                newRefreshToken,
+                jwtTokenService.getAccessTokenExpiration(),
+                userInfo);
     }
 
-    /**
-     * Vérifie si le mot de passe est valide.
-     * Utilise uniquement BCrypt pour la sécurité.
-     */
-    private boolean isPasswordValid(String rawPassword, String encodedPassword) {
-        if (encodedPassword == null || encodedPassword.isEmpty()) {
-            return false;
+    public void logout(String refreshToken) {
+        refreshTokenRepository.findByToken(refreshToken)
+                .ifPresent(token -> {
+                    token.setRevoked(true);
+                    refreshTokenRepository.save(token);
+                });
+    }
+
+    public void logoutAll(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AuthenticationException("Utilisateur non trouvé"));
+        refreshTokenRepository.revokeAllByUser(user);
+    }
+
+    public void forgotPassword(ForgotPasswordRequest request) {
+        String email = request.getEmail().toLowerCase().trim();
+
+        userRepository.findByEmail(email).ifPresent(user -> {
+            String resetToken = UUID.randomUUID().toString();
+            user.setPasswordResetToken(resetToken);
+            user.setPasswordResetExpires(LocalDateTime.now().plusHours(1));
+            userRepository.save(user);
+
+            emailService.sendPasswordResetEmail(email, resetToken);
+        });
+
+        // Ne pas révéler si l'email existe ou non (sécurité)
+    }
+
+    public void resetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findByPasswordResetToken(request.getToken())
+                .orElseThrow(() -> new AuthenticationException("Token de réinitialisation invalide"));
+
+        if (user.getPasswordResetExpires() == null ||
+                LocalDateTime.now().isAfter(user.getPasswordResetExpires())) {
+            throw new AuthenticationException("Token de réinitialisation expiré");
         }
 
-        try {
-            return passwordEncoder.matches(rawPassword, encodedPassword);
-        } catch (Exception e) {
-            // Format de hash invalide
-            return false;
-        }
-    }
+        // Mettre à jour le mot de passe
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setPasswordResetToken(null);
+        user.setPasswordResetExpires(null);
+        user.setFailedLoginAttempts(0);
 
-    /**
-     * Convertit un Utilisateur en UserDto.
-     */
-    public UserDto toUserDto(Utilisateur user) {
-        UserDto dto = new UserDto();
-        dto.setId(user.getIdUtilisateur());
-        dto.setNom(user.getNom());
-        dto.setPrenom(user.getPrenom());
-        dto.setEmail(user.getEmail());
-        dto.setTelephone(user.getTelephone());
-        dto.setStatut(user.getStatut() != null ? user.getStatut().name() : null);
-        dto.setDerniereConnexion(user.getDerniereConnexion());
-
-        if (user.getRole() != null) {
-            dto.setRoleId(user.getRole().getIdRole());
-            dto.setRoleName(user.getRole().getNomRole());
+        if (user.getStatus() == UserStatus.LOCKED) {
+            user.setStatus(UserStatus.ACTIVE);
+            user.setLockedUntil(null);
         }
 
-        if (user.getEcole() != null) {
-            dto.setEcoleId(user.getEcole().getIdEcole());
-            dto.setEcoleNom(user.getEcole().getNom());
+        userRepository.save(user);
+
+        // Révoquer tous les refresh tokens existants
+        refreshTokenRepository.revokeAllByUser(user);
+    }
+
+    public User getCurrentUser(String token) {
+        if (!jwtTokenService.validateToken(token)) {
+            throw new AuthenticationException("Token invalide");
         }
 
-        return dto;
+        Long userId = jwtTokenService.extractUserId(token);
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new AuthenticationException("Utilisateur non trouvé"));
     }
 
-    /**
-     * Récupère un utilisateur par son email.
-     */
-    public Utilisateur findByEmail(String email) {
-        return utilisateurRepository.findByEmail(email).orElse(null);
+    private void logFailedAttempt(String email, String ipAddress, String reason) {
+        LoginAttempt attempt = new LoginAttempt(email, ipAddress, false, reason);
+        loginAttemptRepository.save(attempt);
     }
 
-    /**
-     * Récupère un utilisateur par son téléphone.
-     */
-    public Utilisateur findByTelephone(String telephone) {
-        return utilisateurRepository.findByTelephone(telephone).orElse(null);
-    }
-
-    /**
-     * Vérifie si un email existe déjà.
-     */
-    public boolean emailExists(String email) {
-        return utilisateurRepository.existsByEmail(email);
-    }
-
-    /**
-     * Vérifie si un téléphone existe déjà.
-     */
-    public boolean telephoneExists(String telephone) {
-        return utilisateurRepository.existsByTelephone(telephone);
+    private void logSuccessfulAttempt(String email, String ipAddress) {
+        LoginAttempt attempt = new LoginAttempt(email, ipAddress, true, null);
+        loginAttemptRepository.save(attempt);
     }
 }

@@ -4,12 +4,8 @@ import java.util.List;
 
 import com.digiSchool.digiSchool.Exceptionconfig.model.TenantEntity;
 import com.digiSchool.digiSchool.academic.evaluation.model.Evaluation;
-import com.digiSchool.digiSchool.user.model.Utilisateur;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,175 +15,165 @@ import jakarta.persistence.OneToMany;
 
 @Entity
 public class Classe extends TenantEntity {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long idClasse;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idClasse;
+	private String nomClasse;
 
-    @Column(nullable = false)
-    private String nomClasse;
+	@jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+	private Niveau niveau;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Niveau niveau;
+	@jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+	private SousSysteme sousSysteme;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private SousSysteme sousSysteme;
+	private String section;
+	private Integer capacite;
+	private Double fraisScolarite;
+	private String description;
 
-    private String section;
+	@jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+	private StatutClasse statut;
 
-    private Integer capacite;
+	@ManyToOne
+	@JoinColumn(name = "ecole_id")
+	private Ecole ecole;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private StatutClasse statut = StatutClasse.ACTIVE;
+	@ManyToOne
+	@JoinColumn(name = "annee_scolaire_id")
+	private Anneescolaire anneeScolaire;
 
-    private Double fraisScolarite;
+	@ManyToOne
+	@JoinColumn(name = "titulaire_id")
+	private com.digiSchool.digiSchool.user.model.Utilisateur titulaire;
 
-    private String description;
+	@OneToMany(mappedBy = "classe")
+	private List<Inscription> inscriptions;
 
-    @ManyToOne
-    @JoinColumn(name = "ecole_id")
-    private Ecole ecole;
+	@OneToMany(mappedBy = "classe")
+	private List<Evaluation> evaluations;
 
-    @ManyToOne
-    @JoinColumn(name = "annee_scolaire_id")
-    private Anneescolaire anneeScolaire;
+	@OneToMany(mappedBy = "classe")
+	private List<EmploiDuTemps> emploisDuTemps;
 
-    @ManyToOne
-    @JoinColumn(name = "titulaire_id")
-    private Utilisateur titulaire;
+	public Long getIdClasse() {
+		return idClasse;
+	}
 
-    @OneToMany(mappedBy = "classe")
-    private List<Inscription> inscriptions;
+	public void setIdClasse(Long idClasse) {
+		this.idClasse = idClasse;
+	}
 
-    @OneToMany(mappedBy = "classe")
-    private List<Evaluation> evaluations;
+	public String getNomClasse() {
+		return nomClasse;
+	}
 
-    @OneToMany(mappedBy = "classe")
-    private List<EmploiDuTemps> emploisDuTemps;
+	public void setNomClasse(String nomClasse) {
+		this.nomClasse = nomClasse;
+	}
 
+	public Niveau getNiveau() {
+		return niveau;
+	}
 
-    // ===== Getters & Setters =====
+	public void setNiveau(Niveau niveau) {
+		this.niveau = niveau;
+	}
 
-    public Long getIdClasse() {
-        return idClasse;
-    }
+	public SousSysteme getSousSysteme() {
+		return sousSysteme;
+	}
 
-    public void setIdClasse(Long idClasse) {
-        this.idClasse = idClasse;
-    }
+	public void setSousSysteme(SousSysteme sousSysteme) {
+		this.sousSysteme = sousSysteme;
+	}
 
-    public String getNomClasse() {
-        return nomClasse;
-    }
+	public String getSection() {
+		return section;
+	}
 
-    public void setNomClasse(String nomClasse) {
-        this.nomClasse = nomClasse;
-    }
+	public void setSection(String section) {
+		this.section = section;
+	}
 
-    public Niveau getNiveau() {
-        return niveau;
-    }
+	public Integer getCapacite() {
+		return capacite;
+	}
 
-    public void setNiveau(Niveau niveau) {
-        this.niveau = niveau;
-    }
+	public void setCapacite(Integer capacite) {
+		this.capacite = capacite;
+	}
 
-    public SousSysteme getSousSysteme() {
-        return sousSysteme;
-    }
+	public Double getFraisScolarite() {
+		return fraisScolarite;
+	}
 
-    public void setSousSysteme(SousSysteme sousSysteme) {
-        this.sousSysteme = sousSysteme;
-    }
+	public void setFraisScolarite(Double fraisScolarite) {
+		this.fraisScolarite = fraisScolarite;
+	}
 
-    public String getSection() {
-        return section;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public void setSection(String section) {
-        this.section = section;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public Integer getCapacite() {
-        return capacite;
-    }
+	public StatutClasse getStatut() {
+		return statut;
+	}
 
-    public void setCapacite(Integer capacite) {
-        this.capacite = capacite;
-    }
+	public void setStatut(StatutClasse statut) {
+		this.statut = statut;
+	}
 
-    public StatutClasse getStatut() {
-        return statut;
-    }
+	public Ecole getEcole() {
+		return ecole;
+	}
 
-    public void setStatut(StatutClasse statut) {
-        this.statut = statut;
-    }
+	public void setEcole(Ecole ecole) {
+		this.ecole = ecole;
+	}
 
-    public Double getFraisScolarite() {
-        return fraisScolarite;
-    }
+	public Anneescolaire getAnneeScolaire() {
+		return anneeScolaire;
+	}
 
-    public void setFraisScolarite(Double fraisScolarite) {
-        this.fraisScolarite = fraisScolarite;
-    }
+	public void setAnneeScolaire(Anneescolaire anneeScolaire) {
+		this.anneeScolaire = anneeScolaire;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public com.digiSchool.digiSchool.user.model.Utilisateur getTitulaire() {
+		return titulaire;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public void setTitulaire(com.digiSchool.digiSchool.user.model.Utilisateur titulaire) {
+		this.titulaire = titulaire;
+	}
 
-    public Ecole getEcole() {
-        return ecole;
-    }
+	public List<Inscription> getInscriptions() {
+		return inscriptions;
+	}
 
-    public void setEcole(Ecole ecole) {
-        this.ecole = ecole;
-    }
+	public void setInscriptions(List<Inscription> inscriptions) {
+		this.inscriptions = inscriptions;
+	}
 
-    public Anneescolaire getAnneeScolaire() {
-        return anneeScolaire;
-    }
+	public List<Evaluation> getEvaluations() {
+		return evaluations;
+	}
 
-    public void setAnneeScolaire(Anneescolaire anneeScolaire) {
-        this.anneeScolaire = anneeScolaire;
-    }
+	public void setEvaluations(List<Evaluation> evaluations) {
+		this.evaluations = evaluations;
+	}
 
-    public Utilisateur getTitulaire() {
-        return titulaire;
-    }
+	public List<EmploiDuTemps> getEmploisDuTemps() {
+		return emploisDuTemps;
+	}
 
-    public void setTitulaire(Utilisateur titulaire) {
-        this.titulaire = titulaire;
-    }
+	public void setEmploisDuTemps(List<EmploiDuTemps> emploisDuTemps) {
+		this.emploisDuTemps = emploisDuTemps;
+	}
 
-    public List<Inscription> getInscriptions() {
-        return inscriptions;
-    }
-
-    public void setInscriptions(List<Inscription> inscriptions) {
-        this.inscriptions = inscriptions;
-    }
-
-    public List<Evaluation> getEvaluations() {
-        return evaluations;
-    }
-
-    public void setEvaluations(List<Evaluation> evaluations) {
-        this.evaluations = evaluations;
-    }
-
-    public List<EmploiDuTemps> getEmploisDuTemps() {
-        return emploisDuTemps;
-    }
-
-    public void setEmploisDuTemps(List<EmploiDuTemps> emploisDuTemps) {
-        this.emploisDuTemps = emploisDuTemps;
-    }
 }

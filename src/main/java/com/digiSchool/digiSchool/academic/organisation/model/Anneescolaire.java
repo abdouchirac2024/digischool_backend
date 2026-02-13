@@ -36,14 +36,6 @@ public class Anneescolaire extends TenantEntity{
     @OneToMany(mappedBy = "anneeScolaire")
     private List<Discipline> disciplines;
 
-	public Long getIdAnnee() {
-		return idAnnee;
-	}
-
-	public void setIdAnnee(Long idAnnee) {
-		this.idAnnee = idAnnee;
-	}
-
 	public String getLibelle() {
 		return libelle;
 	}

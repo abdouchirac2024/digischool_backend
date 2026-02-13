@@ -23,6 +23,8 @@ public class Quartier {
 
     private String nom;
 
+    private String description;
+
     @ManyToOne
     private Ville ville;
 
@@ -57,6 +59,14 @@ public class Quartier {
 	public void setVille(Ville ville) {
 		this.ville = ville;
 	}
-    
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 }
 

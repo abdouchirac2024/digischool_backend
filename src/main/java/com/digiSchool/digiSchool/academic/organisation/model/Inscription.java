@@ -47,5 +47,21 @@ public class Inscription extends TenantEntity{
 	public void setStatut(Boolean statut) {
 		this.statut = statut;
 	}
+
+	public Classe getClasse() {
+		return classe;
+	}
+
+	public void setClasse(Classe classe) {
+		this.classe = classe;
+	}
+
+	public Eleve getEleve() {
+		return eleve;
+	}
+
+	public void setEleve(Eleve eleve) {
+		this.eleve = eleve;
+	}
 }
 

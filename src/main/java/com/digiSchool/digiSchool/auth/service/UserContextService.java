@@ -5,8 +5,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.digiSchool.digiSchool.auth.exception.AuthenticationException;
-import com.digiSchool.digiSchool.user.model.Utilisateur;
-import com.digiSchool.digiSchool.user.repository.UtilisateurRepository;
+import com.digiSchool.digiSchool.auth.model.User;
+import com.digiSchool.digiSchool.auth.repository.UserRepository;
+import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
+import com.digiSchool.digiSchool.academic.organisation.repository.EcoleRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -22,12 +24,15 @@ import jakarta.servlet.http.HttpServletRequest;
 @Service
 public class UserContextService {
 
-    private final JwtService jwtService;
-    private final UtilisateurRepository utilisateurRepository;
+    private final JwtTokenService jwtService;
+    private final UserRepository userRepository;
+    private final EcoleRepository ecoleRepository;
 
-    public UserContextService(JwtService jwtService, UtilisateurRepository utilisateurRepository) {
+    public UserContextService(JwtTokenService jwtService, UserRepository userRepository,
+            EcoleRepository ecoleRepository) {
         this.jwtService = jwtService;
-        this.utilisateurRepository = utilisateurRepository;
+        this.userRepository = userRepository;
+        this.ecoleRepository = ecoleRepository;
     }
 
     /**
@@ -54,17 +59,20 @@ public class UserContextService {
         String token = authHeader.substring(7);
         try {
             // D'abord essayer d'extraire directement des claims
-            Long ecoleId = jwtService.extractEcoleId(token);
-            if (ecoleId != null) {
-                return ecoleId;
+            String tenantIdStr = jwtService.extractTenantId(token);
+            if (tenantIdStr != null) {
+                return Long.parseLong(tenantIdStr);
             }
 
             // Si pas d'ecoleId dans le token, chercher l'utilisateur en base
             String username = jwtService.extractUsername(token);
             if (username != null) {
-                Utilisateur user = utilisateurRepository.findByEmail(username).orElse(null);
-                if (user != null && user.getEcole() != null) {
-                    return user.getEcole().getIdEcole();
+                User user = userRepository.findByEmail(username).orElse(null);
+                if (user != null) {
+                    // Chercher l'école associée au tenant de l'utilisateur
+                    return ecoleRepository.findByTenantId(user.getTenantId())
+                            .map(Ecole::getIdEcole)
+                            .orElse(null);
                 }
             }
         } catch (Exception e) {
@@ -104,7 +112,7 @@ public class UserContextService {
      *
      * @return L'utilisateur connecté ou null
      */
-    public Utilisateur getCurrentUser() {
+    public User getCurrentUser() {
         HttpServletRequest request = getCurrentRequest();
         if (request == null) {
             return null;
@@ -116,7 +124,7 @@ public class UserContextService {
             try {
                 String username = jwtService.extractUsername(token);
                 if (username != null) {
-                    return utilisateurRepository.findByEmail(username).orElse(null);
+                    return userRepository.findByEmail(username).orElse(null);
                 }
             } catch (Exception e) {
                 // Token invalide
@@ -132,8 +140,8 @@ public class UserContextService {
      * @return ID de l'utilisateur ou null
      */
     public Long getCurrentUserId() {
-        Utilisateur user = getCurrentUser();
-        return user != null ? user.getIdUtilisateur() : null;
+        User user = getCurrentUser();
+        return user != null ? user.getId() : null;
     }
 
     /**
@@ -167,9 +175,8 @@ public class UserContextService {
     public void checkAccessToEcole(Long ecoleId) {
         if (!hasAccessToEcole(ecoleId)) {
             throw new AuthenticationException(
-                "Accès non autorisé: vous ne pouvez pas accéder aux données d'une autre école",
-                403
-            );
+                    "Accès non autorisé: vous ne pouvez pas accéder aux données d'une autre école",
+                    403);
         }
     }
 
@@ -201,8 +208,8 @@ public class UserContextService {
      */
     private HttpServletRequest getCurrentRequest() {
         try {
-            ServletRequestAttributes attributes =
-                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
+                    .getRequestAttributes();
             return attributes != null ? attributes.getRequest() : null;
         } catch (Exception e) {
             return null;

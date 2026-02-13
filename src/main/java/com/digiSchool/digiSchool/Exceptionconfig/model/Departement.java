@@ -23,6 +23,8 @@ public class Departement {
 
     private String nom;
 
+    private String chefLieu;
+
     @ManyToOne
     private Region region;
 
@@ -57,6 +59,14 @@ public class Departement {
 	public void setRegion(Region region) {
 		this.region = region;
 	}
-    
+
+	public String getChefLieu() {
+		return chefLieu;
+	}
+
+	public void setChefLieu(String chefLieu) {
+		this.chefLieu = chefLieu;
+	}
+
 }
 

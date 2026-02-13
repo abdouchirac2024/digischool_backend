@@ -23,6 +23,8 @@ public class Ville {
 
     private String nom;
 
+    private String codePostal;
+
     @ManyToOne
     private Arrondissement arrondissement;
 
@@ -57,6 +59,14 @@ public class Ville {
 	public void setArrondissement(Arrondissement arrondissement) {
 		this.arrondissement = arrondissement;
 	}
-    
+
+	public String getCodePostal() {
+		return codePostal;
+	}
+
+	public void setCodePostal(String codePostal) {
+		this.codePostal = codePostal;
+	}
+
 }
 

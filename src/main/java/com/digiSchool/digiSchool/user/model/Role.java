@@ -8,12 +8,13 @@ import jakarta.persistence.OneToMany;
 
 @Entity
 public class Role {
-    @Id @GeneratedValue
-    private Long idRole;
-    private String nomRole;
+	@Id
+	@GeneratedValue
+	private Long idRole;
+	private String nomRole;
 
-    @OneToMany(mappedBy="role")
-    private List<Utilisateur> utilisateurs;
+	@OneToMany(mappedBy = "role")
+	private List<Utilisateur> utilisateurs;
 
 	public Long getIdRole() {
 		return idRole;

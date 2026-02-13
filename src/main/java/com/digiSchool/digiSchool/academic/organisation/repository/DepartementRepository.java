@@ -1,4 +1,6 @@
-package com.digiSchool.digiSchool.Exceptionconfig.repository;
+package com.digiSchool.digiSchool.academic.organisation.repository;
+
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -9,4 +11,6 @@ import com.digiSchool.digiSchool.Exceptionconfig.model.Departement;
 public interface DepartementRepository extends JpaRepository<Departement, Long> {
 
     boolean existsByCode(String code);
+
+    List<Departement> findByRegionId(Long regionId);
 }

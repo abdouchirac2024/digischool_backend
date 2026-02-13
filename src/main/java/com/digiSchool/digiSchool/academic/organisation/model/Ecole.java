@@ -18,114 +18,110 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(
-	    name = "ecole",
-	    uniqueConstraints = {
-	        @UniqueConstraint(columnNames = "code_ecole")
-	    },
-	    indexes = {
-	        @Index(name = "idx_ecole_code", columnList = "code_ecole")
-	    }
-	)
-public class Ecole extends TenantEntity{
-	   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	    private Long idEcole;
-	   @Column(name = "code_ecole", nullable = false, unique = true, updatable = false)
-	   private String codeEcole;
+@Table(name = "ecole", uniqueConstraints = {
+		@UniqueConstraint(columnNames = "code_ecole")
+}, indexes = {
+		@Index(name = "idx_ecole_code", columnList = "code_ecole")
+})
+public class Ecole extends TenantEntity {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long idEcole;
+	@Column(name = "code_ecole", nullable = false, unique = true, updatable = false)
+	private String codeEcole;
 
-	    private String nom;
-	    private String adresse;
-	    private String telephone;
-	    private String email;
-	    private Boolean statut;
+	private String nom;
+	private String adresse;
+	private String telephone;
+	private String email;
+	private Boolean statut;
 
-	    @OneToMany(mappedBy = "ecole")
-	    private List<Utilisateur> utilisateurs;
+	@OneToMany(mappedBy = "ecole")
+	private List<Utilisateur> utilisateurs;
 
-	    @OneToMany(mappedBy = "ecole")
-	    private List<Classe> classes;
-	    
-	    @ManyToOne
-	    private Quartier quartier;
+	@OneToMany(mappedBy = "ecole")
+	private List<Classe> classes;
 
-		public Long getIdEcole() {
-			return idEcole;
-		}
+	@ManyToOne
+	private Quartier quartier;
 
-		public void setIdEcole(Long idEcole) {
-			this.idEcole = idEcole;
-		}
+	public Long getIdEcole() {
+		return idEcole;
+	}
 
-		public String getNom() {
-			return nom;
-		}
+	public void setIdEcole(Long idEcole) {
+		this.idEcole = idEcole;
+	}
 
-		public void setNom(String nom) {
-			this.nom = nom;
-		}
+	public String getCodeEcole() {
+		return codeEcole;
+	}
 
-		public String getAdresse() {
-			return adresse;
-		}
+	public void setCodeEcole(String codeEcole) {
+		this.codeEcole = codeEcole;
+	}
 
-		public void setAdresse(String adresse) {
-			this.adresse = adresse;
-		}
+	public String getNom() {
+		return nom;
+	}
 
-		public String getTelephone() {
-			return telephone;
-		}
+	public void setNom(String nom) {
+		this.nom = nom;
+	}
 
-		public void setTelephone(String telephone) {
-			this.telephone = telephone;
-		}
+	public String getAdresse() {
+		return adresse;
+	}
 
-		public String getEmail() {
-			return email;
-		}
+	public void setAdresse(String adresse) {
+		this.adresse = adresse;
+	}
 
-		public void setEmail(String email) {
-			this.email = email;
-		}
+	public String getTelephone() {
+		return telephone;
+	}
 
-		public Boolean getStatut() {
-			return statut;
-		}
+	public void setTelephone(String telephone) {
+		this.telephone = telephone;
+	}
 
-		public void setStatut(Boolean statut) {
-			this.statut = statut;
-		}
+	public String getEmail() {
+		return email;
+	}
 
-		public List<Utilisateur> getUtilisateurs() {
-			return utilisateurs;
-		}
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-		public void setUtilisateurs(List<Utilisateur> utilisateurs) {
-			this.utilisateurs = utilisateurs;
-		}
+	public Boolean getStatut() {
+		return statut;
+	}
 
-		public List<Classe> getClasses() {
-			return classes;
-		}
+	public void setStatut(Boolean statut) {
+		this.statut = statut;
+	}
 
-		public void setClasses(List<Classe> classes) {
-			this.classes = classes;
-		}
+	public List<Utilisateur> getUtilisateurs() {
+		return utilisateurs;
+	}
 
-		public Quartier getQuartier() {
-			return quartier;
-		}
+	public void setUtilisateurs(List<Utilisateur> utilisateurs) {
+		this.utilisateurs = utilisateurs;
+	}
 
-		public void setQuartier(Quartier quartier) {
-			this.quartier = quartier;
-		}
+	public List<Classe> getClasses() {
+		return classes;
+	}
 
-		public String getCodeEcole() {
-			return codeEcole;
-		}
+	public void setClasses(List<Classe> classes) {
+		this.classes = classes;
+	}
 
-		public void setCodeEcole(String codeEcole) {
-			this.codeEcole = codeEcole;
-		}
+	public Quartier getQuartier() {
+		return quartier;
+	}
 
+	public void setQuartier(Quartier quartier) {
+		this.quartier = quartier;
+	}
 }

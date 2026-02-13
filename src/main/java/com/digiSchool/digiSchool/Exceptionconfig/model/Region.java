@@ -1,30 +1,25 @@
 package com.digiSchool.digiSchool.Exceptionconfig.model;
 
-import java.util.List;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(
-    uniqueConstraints = @UniqueConstraint(columnNames = "code")
-)
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = "code"))
 public class Region {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+	@Id
+	@GeneratedValue
+	private Long id;
 
-    @Column(nullable = false, length = 10)
-    private String code;
+	@Column(nullable = false, length = 10)
+	private String code;
 
-    @Column(nullable = false)
-    private String nom;
+	@Column(nullable = false)
+	private String nom;
 
 	public Long getId() {
 		return id;
@@ -49,6 +44,5 @@ public class Region {
 	public void setNom(String nom) {
 		this.nom = nom;
 	}
-    
-}
 
+}

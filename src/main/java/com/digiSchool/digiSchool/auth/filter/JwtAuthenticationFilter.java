@@ -12,7 +12,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.digiSchool.digiSchool.auth.service.JwtService;
+import com.digiSchool.digiSchool.Exceptionconfig.service.TenantContext;
+import com.digiSchool.digiSchool.auth.service.JwtTokenService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -21,21 +22,22 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Filtre d'authentification JWT.
- * Intercepte chaque requête pour valider le token JWT et établir le contexte de sécurité.
+ * Intercepte chaque requête pour valider le token JWT et établir le contexte de
+ * sécurité.
  */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
+    private final JwtTokenService jwtService;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtTokenService jwtService) {
         this.jwtService = jwtService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         // Récupérer le header Authorization
@@ -52,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             // Valider le token
-            if (jwtService.isTokenValid(token)) {
+            if (jwtService.validateToken(token)) {
                 String username = jwtService.extractUsername(token);
                 String role = jwtService.extractRole(token);
 
@@ -63,14 +65,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
 
                 // Créer l'objet d'authentification
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(username, null, authorities);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,
+                        null, authorities);
 
                 // Ajouter les détails de la requête
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 // Établir le contexte de sécurité
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                // Définir le TenantContext (Data Isolation)
+                String ecoleId = jwtService.extractTenantId(token);
+                if (ecoleId != null) {
+                    TenantContext.setTenant(ecoleId);
+                }
             }
         } catch (Exception e) {
             // Token invalide - continuer sans authentification
@@ -78,7 +86,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.clearContext();
         }
 
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            TenantContext.clear();
+        }
     }
 
     /**
@@ -89,7 +101,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         // Liste des endpoints publics qui n'ont pas besoin de vérification JWT
         return path.startsWith("/swagger-ui") ||
-               path.startsWith("/v3/api-docs") ||
-               path.startsWith("/actuator/health");
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/actuator/health");
     }
 }

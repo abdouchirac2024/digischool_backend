@@ -7,10 +7,10 @@ import com.digiSchool.digiSchool.Exceptionconfig.model.Departement;
 import com.digiSchool.digiSchool.Exceptionconfig.model.Quartier;
 import com.digiSchool.digiSchool.Exceptionconfig.model.Region;
 import com.digiSchool.digiSchool.Exceptionconfig.model.Ville;
-import com.digiSchool.digiSchool.Exceptionconfig.repository.ArrondissementRepository;
-import com.digiSchool.digiSchool.Exceptionconfig.repository.DepartementRepository;
-import com.digiSchool.digiSchool.Exceptionconfig.repository.QuartierRepository;
-import com.digiSchool.digiSchool.Exceptionconfig.repository.VilleRepository;
+import com.digiSchool.digiSchool.academic.organisation.repository.ArrondissementRepository;
+import com.digiSchool.digiSchool.academic.organisation.repository.DepartementRepository;
+import com.digiSchool.digiSchool.academic.organisation.repository.QuartierRepository;
+import com.digiSchool.digiSchool.academic.organisation.repository.VilleRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.RegionRepository;
 
 import java.util.HashMap;
@@ -18,7 +18,8 @@ import java.util.Map;
 
 /**
  * Seeder pour la geographie du Cameroun.
- * Cree les 10 regions avec leurs departements, arrondissements, villes et quartiers.
+ * Cree les 10 regions avec leurs departements, arrondissements, villes et
+ * quartiers.
  */
 @Component
 public class RegionSeeder {
@@ -33,10 +34,10 @@ public class RegionSeeder {
     private Map<String, Quartier> quartiersMap = new HashMap<>();
 
     public RegionSeeder(RegionRepository regionRepository,
-                        DepartementRepository departementRepository,
-                        ArrondissementRepository arrondissementRepository,
-                        VilleRepository villeRepository,
-                        QuartierRepository quartierRepository) {
+            DepartementRepository departementRepository,
+            ArrondissementRepository arrondissementRepository,
+            VilleRepository villeRepository,
+            QuartierRepository quartierRepository) {
         this.regionRepository = regionRepository;
         this.departementRepository = departementRepository;
         this.arrondissementRepository = arrondissementRepository;

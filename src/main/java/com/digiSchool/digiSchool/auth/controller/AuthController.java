@@ -1,7 +1,8 @@
 package com.digiSchool.digiSchool.auth.controller;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,25 +10,19 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.digiSchool.digiSchool.auth.dto.AuthResponse;
+import com.digiSchool.digiSchool.auth.dto.ForgotPasswordRequest;
 import com.digiSchool.digiSchool.auth.dto.LoginRequest;
-import com.digiSchool.digiSchool.auth.dto.LoginResponse;
-import com.digiSchool.digiSchool.auth.dto.UserDto;
-import com.digiSchool.digiSchool.auth.exception.AuthenticationException;
+import com.digiSchool.digiSchool.auth.dto.RefreshTokenRequest;
+import com.digiSchool.digiSchool.auth.dto.ResetPasswordRequest;
+import com.digiSchool.digiSchool.auth.model.User;
 import com.digiSchool.digiSchool.auth.service.AuthService;
 
-/**
- * Contrôleur d'authentification.
- * Gère les endpoints de connexion, déconnexion et récupération des infos utilisateur.
- *
- * Endpoints:
- * - POST /api/auth/login - Connexion
- * - POST /api/auth/logout - Déconnexion
- * - POST /api/auth/refresh - Rafraîchir le token
- * - GET /api/auth/me - Obtenir l'utilisateur courant
- */
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin
 public class AuthController {
 
     private final AuthService authService;
@@ -36,136 +31,91 @@ public class AuthController {
         this.authService = authService;
     }
 
-    /**
-     * Connexion utilisateur.
-     * Vérifie email/mot de passe et retourne un token JWT.
-     *
-     * @param request Email et mot de passe
-     * @return Token JWT et informations utilisateur
-     */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        try {
-            LoginResponse response = authService.authenticate(request);
-            return ResponseEntity.ok(response);
-        } catch (AuthenticationException e) {
-            return ResponseEntity
-                .status(e.getStatusCode())
-                .body(new ErrorResponse(e.getMessage()));
-        }
+    public ResponseEntity<AuthResponse> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest) {
+
+        String ipAddress = getClientIpAddress(httpRequest);
+        AuthResponse response = authService.login(request, ipAddress);
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Récupérer les informations de l'utilisateur connecté.
-     *
-     * @param authHeader Header Authorization contenant le token JWT
-     * @return Informations de l'utilisateur
-     */
-    @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+    @PostMapping("/refresh-token")
+    public ResponseEntity<AuthResponse> refreshToken(
+            @Valid @RequestBody RefreshTokenRequest request) {
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity
-                .status(401)
-                .body(new ErrorResponse("Token manquant"));
-        }
-
-        String token = authHeader.substring(7);
-
-        try {
-            UserDto user = authService.getUserFromToken(token);
-            return ResponseEntity.ok(user);
-        } catch (AuthenticationException e) {
-            return ResponseEntity
-                .status(e.getStatusCode())
-                .body(new ErrorResponse(e.getMessage()));
-        }
+        AuthResponse response = authService.refreshToken(request);
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Rafraîchir le token JWT.
-     *
-     * @param request Corps contenant le refresh token
-     * @return Nouveaux tokens
-     */
-    @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
-        try {
-            LoginResponse response = authService.refreshToken(request.getRefreshToken());
-            return ResponseEntity.ok(response);
-        } catch (AuthenticationException e) {
-            return ResponseEntity
-                .status(e.getStatusCode())
-                .body(new ErrorResponse(e.getMessage()));
-        }
-    }
-
-    /**
-     * Déconnexion (côté client, on supprime juste le token).
-     * Côté serveur, le token reste valide jusqu'à expiration (stateless).
-     *
-     * @return Message de confirmation
-     */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        return ResponseEntity.ok(new SuccessResponse("Déconnexion réussie"));
+    public ResponseEntity<Map<String, String>> logout(
+            @RequestBody RefreshTokenRequest request) {
+
+        authService.logout(request.getRefreshToken());
+        return ResponseEntity.ok(Map.of("message", "Déconnexion réussie"));
     }
 
-    // ==================== Classes internes pour les réponses ====================
+    @PostMapping("/logout-all")
+    public ResponseEntity<Map<String, String>> logoutAll(
+            @RequestHeader("Authorization") String authHeader) {
 
-    /**
-     * Requête de rafraîchissement de token.
-     */
-    public static class RefreshTokenRequest {
-        private String refreshToken;
-
-        public String getRefreshToken() {
-            return refreshToken;
-        }
-
-        public void setRefreshToken(String refreshToken) {
-            this.refreshToken = refreshToken;
-        }
+        String token = extractToken(authHeader);
+        User user = authService.getCurrentUser(token);
+        authService.logoutAll(user.getId());
+        return ResponseEntity.ok(Map.of("message", "Déconnexion de toutes les sessions réussie"));
     }
 
-    /**
-     * Réponse d'erreur.
-     */
-    public static class ErrorResponse {
-        private String message;
-        private boolean success = false;
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
 
-        public ErrorResponse(String message) {
-            this.message = message;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public boolean isSuccess() {
-            return success;
-        }
+        authService.forgotPassword(request);
+        return ResponseEntity.ok(Map.of(
+            "message", "Si cet email existe, un lien de réinitialisation a été envoyé"
+        ));
     }
 
-    /**
-     * Réponse de succès.
-     */
-    public static class SuccessResponse {
-        private String message;
-        private boolean success = true;
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
 
-        public SuccessResponse(String message) {
-            this.message = message;
-        }
+        authService.resetPassword(request);
+        return ResponseEntity.ok(Map.of("message", "Mot de passe réinitialisé avec succès"));
+    }
 
-        public String getMessage() {
-            return message;
-        }
+    @GetMapping("/me")
+    public ResponseEntity<AuthResponse.UserInfo> getCurrentUser(
+            @RequestHeader("Authorization") String authHeader) {
 
-        public boolean isSuccess() {
-            return success;
+        String token = extractToken(authHeader);
+        User user = authService.getCurrentUser(token);
+
+        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
+            user.getId(),
+            user.getEmail(),
+            user.getNom(),
+            user.getPrenom(),
+            user.getRole(),
+            user.getTenantId()
+        );
+
+        return ResponseEntity.ok(userInfo);
+    }
+
+    private String extractToken(String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
         }
+        throw new IllegalArgumentException("Token invalide");
+    }
+
+    private String getClientIpAddress(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 }
