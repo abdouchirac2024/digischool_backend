@@ -74,21 +74,47 @@ body {
   background: rgba(255, 255, 255, 0.35) !important;
 }
 
-/* Hide default Swagger logo, replace with text */
-.swagger-ui .topbar-wrapper .link {
-  content: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='0' height='0'/%3E") !important;
-  max-height: 0 !important;
-  visibility: hidden;
+/* --- Logo + Brand in Topbar --- */
+.swagger-ui .topbar-wrapper {
+  display: flex;
+  align-items: center;
 }
 
+.swagger-ui .topbar-wrapper .link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  text-decoration: none !important;
+}
+
+/* Hide default Swagger logo image */
+.swagger-ui .topbar-wrapper .link img,
+.swagger-ui .topbar-wrapper .link svg {
+  display: none !important;
+}
+
+/* Show DigiSchool logo */
+.swagger-ui .topbar-wrapper .link::before {
+  content: '' !important;
+  display: block !important;
+  width: 42px !important;
+  height: 42px !important;
+  background: url('/swagger-ui/logo.png') no-repeat center center !important;
+  background-size: contain !important;
+  border-radius: 10px !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Show brand text next to logo */
 .swagger-ui .topbar-wrapper .link::after {
-  content: 'DigiSchool API';
-  visibility: visible;
-  display: block;
-  font-size: 22px;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: 0.5px;
+  content: 'DigiSchool API' !important;
+  display: block !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  letter-spacing: 0.5px !important;
+  white-space: nowrap !important;
 }
 
 /* --- Info Section --- */
