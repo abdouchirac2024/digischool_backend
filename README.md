@@ -662,7 +662,7 @@ Le tenant est genere automatiquement par `EcoleSeeder.generateTenantId()` a part
 
 Toutes les entites d'une ecole partagent le meme tenant : users, annees scolaires, classes.
 
-Chaque utilisateur appartient a une ecole (`ecoleId` dans le JWT).
+Chaque utilisateur appartient a une ecole via son `tenant` (extrait automatiquement du JWT).
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
@@ -683,9 +683,9 @@ Chaque utilisateur appartient a une ecole (`ecoleId` dans le JWT).
                     └───────────────┘
 ```
 
-- L'`ecoleId` est extrait du JWT (non manipulable)
+- Le `tenant` est extrait du JWT (non manipulable)
 - Chaque utilisateur voit uniquement les donnees de son ecole
-- L'Admin SaaS (`ecoleId = null`) voit tout
+- L'Admin SaaS voit toutes les ecoles
 
 ---
 
