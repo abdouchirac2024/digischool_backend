@@ -81,6 +81,40 @@ public class EleveServiceImpl implements EleveService {
         return toDto(saved);
     }
 
+    @Override
+    public EleveDto update(Long id, EleveDto dto) {
+        String tenant = TenantContext.getTenant();
+        Eleve eleve = eleveRepository.findByIdAndTenant(id, tenant)
+                .orElseThrow(() -> new RuntimeException("Élève introuvable"));
+
+        if (dto.getNom() != null) {
+            eleve.setNom(dto.getNom());
+        }
+        if (dto.getPrenom() != null) {
+            eleve.setPrenom(dto.getPrenom());
+        }
+        if (dto.getDateNaissance() != null) {
+            eleve.setDateNaissance(dto.getDateNaissance());
+        }
+        if (dto.getLieuNaissance() != null) {
+            eleve.setLieuNaissance(dto.getLieuNaissance());
+        }
+        if (dto.getSexe() != null) {
+            eleve.setSexe(Sexe.valueOf(dto.getSexe()));
+        }
+
+        Eleve saved = eleveRepository.save(eleve);
+        return toDto(saved);
+    }
+
+    @Override
+    public void delete(Long id) {
+        String tenant = TenantContext.getTenant();
+        Eleve eleve = eleveRepository.findByIdAndTenant(id, tenant)
+                .orElseThrow(() -> new RuntimeException("Élève introuvable"));
+        eleveRepository.delete(eleve);
+    }
+
     // =====================
     // Mapping DTO <-> Entity
     // =====================

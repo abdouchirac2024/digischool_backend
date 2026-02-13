@@ -61,17 +61,29 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request, String ipAddress) {
-        String email = request.getEmail().toLowerCase().trim();
+        String login = request.getLogin().trim();
 
         // Vérifier le rate limiting
-        checkRateLimit(email, ipAddress);
+        checkRateLimit(login, ipAddress);
+
+        // Détecter si c'est un email (contient @) ou un téléphone
+        boolean isEmail = login.contains("@");
 
         // Trouver l'utilisateur
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> {
-                    logFailedAttempt(email, ipAddress, "Utilisateur non trouvé");
-                    return new AuthenticationException("Email ou mot de passe incorrect");
-                });
+        User user;
+        if (isEmail) {
+            user = userRepository.findByEmail(login.toLowerCase())
+                    .orElseThrow(() -> {
+                        logFailedAttempt(login, ipAddress, "Utilisateur non trouvé");
+                        return new AuthenticationException("Identifiant ou mot de passe incorrect");
+                    });
+        } else {
+            user = userRepository.findByTelephone(login)
+                    .orElseThrow(() -> {
+                        logFailedAttempt(login, ipAddress, "Utilisateur non trouvé");
+                        return new AuthenticationException("Identifiant ou mot de passe incorrect");
+                    });
+        }
 
         // Vérifier si le compte est verrouillé
         if (user.getStatus() == UserStatus.LOCKED) {
@@ -82,21 +94,21 @@ public class AuthService {
                 user.setLockedUntil(null);
                 userRepository.save(user);
             } else {
-                logFailedAttempt(email, ipAddress, "Compte verrouillé");
+                logFailedAttempt(login, ipAddress, "Compte verrouillé");
                 throw new AuthenticationException("Compte verrouillé. Réessayez plus tard.");
             }
         }
 
         // Vérifier si le compte est actif
         if (user.getStatus() != UserStatus.ACTIVE) {
-            logFailedAttempt(email, ipAddress, "Compte inactif");
+            logFailedAttempt(login, ipAddress, "Compte inactif");
             throw new AuthenticationException("Compte inactif. Contactez l'administrateur.");
         }
 
         // Vérifier le mot de passe
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             handleFailedLogin(user, ipAddress);
-            throw new AuthenticationException("Email ou mot de passe incorrect");
+            throw new AuthenticationException("Identifiant ou mot de passe incorrect");
         }
 
         // Connexion réussie
@@ -151,13 +163,7 @@ public class AuthService {
         refreshTokenRepository.save(refreshTokenEntity);
 
         // Construire la réponse
-        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
-                user.getId(),
-                user.getEmail(),
-                user.getNom(),
-                user.getPrenom(),
-                user.getRole(),
-                user.getTenantId());
+        AuthResponse.UserInfo userInfo = buildUserInfo(user);
 
         return new AuthResponse(
                 accessToken,
@@ -204,13 +210,7 @@ public class AuthService {
                 LocalDateTime.now().plusSeconds(refreshTokenExpiration / 1000));
         refreshTokenRepository.save(newRefreshTokenEntity);
 
-        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
-                user.getId(),
-                user.getEmail(),
-                user.getNom(),
-                user.getPrenom(),
-                user.getRole(),
-                user.getTenantId());
+        AuthResponse.UserInfo userInfo = buildUserInfo(user);
 
         return new AuthResponse(
                 newAccessToken,
@@ -292,5 +292,19 @@ public class AuthService {
     private void logSuccessfulAttempt(String email, String ipAddress) {
         LoginAttempt attempt = new LoginAttempt(email, ipAddress, true, null);
         loginAttemptRepository.save(attempt);
+    }
+
+    public AuthResponse.UserInfo buildUserInfo(User user) {
+        return new AuthResponse.UserInfo(
+                user.getId(),
+                user.getEmail(),
+                user.getNom(),
+                user.getPrenom(),
+                user.getTelephone(),
+                user.getRole(),
+                user.getTenantId(),
+                user.getEcole() != null ? user.getEcole().getIdEcole() : null,
+                user.getEcole() != null ? user.getEcole().getNom() : null,
+                user.getEcole() != null ? user.getEcole().getCodeEcole() : null);
     }
 }

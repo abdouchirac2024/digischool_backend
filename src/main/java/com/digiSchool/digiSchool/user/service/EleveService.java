@@ -14,4 +14,8 @@ public interface EleveService {
     List<EleveDto> search(String query);
 
     EleveDto create(EleveDto dto);
+
+    EleveDto update(Long id, EleveDto dto);
+
+    void delete(Long id);
 }

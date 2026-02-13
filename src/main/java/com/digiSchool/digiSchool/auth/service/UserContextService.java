@@ -70,7 +70,7 @@ public class UserContextService {
                 User user = userRepository.findByEmail(username).orElse(null);
                 if (user != null) {
                     // Chercher l'école associée au tenant de l'utilisateur
-                    return ecoleRepository.findByTenantId(user.getTenantId())
+                    return ecoleRepository.findByTenant(user.getTenantId())
                             .map(Ecole::getIdEcole)
                             .orElse(null);
                 }

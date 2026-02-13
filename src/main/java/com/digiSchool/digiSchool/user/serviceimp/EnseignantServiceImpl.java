@@ -3,6 +3,7 @@ package com.digiSchool.digiSchool.user.serviceimp;
 import com.digiSchool.digiSchool.auth.model.RoleType;
 import com.digiSchool.digiSchool.auth.model.User;
 import com.digiSchool.digiSchool.auth.repository.UserRepository;
+import com.digiSchool.digiSchool.Exceptionconfig.service.TenantContext;
 import com.digiSchool.digiSchool.user.dto.EnseignantDto;
 import com.digiSchool.digiSchool.user.model.Enseignant;
 import com.digiSchool.digiSchool.user.repository.EnseignantRepository;
@@ -30,24 +31,16 @@ public class EnseignantServiceImpl implements EnseignantService {
 
     @Override
     public Enseignant createEnseignant(EnseignantDto dto) {
+        String tenant = TenantContext.getTenant();
+
         // Create User first
         User user = new User();
         user.setNom(dto.getNom());
         user.setPrenom(dto.getPrenom());
         user.setEmail(dto.getEmail());
-        // Default password or generated
         user.setPasswordHash(passwordEncoder.encode("DefaultPassword123!"));
         user.setRole(RoleType.ENSEIGNANT);
-        // TenantId is handled by context or needs to be set if manual creation.
-        // Assuming TenantContext is available, but User entity requires it.
-        // In a real flow, this comes from the logged-in admin's context.
-        // user.setTenantId(TenantContext.getTenant());
-
-        // However, standard saving might require manual setting if not intercepted or
-        // if context is missing.
-        // Letting standard flow handle it if possible, otherwise we might need to set
-        // it.
-
+        user.setTenantId(tenant);
         user = userRepository.save(user);
 
         Enseignant enseignant = new Enseignant();
@@ -58,13 +51,15 @@ public class EnseignantServiceImpl implements EnseignantService {
         enseignant.setExperience(dto.getExperience());
         enseignant.setBio(dto.getBio());
         enseignant.setPhotoUrl(dto.getPhotoUrl());
+        enseignant.setTenant(tenant);
 
         return enseignantRepository.save(enseignant);
     }
 
     @Override
     public Enseignant updateEnseignant(Long id, EnseignantDto dto) {
-        Enseignant enseignant = enseignantRepository.findById(id)
+        String tenant = TenantContext.getTenant();
+        Enseignant enseignant = enseignantRepository.findByIdAndTenant(id, tenant)
                 .orElseThrow(() -> new RuntimeException("Enseignant non trouvé"));
 
         enseignant.setTelephone(dto.getTelephone());
@@ -77,7 +72,6 @@ public class EnseignantServiceImpl implements EnseignantService {
         if (user != null) {
             user.setNom(dto.getNom());
             user.setPrenom(dto.getPrenom());
-            // Email update might require verification
             userRepository.save(user);
         }
 
@@ -86,22 +80,26 @@ public class EnseignantServiceImpl implements EnseignantService {
 
     @Override
     public EnseignantDto getEnseignantById(Long id) {
-        Enseignant enseignant = enseignantRepository.findById(id)
+        String tenant = TenantContext.getTenant();
+        Enseignant enseignant = enseignantRepository.findByIdAndTenant(id, tenant)
                 .orElseThrow(() -> new RuntimeException("Enseignant non trouvé"));
         return convertToDto(enseignant);
     }
 
     @Override
     public List<EnseignantDto> getAllEnseignants() {
-        return enseignantRepository.findAll().stream()
+        String tenant = TenantContext.getTenant();
+        return enseignantRepository.findAllByTenant(tenant).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public void deleteEnseignant(Long id) {
-        enseignantRepository.deleteById(id);
-        // Optionally delete linked user or deactivate
+        String tenant = TenantContext.getTenant();
+        Enseignant enseignant = enseignantRepository.findByIdAndTenant(id, tenant)
+                .orElseThrow(() -> new RuntimeException("Enseignant non trouvé"));
+        enseignantRepository.delete(enseignant);
     }
 
     private EnseignantDto convertToDto(Enseignant enseignant) {

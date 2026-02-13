@@ -108,8 +108,8 @@ public class EcoleSeeder {
         e.setStatut(statut);
         e.setQuartier(quartier);
 
-        // IMPORTANT: Do NOT set tenant before save - we need the generated ID first
-        // Save to get the auto-generated ID
+        // Set a temporary tenant to satisfy NOT NULL constraint, will be updated after save
+        e.setTenant("TEMP");
         Ecole saved = ecoleRepository.save(e);
 
         // Generate hierarchical tenant ID: CM-{REGION}-ECOLE-{ID}

@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "digischool-api-collection",
     "name": "DigiSchool API",
-    "description": "Collection complète des API DigiSchool Backend\n\nVersion: 1.0.0\nBase URL: http://localhost:8080/api\n\n## Authentification\nLa plupart des endpoints nécessitent un token JWT.\n1. Utilisez /auth/login pour obtenir un token\n2. Le token est automatiquement stocké dans la variable {{access_token}}\n3. Les requêtes authentifiées utilisent ce token automatiquement",
+    "description": "Collection complète des API DigiSchool Backend\n\nVersion: 2.0.0\nBase URL: http://localhost:8080/api\n\n## Authentification\nLa plupart des endpoints nécessitent un token JWT.\n1. Utilisez /auth/login pour obtenir un token (email ou téléphone)\n2. Le token est automatiquement stocké dans la variable {{access_token}}\n3. Les requêtes authentifiées utilisent ce token automatiquement\n\n## Login\nLe champ `login` accepte un email ou un numéro de téléphone.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -35,7 +35,7 @@
   "item": [
     {
       "name": "Authentication",
-      "description": "Endpoints d'authentification (login, logout, refresh token, profil)",
+      "description": "Endpoints d'authentification (login, logout, refresh token, profil)\n\nLe login accepte un email ou un numéro de téléphone via le champ `login`.",
       "item": [
         {
           "name": "Login (Email)",
@@ -46,9 +46,9 @@
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "    var jsonData = pm.response.json();",
-                  "    if (jsonData.token) {",
-                  "        pm.collectionVariables.set('access_token', jsonData.token);",
-                  "        console.log('Token saved:', jsonData.token.substring(0, 20) + '...');",
+                  "    if (jsonData.accessToken) {",
+                  "        pm.collectionVariables.set('access_token', jsonData.accessToken);",
+                  "        console.log('Access token saved:', jsonData.accessToken.substring(0, 20) + '...');",
                   "    }",
                   "    if (jsonData.refreshToken) {",
                   "        pm.collectionVariables.set('refresh_token', jsonData.refreshToken);",
@@ -58,8 +58,77 @@
                   "pm.test('Login successful', function() {",
                   "    pm.response.to.have.status(200);",
                   "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.success).to.be.true;",
-                  "    pm.expect(jsonData.token).to.be.a('string');",
+                  "    pm.expect(jsonData.accessToken).to.be.a('string');",
+                  "    pm.expect(jsonData.refreshToken).to.be.a('string');",
+                  "    pm.expect(jsonData.user).to.be.an('object');",
+                  "    pm.expect(jsonData.user.email).to.be.a('string');",
+                  "    pm.expect(jsonData.user.role).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"login\": \"admin@digischool.cm\",\n    \"password\": \"Admin@2025\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Connexion avec email ou téléphone.\n\nLe champ `login` accepte :\n- Un email : `admin@digischool.cm`\n- Un téléphone : `+237677123456`\n\n**Comptes de test disponibles:**\n\n| Role | Email | Téléphone | Password |\n|------|-------|-----------|----------|\n| Admin | admin@digischool.cm | +237600000000 | Admin@2025 |\n| Directeur | smbarga@lavictoire.cm | +237677123456 | Directeur@2025 |\n| Enseignant | jpkamga@lavictoire.cm | +237670111222 | Enseignant@2025 |\n| Secrétaire | catangana@lavictoire.cm | +237660555666 | Secretaire@2025 |\n| Parent | fnkoulou@gmail.com | +237691666777 | Parent@2025 |\n| En attente | enattente@test.cm | +237699000111 | Test@2025 |\n| Inactif | inactif@test.cm | +237699000222 | Test@2025 |"
+          },
+          "response": [
+            {
+              "name": "Login Success",
+              "originalRequest": {
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"login\": \"admin@digischool.cm\",\n    \"password\": \"Admin@2025\"\n}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"tokenType\": \"Bearer\",\n    \"expiresIn\": 86400000,\n    \"user\": {\n        \"id\": 1,\n        \"email\": \"admin@digischool.cm\",\n        \"nom\": \"Admin\",\n        \"prenom\": \"Super\",\n        \"telephone\": \"+237600000000\",\n        \"role\": \"SUPER_ADMIN\",\n        \"tenantId\": \"CM-CENTRE-ECOLE-001\",\n        \"ecoleId\": 1,\n        \"ecoleNom\": \"Ecole Bilingue La Victoire\",\n        \"codeEcole\": \"ECB-001\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login (Téléphone)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.accessToken) {",
+                  "        pm.collectionVariables.set('access_token', jsonData.accessToken);",
+                  "    }",
+                  "    if (jsonData.refreshToken) {",
+                  "        pm.collectionVariables.set('refresh_token', jsonData.refreshToken);",
+                  "    }",
+                  "}",
+                  "",
+                  "pm.test('Login with phone successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.accessToken).to.be.a('string');",
                   "    pm.expect(jsonData.user).to.be.an('object');",
                   "});"
                 ],
@@ -80,79 +149,24 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"identifier\": \"admin@digischool.cm\",\n    \"password\": \"Admin@2025\"\n}"
+              "raw": "{\n    \"login\": \"+237677123456\",\n    \"password\": \"Directeur@2025\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
               "host": ["{{base_url}}"],
               "path": ["auth", "login"]
             },
-            "description": "Connexion avec email et mot de passe.\n\n**Comptes de test disponibles:**\n\n| Role | Email | Téléphone | Password |\n|------|-------|-----------|----------|\n| Admin | admin@digischool.cm | +237600000000 | Admin@2025 |\n| Directeur | smbarga@lavictoire.cm | +237677123456 | Directeur@2025 |\n| Enseignant | jpkamga@lavictoire.cm | +237670111222 | Enseignant@2025 |\n| Secrétaire | catangana@lavictoire.cm | +237660555666 | Secretaire@2025 |\n| Parent | fnkoulou@gmail.com | +237691666777 | Parent@2025 |\n| Utilisateur EN_ATTENTE | enattente@test.cm | +237699000111 | Test@2025 |\n| Utilisateur INACTIF | inactif@test.cm | +237699000222 | Test@2025 |"
+            "description": "Connexion avec numéro de téléphone.\n\nUtilise le champ `login` avec un numéro de téléphone au lieu d'un email."
           },
           "response": [
             {
-              "name": "Login Success",
-              "originalRequest": {
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"identifier\": \"admin@digischool.cm\",\n    \"password\": \"Admin@2025\"\n}"
-                }
-              },
+              "name": "Login Phone Success",
               "status": "OK",
               "code": 200,
               "_postman_previewlanguage": "json",
-              "body": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"expiresIn\": 86400000,\n    \"user\": {\n        \"id\": 1,\n        \"nom\": \"Admin\",\n        \"prenom\": \"Super\",\n        \"email\": \"admin@digischool.cm\",\n        \"telephone\": \"699000001\",\n        \"statut\": \"ACTIF\",\n        \"derniereConnexion\": \"2024-01-15T10:30:00\",\n        \"roleId\": 1,\n        \"roleName\": \"ADMIN\",\n        \"ecoleId\": null,\n        \"ecoleNom\": null\n    },\n    \"message\": \"Connexion réussie\",\n    \"success\": true\n}"
+              "body": "{\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"tokenType\": \"Bearer\",\n    \"expiresIn\": 86400000,\n    \"user\": {\n        \"id\": 2,\n        \"email\": \"smbarga@lavictoire.cm\",\n        \"nom\": \"Mbarga\",\n        \"prenom\": \"Samuel\",\n        \"telephone\": \"+237677123456\",\n        \"role\": \"ADMIN_ECOLE\",\n        \"tenantId\": \"CM-CENTRE-ECOLE-001\",\n        \"ecoleId\": 1,\n        \"ecoleNom\": \"Ecole Bilingue La Victoire\",\n        \"codeEcole\": \"ECB-001\"\n    }\n}"
             }
           ]
-        },
-        {
-          "name": "Login (Téléphone)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    var jsonData = pm.response.json();",
-                  "    if (jsonData.token) {",
-                  "        pm.collectionVariables.set('access_token', jsonData.token);",
-                  "    }",
-                  "    if (jsonData.refreshToken) {",
-                  "        pm.collectionVariables.set('refresh_token', jsonData.refreshToken);",
-                  "    }",
-                  "}",
-                  "",
-                  "pm.test('Login with phone successful', function() {",
-                  "    pm.response.to.have.status(200);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"identifier\": \"+237677123456\",\n    \"password\": \"Directeur@2025\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "login"]
-            },
-            "description": "Connexion avec numéro de téléphone et mot de passe."
-          }
         },
         {
           "name": "Get Current User (Me)",
@@ -166,7 +180,8 @@
                   "    var jsonData = pm.response.json();",
                   "    pm.expect(jsonData.id).to.exist;",
                   "    pm.expect(jsonData.email).to.be.a('string');",
-                  "    pm.expect(jsonData.roleName).to.be.a('string');",
+                  "    pm.expect(jsonData.role).to.be.a('string');",
+                  "    pm.expect(jsonData.telephone).to.be.a('string');",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -181,7 +196,7 @@
               "host": ["{{base_url}}"],
               "path": ["auth", "me"]
             },
-            "description": "Récupère les informations de l'utilisateur connecté.\n\n**Requiert:** Token JWT valide dans le header Authorization"
+            "description": "Récupère les informations de l'utilisateur connecté.\n\n**Requiert:** Token JWT valide dans le header Authorization\n\n**Réponse enrichie:** Inclut telephone, ecoleId, ecoleNom, codeEcole"
           },
           "response": [
             {
@@ -189,7 +204,7 @@
               "status": "OK",
               "code": 200,
               "_postman_previewlanguage": "json",
-              "body": "{\n    \"id\": 2,\n    \"nom\": \"Directeur\",\n    \"prenom\": \"Jean\",\n    \"email\": \"directeur@lycee-leclerc.cm\",\n    \"telephone\": \"699000002\",\n    \"statut\": \"ACTIF\",\n    \"derniereConnexion\": \"2024-01-15T10:30:00\",\n    \"roleId\": 2,\n    \"roleName\": \"DIRECTEUR\",\n    \"ecoleId\": 1,\n    \"ecoleNom\": \"Lycée Leclerc\"\n}"
+              "body": "{\n    \"id\": 2,\n    \"email\": \"smbarga@lavictoire.cm\",\n    \"nom\": \"Mbarga\",\n    \"prenom\": \"Samuel\",\n    \"telephone\": \"+237677123456\",\n    \"role\": \"ADMIN_ECOLE\",\n    \"tenantId\": \"CM-CENTRE-ECOLE-001\",\n    \"ecoleId\": 1,\n    \"ecoleNom\": \"Ecole Bilingue La Victoire\",\n    \"codeEcole\": \"ECB-001\"\n}"
             }
           ]
         },
@@ -202,8 +217,8 @@
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "    var jsonData = pm.response.json();",
-                  "    if (jsonData.token) {",
-                  "        pm.collectionVariables.set('access_token', jsonData.token);",
+                  "    if (jsonData.accessToken) {",
+                  "        pm.collectionVariables.set('access_token', jsonData.accessToken);",
                   "    }",
                   "    if (jsonData.refreshToken) {",
                   "        pm.collectionVariables.set('refresh_token', jsonData.refreshToken);",
@@ -212,6 +227,8 @@
                   "",
                   "pm.test('Token refresh successful', function() {",
                   "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.accessToken).to.be.a('string');",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -234,11 +251,11 @@
               "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/auth/refresh",
+              "raw": "{{base_url}}/auth/refresh-token",
               "host": ["{{base_url}}"],
-              "path": ["auth", "refresh"]
+              "path": ["auth", "refresh-token"]
             },
-            "description": "Rafraîchit le token d'accès en utilisant le refresh token."
+            "description": "Rafraîchit le token d'accès en utilisant le refresh token.\n\nRetourne un nouveau accessToken et refreshToken."
           }
         },
         {
@@ -262,13 +279,22 @@
           ],
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
             "url": {
               "raw": "{{base_url}}/auth/logout",
               "host": ["{{base_url}}"],
               "path": ["auth", "logout"]
             },
-            "description": "Déconnexion de l'utilisateur. Invalide le token côté serveur."
+            "description": "Déconnexion de l'utilisateur. Révoque le refresh token côté serveur.\n\n**Body:** `{ \"refreshToken\": \"...\" }`"
           },
           "response": [
             {
@@ -276,7 +302,7 @@
               "status": "OK",
               "code": 200,
               "_postman_previewlanguage": "json",
-              "body": "{\n    \"message\": \"Déconnexion réussie\",\n    \"success\": true\n}"
+              "body": "{\n    \"message\": \"Déconnexion réussie\"\n}"
             }
           ]
         }

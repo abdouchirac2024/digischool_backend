@@ -92,14 +92,7 @@ public class AuthController {
         String token = extractToken(authHeader);
         User user = authService.getCurrentUser(token);
 
-        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
-            user.getId(),
-            user.getEmail(),
-            user.getNom(),
-            user.getPrenom(),
-            user.getRole(),
-            user.getTenantId()
-        );
+        AuthResponse.UserInfo userInfo = authService.buildUserInfo(user);
 
         return ResponseEntity.ok(userInfo);
     }

@@ -9,7 +9,7 @@ import com.digiSchool.digiSchool.academic.organisation.model.Niveau;
 import com.digiSchool.digiSchool.academic.organisation.model.SousSysteme;
 import com.digiSchool.digiSchool.academic.organisation.model.StatutClasse;
 import com.digiSchool.digiSchool.academic.organisation.repository.ClasseRepository;
-import com.digiSchool.digiSchool.user.model.Utilisateur;
+import com.digiSchool.digiSchool.auth.model.User;
 
 /**
  * Seeder pour les classes.
@@ -21,18 +21,16 @@ public class ClasseSeeder {
     private final ClasseRepository classeRepository;
     private final EcoleSeeder ecoleSeeder;
     private final AnneeScolaireSeeder anneeScolaireSeeder;
-    private final UtilisateurSeeder utilisateurSeeder;
-
-    private static final String TENANT = "default";
+    private final UserSeeder userSeeder;
 
     public ClasseSeeder(ClasseRepository classeRepository,
                         EcoleSeeder ecoleSeeder,
                         AnneeScolaireSeeder anneeScolaireSeeder,
-                        UtilisateurSeeder utilisateurSeeder) {
+                        UserSeeder userSeeder) {
         this.classeRepository = classeRepository;
         this.ecoleSeeder = ecoleSeeder;
         this.anneeScolaireSeeder = anneeScolaireSeeder;
-        this.utilisateurSeeder = utilisateurSeeder;
+        this.userSeeder = userSeeder;
     }
 
     /**
@@ -48,41 +46,43 @@ public class ClasseSeeder {
         Ecole ecoleAnglo = ecoleSeeder.getEcole("ECA-001");
         Ecole ecoleFranco = ecoleSeeder.getEcole("ECF-001");
 
-        Anneescolaire annee2024 = anneeScolaireSeeder.getAnnee("2024-2025");
-        Anneescolaire annee2025 = anneeScolaireSeeder.getAnnee("2025-2026");
+        Anneescolaire annee2024Bilingue = anneeScolaireSeeder.getAnnee("2024-2025", "ECB-001");
+        Anneescolaire annee2025Bilingue = anneeScolaireSeeder.getAnnee("2025-2026", "ECB-001");
+        Anneescolaire annee2025Anglo = anneeScolaireSeeder.getAnnee("2025-2026", "ECA-001");
+        Anneescolaire annee2025Franco = anneeScolaireSeeder.getAnnee("2025-2026", "ECF-001");
 
-        Utilisateur enseignant1 = utilisateurSeeder.getUtilisateur("enseignant1");
-        Utilisateur enseignant2 = utilisateurSeeder.getUtilisateur("enseignant2");
-        Utilisateur enseignant3 = utilisateurSeeder.getUtilisateur("enseignant3");
-        Utilisateur enseignant4 = utilisateurSeeder.getUtilisateur("enseignant4");
+        User enseignant1 = userSeeder.getUser("enseignant1");
+        User enseignant2 = userSeeder.getUser("enseignant2");
+        User enseignant3 = userSeeder.getUser("enseignant3");
+        User enseignant4 = userSeeder.getUser("enseignant4");
 
         // ============================================================
         // Ecole Bilingue La Victoire (Francophone + Anglophone)
         // ============================================================
-        seedEcoleBilingue(ecoleBilingue, annee2025, enseignant1, enseignant2);
+        seedEcoleBilingue(ecoleBilingue, annee2025Bilingue, enseignant1, enseignant2);
 
         // ============================================================
         // Progressive Comprehensive College (Anglophone)
         // ============================================================
-        seedEcoleAnglo(ecoleAnglo, annee2025, enseignant4);
+        seedEcoleAnglo(ecoleAnglo, annee2025Anglo, enseignant4);
 
         // ============================================================
         // Groupe Scolaire Les Champions (Francophone)
         // ============================================================
-        seedEcoleFranco(ecoleFranco, annee2025, enseignant3);
+        seedEcoleFranco(ecoleFranco, annee2025Franco, enseignant3);
 
         // ============================================================
         // Classe archivee (annee 2024-2025)
         // ============================================================
         Classe classeArchivee = createClasse("CM2-A", Niveau.PRIMAIRE, SousSysteme.FRANCOPHONE, "A", 48, 22000.0,
-                "Classe 2024-2025 archivee", ecoleBilingue, annee2024, null);
+                "Classe 2024-2025 archivee", ecoleBilingue, annee2024Bilingue, null);
         classeArchivee.setStatut(StatutClasse.ARCHIVEE);
         classeRepository.save(classeArchivee);
 
         System.out.println("  -> Classes : 20 classes creees (19 actives + 1 archivee)");
     }
 
-    private void seedEcoleBilingue(Ecole ecole, Anneescolaire annee, Utilisateur enseignant1, Utilisateur enseignant2) {
+    private void seedEcoleBilingue(Ecole ecole, Anneescolaire annee, User enseignant1, User enseignant2) {
         // Primaire Francophone
         createClasse("SIL-A", Niveau.PRIMAIRE, SousSysteme.FRANCOPHONE, "A", 45, 25000.0,
                 "Section d'Initiation au Langage", ecole, annee, enseignant1);
@@ -110,7 +110,7 @@ public class ClasseSeeder {
                 "5-6 ans", ecole, annee, null);
     }
 
-    private void seedEcoleAnglo(Ecole ecole, Anneescolaire annee, Utilisateur enseignant4) {
+    private void seedEcoleAnglo(Ecole ecole, Anneescolaire annee, User enseignant4) {
         // Secondary (College anglophone)
         createClasse("Form 1-A", Niveau.SECONDARY, SousSysteme.ANGLOPHONE, "A", 60, 50000.0,
                 null, ecole, annee, enseignant4);
@@ -124,7 +124,7 @@ public class ClasseSeeder {
                 "GCE A/L Arts", ecole, annee, null);
     }
 
-    private void seedEcoleFranco(Ecole ecole, Anneescolaire annee, Utilisateur enseignant3) {
+    private void seedEcoleFranco(Ecole ecole, Anneescolaire annee, User enseignant3) {
         // College francophone
         createClasse("6eme-A", Niveau.COLLEGE, SousSysteme.FRANCOPHONE, "A", 60, 45000.0,
                 null, ecole, annee, enseignant3);
@@ -143,7 +143,7 @@ public class ClasseSeeder {
     private Classe createClasse(String nomClasse, Niveau niveau, SousSysteme sousSysteme,
                                  String section, Integer capacite, Double fraisScolarite,
                                  String description, Ecole ecole, Anneescolaire annee,
-                                 Utilisateur titulaire) {
+                                 User titulaire) {
         Classe c = new Classe();
         c.setNomClasse(nomClasse);
         c.setNiveau(niveau);
@@ -156,7 +156,7 @@ public class ClasseSeeder {
         c.setEcole(ecole);
         c.setAnneeScolaire(annee);
         c.setTitulaire(titulaire);
-        c.setTenant(TENANT);
+        c.setTenant(ecole.getTenant());
         return classeRepository.save(c);
     }
 }

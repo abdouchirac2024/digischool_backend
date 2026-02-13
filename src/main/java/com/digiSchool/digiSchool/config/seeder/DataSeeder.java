@@ -1,6 +1,7 @@
 package com.digiSchool.digiSchool.config.seeder;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
@@ -12,13 +13,14 @@ import org.springframework.stereotype.Component;
  * quartiers)
  * 3. EcoleSeeder - Cree les ecoles (depend des quartiers)
  * 4. AnneeScolaireSeeder - Cree les annees scolaires
- * 5. UtilisateurSeeder - Cree les utilisateurs (depend des roles et ecoles)
+ * 5. UserSeeder - Cree les utilisateurs (depend des ecoles)
  * 6. ClasseSeeder - Cree les classes (depend des ecoles, annees et
  * utilisateurs)
  *
  * Chaque seeder verifie si les donnees existent deja avant de les creer.
  */
 @Component
+@Order(1)
 public class DataSeeder implements CommandLineRunner {
 
     private final RoleSeeder roleSeeder;
@@ -26,7 +28,6 @@ public class DataSeeder implements CommandLineRunner {
     private final EcoleSeeder ecoleSeeder;
     private final UserSeeder userSeeder;
     private final AnneeScolaireSeeder anneeScolaireSeeder;
-    private final UtilisateurSeeder utilisateurSeeder;
     private final ClasseSeeder classeSeeder;
 
     public DataSeeder(RoleSeeder roleSeeder,
@@ -34,14 +35,12 @@ public class DataSeeder implements CommandLineRunner {
             EcoleSeeder ecoleSeeder,
             UserSeeder userSeeder,
             AnneeScolaireSeeder anneeScolaireSeeder,
-            UtilisateurSeeder utilisateurSeeder,
             ClasseSeeder classeSeeder) {
         this.roleSeeder = roleSeeder;
         this.regionSeeder = regionSeeder;
         this.ecoleSeeder = ecoleSeeder;
         this.userSeeder = userSeeder;
         this.anneeScolaireSeeder = anneeScolaireSeeder;
-        this.utilisateurSeeder = utilisateurSeeder;
         this.classeSeeder = classeSeeder;
     }
 
@@ -62,16 +61,13 @@ public class DataSeeder implements CommandLineRunner {
         // 3. Ecoles (depend des quartiers)
         ecoleSeeder.seed();
 
-        // 4. Users Auth (depend des ecoles pour le tenant ID)
-        userSeeder.seed();
-
-        // 5. Annees scolaires (pas de dependance)
+        // 4. Annees scolaires (pas de dependance)
         anneeScolaireSeeder.seed();
 
-        // 6. Utilisateurs (depend des roles et ecoles)
-        utilisateurSeeder.seed();
+        // 5. Users (depend des ecoles)
+        userSeeder.seed();
 
-        // 7. Classes (depend des ecoles, annees et utilisateurs)
+        // 6. Classes (depend des ecoles, annees et users)
         classeSeeder.seed();
 
         System.out.println();

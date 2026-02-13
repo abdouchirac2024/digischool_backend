@@ -13,5 +13,5 @@ public interface EcoleRepository extends JpaRepository<Ecole, Long> {
 
     boolean existsByCodeEcole(String codeEcole);
 
-    Optional<Ecole> findByTenantId(String tenantId);
+    Optional<Ecole> findByTenant(String tenant);
 }

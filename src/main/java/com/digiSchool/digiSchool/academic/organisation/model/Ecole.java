@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.digiSchool.digiSchool.Exceptionconfig.model.Quartier;
 import com.digiSchool.digiSchool.Exceptionconfig.model.TenantEntity;
-import com.digiSchool.digiSchool.user.model.Utilisateur;
+import com.digiSchool.digiSchool.auth.model.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,7 +37,7 @@ public class Ecole extends TenantEntity {
 	private Boolean statut;
 
 	@OneToMany(mappedBy = "ecole")
-	private List<Utilisateur> utilisateurs;
+	private List<User> users;
 
 	@OneToMany(mappedBy = "ecole")
 	private List<Classe> classes;
@@ -101,12 +101,12 @@ public class Ecole extends TenantEntity {
 		this.statut = statut;
 	}
 
-	public List<Utilisateur> getUtilisateurs() {
-		return utilisateurs;
+	public List<User> getUsers() {
+		return users;
 	}
 
-	public void setUtilisateurs(List<Utilisateur> utilisateurs) {
-		this.utilisateurs = utilisateurs;
+	public void setUsers(List<User> users) {
+		this.users = users;
 	}
 
 	public List<Classe> getClasses() {

@@ -60,7 +60,7 @@ public class SecurityConfig {
                 // Endpoints publics (pas besoin d'authentification)
                 .requestMatchers(
                     "/api/auth/login",        // Login
-                    "/api/auth/register",     // Inscription
+                    "/api/auth/refresh-token", // Rafraîchir token
                     "/api/auth/forgot-password", // Mot de passe oublié
                     "/api/auth/reset-password",  // Réinitialisation mot de passe
                     "/api/public/**",         // Endpoints publics

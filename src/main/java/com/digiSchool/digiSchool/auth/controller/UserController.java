@@ -154,8 +154,12 @@ public class UserController {
             user.getEmail(),
             user.getNom(),
             user.getPrenom(),
+            user.getTelephone(),
             user.getRole(),
-            user.getTenantId()
+            user.getTenantId(),
+            user.getEcole() != null ? user.getEcole().getIdEcole() : null,
+            user.getEcole() != null ? user.getEcole().getNom() : null,
+            user.getEcole() != null ? user.getEcole().getCodeEcole() : null
         );
     }
 }

@@ -11,6 +11,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.digiSchool.digiSchool.Exceptionconfig.model.Quartier;
+import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,15 +22,19 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenant")
 @Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "email")
+        @UniqueConstraint(columnNames = "email"),
+        @UniqueConstraint(columnNames = "telephone")
 }, indexes = {
         @Index(name = "idx_user_email", columnList = "email"),
+        @Index(name = "idx_user_telephone", columnList = "telephone"),
         @Index(name = "idx_user_tenant", columnList = "tenant_id"),
         @Index(name = "idx_user_role", columnList = "role")
 })
@@ -51,6 +58,17 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private String prenom;
+
+    @Column(unique = true)
+    private String telephone;
+
+    @ManyToOne
+    @JoinColumn(name = "ecole_id")
+    private Ecole ecole;
+
+    @ManyToOne
+    @JoinColumn(name = "quartier_id")
+    private Quartier quartier;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -178,6 +196,30 @@ public class User implements UserDetails {
 
     public void setPrenom(String prenom) {
         this.prenom = prenom;
+    }
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
+
+    public Ecole getEcole() {
+        return ecole;
+    }
+
+    public void setEcole(Ecole ecole) {
+        this.ecole = ecole;
+    }
+
+    public Quartier getQuartier() {
+        return quartier;
+    }
+
+    public void setQuartier(Quartier quartier) {
+        this.quartier = quartier;
     }
 
     public RoleType getRole() {

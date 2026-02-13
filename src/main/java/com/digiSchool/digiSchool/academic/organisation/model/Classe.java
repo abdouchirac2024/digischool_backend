@@ -45,7 +45,7 @@ public class Classe extends TenantEntity {
 
 	@ManyToOne
 	@JoinColumn(name = "titulaire_id")
-	private com.digiSchool.digiSchool.user.model.Utilisateur titulaire;
+	private com.digiSchool.digiSchool.auth.model.User titulaire;
 
 	@OneToMany(mappedBy = "classe")
 	private List<Inscription> inscriptions;
@@ -144,11 +144,11 @@ public class Classe extends TenantEntity {
 		this.anneeScolaire = anneeScolaire;
 	}
 
-	public com.digiSchool.digiSchool.user.model.Utilisateur getTitulaire() {
+	public com.digiSchool.digiSchool.auth.model.User getTitulaire() {
 		return titulaire;
 	}
 
-	public void setTitulaire(com.digiSchool.digiSchool.user.model.Utilisateur titulaire) {
+	public void setTitulaire(com.digiSchool.digiSchool.auth.model.User titulaire) {
 		this.titulaire = titulaire;
 	}
 

@@ -1,6 +1,7 @@
 package com.digiSchool.digiSchool.auth.config;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,7 @@ import com.digiSchool.digiSchool.user.repository.EleveRepository;
 import com.digiSchool.digiSchool.user.repository.ParentRepository;
 
 @Component
+@Order(2)
 public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
@@ -67,7 +69,7 @@ public class DataInitializer implements CommandLineRunner {
                 "Avenue Kennedy, Bastos",
                 "+237 699 123 456",
                 "contact@digischool-bastos.cm",
-                "YDE-BAS",
+                "QBS",
                 "DIGI-001");
 
         // École 2 - DIGI-002 (Yaoundé)
@@ -77,7 +79,7 @@ public class DataInitializer implements CommandLineRunner {
                 "Quartier Essos, Yaoundé",
                 "+237 222 111 222",
                 "contact@lby-yde.cm",
-                "YDE-ESS",
+                "QES",
                 "DIGI-002");
 
         // École 3 - DIGI-003 (Bafoussam)
@@ -87,7 +89,7 @@ public class DataInitializer implements CommandLineRunner {
                 "Quartier Tamdja, Bafoussam",
                 "+237 333 444 555",
                 "info@saintjean-bfs.cm",
-                "BFS-TAM",
+                "QTD",
                 "DIGI-003");
 
         // --- INITIALISATION DES CLASSES ---
@@ -134,30 +136,30 @@ public class DataInitializer implements CommandLineRunner {
 
         // Parents pour DIGI-001
         createParentIfNotExists("P001-001", "Mbianda", "Guy", "guy.mbianda@email.com", "677112233", "Bastos, YDE",
-                "YDE-BAS", "Ingénieur", "DIGI-001");
+                "QBS", "Ingénieur", "DIGI-001");
         createParentIfNotExists("P001-002", "Ngassa", "Alice", "alice.ngassa@email.com", "699554433", "Nlongkak, YDE",
-                "YDE-NLS", "Commerçante", "DIGI-001");
+                "QNL", "Commerçante", "DIGI-001");
 
         // Parents pour DIGI-002
         createParentIfNotExists("P002-001", "Kamga", "Jean", "jean.kamga@email.com", "688001122", "Essos, YDE",
-                "YDE-ESS", "Avocat", "DIGI-002");
+                "QES", "Avocat", "DIGI-002");
 
         // Parents pour DIGI-003
         createParentIfNotExists("P003-001", "Wabo", "Claude", "claude.wabo@email.com", "655778899", "Tamdja, BFS",
-                "BFS-TAM", "Médecin", "DIGI-003");
+                "QTD", "Médecin", "DIGI-003");
 
         // --- INITIALISATION DES ÉLÈVES ---
 
         // Élèves pour DIGI-002 (2 élèves)
-        createEleveIfNotExists("ELV-2024-006", "Biya", "Samuel", "2012-08-20", "YDE-ESS", "6ème Bilingue",
+        createEleveIfNotExists("ELV-2024-006", "Biya", "Samuel", "2012-08-20", "QES", "6ème Bilingue",
                 "DIGI-002");
-        createEleveIfNotExists("ELV-2024-007", "Etoa", "Stéphanie", "2013-02-15", "YDE-ESS", "5ème Bilingue",
+        createEleveIfNotExists("ELV-2024-007", "Etoa", "Stéphanie", "2013-02-15", "QES", "5ème Bilingue",
                 "DIGI-002");
 
         // Élèves pour DIGI-003 (2 élèves)
-        createEleveIfNotExists("ELV-2024-008", "Tchouta", "Rodrigue", "2006-11-10", "BFS-TAM", "Terminale C",
+        createEleveIfNotExists("ELV-2024-008", "Tchouta", "Rodrigue", "2006-11-10", "QTD", "Terminale C",
                 "DIGI-003");
-        createEleveIfNotExists("ELV-2024-009", "Djeukam", "Patricia", "2007-04-05", "BFS-TAM", "Terminale C",
+        createEleveIfNotExists("ELV-2024-009", "Djeukam", "Patricia", "2007-04-05", "QTD", "Terminale C",
                 "DIGI-003");
 
         // --- INITIALISATION DES RELATIONS ÉLÈVE-PARENT ---
@@ -236,6 +238,11 @@ public class DataInitializer implements CommandLineRunner {
     private void createParentIfNotExists(String matricule, String nom, String prenom, String email,
             String tel, String adresse, String quartierCode, String profession, String tenantId) {
         if (!parentRepository.existsByMatriculeParent(matricule)) {
+            var quartier = quartierRepository.findByCode(quartierCode).orElse(null);
+            if (quartier == null) {
+                System.out.println("⚠ Parent ignoré (quartier " + quartierCode + " introuvable): " + matricule);
+                return;
+            }
             Parent parent = new Parent();
             parent.setMatriculeParent(matricule);
             parent.setNom(nom);
@@ -246,8 +253,7 @@ public class DataInitializer implements CommandLineRunner {
             parent.setProfession(profession);
             parent.setActif(true);
             parent.setTenant(tenantId);
-
-            quartierRepository.findByCode(quartierCode).ifPresent(parent::setQuartier);
+            parent.setQuartier(quartier);
 
             parentRepository.save(parent);
             System.out.println("✓ Parent créé: " + nom + " " + prenom + " [" + matricule + "]");

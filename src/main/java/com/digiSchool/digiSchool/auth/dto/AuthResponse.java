@@ -64,18 +64,27 @@ public class AuthResponse {
         private String email;
         private String nom;
         private String prenom;
+        private String telephone;
         private RoleType role;
         private String tenantId;
+        private Long ecoleId;
+        private String ecoleNom;
+        private String codeEcole;
 
         public UserInfo() {}
 
-        public UserInfo(Long id, String email, String nom, String prenom, RoleType role, String tenantId) {
+        public UserInfo(Long id, String email, String nom, String prenom, String telephone,
+                        RoleType role, String tenantId, Long ecoleId, String ecoleNom, String codeEcole) {
             this.id = id;
             this.email = email;
             this.nom = nom;
             this.prenom = prenom;
+            this.telephone = telephone;
             this.role = role;
             this.tenantId = tenantId;
+            this.ecoleId = ecoleId;
+            this.ecoleNom = ecoleNom;
+            this.codeEcole = codeEcole;
         }
 
         public Long getId() {
@@ -110,6 +119,14 @@ public class AuthResponse {
             this.prenom = prenom;
         }
 
+        public String getTelephone() {
+            return telephone;
+        }
+
+        public void setTelephone(String telephone) {
+            this.telephone = telephone;
+        }
+
         public RoleType getRole() {
             return role;
         }
@@ -124,6 +141,30 @@ public class AuthResponse {
 
         public void setTenantId(String tenantId) {
             this.tenantId = tenantId;
+        }
+
+        public Long getEcoleId() {
+            return ecoleId;
+        }
+
+        public void setEcoleId(Long ecoleId) {
+            this.ecoleId = ecoleId;
+        }
+
+        public String getEcoleNom() {
+            return ecoleNom;
+        }
+
+        public void setEcoleNom(String ecoleNom) {
+            this.ecoleNom = ecoleNom;
+        }
+
+        public String getCodeEcole() {
+            return codeEcole;
+        }
+
+        public void setCodeEcole(String codeEcole) {
+            this.codeEcole = codeEcole;
         }
     }
 }

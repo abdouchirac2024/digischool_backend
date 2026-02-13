@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -49,5 +51,16 @@ public class EleveController {
     @GetMapping("/search")
     public ResponseEntity<List<EleveDto>> search(@RequestParam String query) {
         return ResponseEntity.ok(eleveService.search(query));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EleveDto> update(@PathVariable Long id, @RequestBody EleveDto dto) {
+        return ResponseEntity.ok(eleveService.update(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        eleveService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

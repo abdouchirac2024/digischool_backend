@@ -11,4 +11,5 @@ import com.digiSchool.digiSchool.academic.organisation.model.Classe;
 public interface ClasseRepository extends JpaRepository<Classe, Long> {
     boolean existsByNomClasseAndEcoleIdEcole(String nomClasse, Long idEcole);
     Optional<Classe> findByNomClasseAndTenant(String nomClasse, String tenant);
+    java.util.List<Classe> findByEcoleIdEcole(Long ecoleId);
 }
