@@ -231,25 +231,25 @@ Les seeders sont appeles dans un ordre precis pour respecter les dependances :
 3. EcoleSeeder          Cree: 3 ecoles (Yaounde, Douala, Bafoussam)
         │
         ▼
-4. AnneeScolaireSeeder  Cree: 6 annees (2 par ecole, tenant = ecole)
+4. AnneeScolaireSeeder  Cree: 6 annees (2 par ecole, tenant = ecole.getTenant())
         │
         ▼
-5. UserSeeder           Cree: 14 utilisateurs avec differents roles
+5. UserSeeder           Cree: 14 utilisateurs (tenant = ecole.getTenant())
         │
         ▼
-6. ClasseSeeder         Cree: 20 classes (maternelle au lycee)
+6. ClasseSeeder         Cree: 20 classes (tenant = ecole.getTenant())
 ```
 
 ### Donnees creees
 
-| Seeder | Nombre | Details |
-|:-------|:------:|:--------|
-| **RoleSeeder** | 5 | ADMIN, DIRECTEUR, ENSEIGNANT, SECRETAIRE, PARENT |
-| **RegionSeeder** | ~200 | 10 regions, 58 departements, villes, quartiers |
-| **EcoleSeeder** | 3 | Ecoles a Yaounde, Douala, Bafoussam |
-| **AnneeScolaireSeeder** | 6 | 2 annees x 3 ecoles (tenant = ecole.getTenant()) |
-| **UserSeeder** | 14 | Admin, directeurs, enseignants, parents, etc. |
-| **ClasseSeeder** | 20 | Maternelle, primaire, college, lycee |
+| Seeder | Nombre | Tenant | Details |
+|:-------|:------:|:------:|:--------|
+| **RoleSeeder** | 5 | - | ADMIN, DIRECTEUR, ENSEIGNANT, SECRETAIRE, PARENT |
+| **RegionSeeder** | ~200 | - | 10 regions, 58 departements, villes, quartiers |
+| **EcoleSeeder** | 3 | `CM-{REGION}-ECOLE-{ID}` | Ecoles a Yaounde, Douala, Bafoussam |
+| **AnneeScolaireSeeder** | 6 | `ecole.getTenant()` | 2 annees x 3 ecoles |
+| **UserSeeder** | 14 | `ecole.getTenant()` | Admin, directeurs, enseignants, parents, etc. |
+| **ClasseSeeder** | 20 | `ecole.getTenant()` | Maternelle, primaire, college, lycee |
 
 ### Comportement
 
@@ -604,15 +604,15 @@ curl -X POST http://localhost:8080/api/auth/login \
 
 Les comptes suivants sont crees automatiquement par les seeders :
 
-| Role | Email | Telephone | Password |
-|:---|:---|:---|:---|
-| **Admin SaaS** | admin@digischool.cm | +237600000000 | `Admin@2025` |
-| **Directeur** | smbarga@lavictoire.cm | +237677123456 | `Directeur@2025` |
-| **Enseignant** | jpkamga@lavictoire.cm | +237670111222 | `Enseignant@2025` |
-| **Secretaire** | catangana@lavictoire.cm | +237660555666 | `Secretaire@2025` |
-| **Parent** | fnkoulou@gmail.com | +237691666777 | `Parent@2025` |
-| **En Attente** | enattente@test.cm | +237699000111 | `Test@2025` |
-| **Inactif** | inactif@test.cm | +237699000222 | `Test@2025` |
+| Role | Email | Telephone | Tenant | Password |
+|:---|:---|:---|:---|:---|
+| **Admin SaaS** | admin@digischool.cm | +237600000000 | `CM-CENTRE-ECOLE-001` | `Admin@2025` |
+| **Directeur** | smbarga@lavictoire.cm | +237677123456 | `CM-CENTRE-ECOLE-001` | `Directeur@2025` |
+| **Enseignant** | jpkamga@lavictoire.cm | +237670111222 | `CM-CENTRE-ECOLE-001` | `Enseignant@2025` |
+| **Secretaire** | catangana@lavictoire.cm | +237660555666 | `CM-CENTRE-ECOLE-001` | `Secretaire@2025` |
+| **Parent** | fnkoulou@gmail.com | +237691666777 | `CM-CENTRE-ECOLE-001` | `Parent@2025` |
+| **En Attente** | enattente@test.cm | +237699000111 | `CM-CENTRE-ECOLE-001` | `Test@2025` |
+| **Inactif** | inactif@test.cm | +237699000222 | `CM-CENTRE-ECOLE-001` | `Test@2025` |
 
 > **Note :** L'Admin SaaS peut acceder a toutes les ressources de toutes les ecoles.
 
@@ -660,7 +660,20 @@ Le tenant suit le format hierarchique `CM-{REGION}-ECOLE-{ID}` :
 
 Le tenant est genere automatiquement par `EcoleSeeder.generateTenantId()` a partir de la hierarchie geographique (Quartier → Ville → Region).
 
-Toutes les entites d'une ecole partagent le meme tenant : users, annees scolaires, classes.
+### Entites multi-tenant
+
+Toutes les entites d'une ecole partagent le meme tenant au format `CM-{REGION}-ECOLE-{ID}` :
+
+| Entite | Champ | Format |
+|:-------|:------|:-------|
+| **Ecole** | `tenant` | `CM-{REGION}-ECOLE-{ID}` |
+| **User** | `tenantId` | `CM-{REGION}-ECOLE-{ID}` |
+| **Classe** | `tenant` | `CM-{REGION}-ECOLE-{ID}` |
+| **Annee Scolaire** | `tenant` | `CM-{REGION}-ECOLE-{ID}` |
+| **Eleve** | `tenant` | `CM-{REGION}-ECOLE-{ID}` |
+| **Parent** | `tenant` | `CM-{REGION}-ECOLE-{ID}` |
+| **Enseignant** | `tenant` | `CM-{REGION}-ECOLE-{ID}` |
+| **EleveParent** | `tenant` | `CM-{REGION}-ECOLE-{ID}` |
 
 Chaque utilisateur appartient a une ecole via son `tenant` (extrait automatiquement du JWT).
 
