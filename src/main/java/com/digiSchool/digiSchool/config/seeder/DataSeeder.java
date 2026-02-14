@@ -9,14 +9,16 @@ import org.springframework.stereotype.Component;
  *
  * Appelle les seeders dans l'ordre correct pour respecter les dependances:
  * 1. RoleSeeder - Cree les roles (ADMIN, DIRECTEUR, etc.)
- * 2. RegionSeeder - Cree la geographie (regions, departements, villes,
- * quartiers)
+ * 2. RegionSeeder - Cree la geographie (regions, departements, villes, quartiers)
  * 3. EcoleSeeder - Cree les ecoles (depend des quartiers)
- * 4. AnneeScolaireSeeder - Cree les annees scolaires
+ * 4. AnneeScolaireSeeder - Cree les annees scolaires (depend des ecoles)
  * 5. UserSeeder - Cree les utilisateurs (depend des ecoles)
- * 6. ClasseSeeder - Cree les classes (depend des ecoles, annees et
- * utilisateurs)
+ * 6. ClasseSeeder - Cree les classes (depend des ecoles, annees et utilisateurs)
+ * 7. ParentSeeder - Cree les parents (depend des ecoles et quartiers)
+ * 8. EleveSeeder - Cree les eleves (depend des ecoles et quartiers)
+ * 9. EleveParentSeeder - Cree les relations eleve-parent (depend des eleves et parents)
  *
+ * Tous les tenants suivent le format CM-{REGION}-ECOLE-{ID} via ecole.getTenant().
  * Chaque seeder verifie si les donnees existent deja avant de les creer.
  */
 @Component
@@ -29,19 +31,28 @@ public class DataSeeder implements CommandLineRunner {
     private final UserSeeder userSeeder;
     private final AnneeScolaireSeeder anneeScolaireSeeder;
     private final ClasseSeeder classeSeeder;
+    private final ParentSeeder parentSeeder;
+    private final EleveSeeder eleveSeeder;
+    private final EleveParentSeeder eleveParentSeeder;
 
     public DataSeeder(RoleSeeder roleSeeder,
             RegionSeeder regionSeeder,
             EcoleSeeder ecoleSeeder,
             UserSeeder userSeeder,
             AnneeScolaireSeeder anneeScolaireSeeder,
-            ClasseSeeder classeSeeder) {
+            ClasseSeeder classeSeeder,
+            ParentSeeder parentSeeder,
+            EleveSeeder eleveSeeder,
+            EleveParentSeeder eleveParentSeeder) {
         this.roleSeeder = roleSeeder;
         this.regionSeeder = regionSeeder;
         this.ecoleSeeder = ecoleSeeder;
         this.userSeeder = userSeeder;
         this.anneeScolaireSeeder = anneeScolaireSeeder;
         this.classeSeeder = classeSeeder;
+        this.parentSeeder = parentSeeder;
+        this.eleveSeeder = eleveSeeder;
+        this.eleveParentSeeder = eleveParentSeeder;
     }
 
     @Override
@@ -61,7 +72,7 @@ public class DataSeeder implements CommandLineRunner {
         // 3. Ecoles (depend des quartiers)
         ecoleSeeder.seed();
 
-        // 4. Annees scolaires (pas de dependance)
+        // 4. Annees scolaires (depend des ecoles)
         anneeScolaireSeeder.seed();
 
         // 5. Users (depend des ecoles)
@@ -69,6 +80,15 @@ public class DataSeeder implements CommandLineRunner {
 
         // 6. Classes (depend des ecoles, annees et users)
         classeSeeder.seed();
+
+        // 7. Parents (depend des ecoles et quartiers)
+        parentSeeder.seed();
+
+        // 8. Eleves (depend des ecoles et quartiers)
+        eleveSeeder.seed();
+
+        // 9. Relations eleve-parent (depend des eleves et parents)
+        eleveParentSeeder.seed();
 
         System.out.println();
         System.out.println("╔══════════════════════════════════════════════════════════════╗");

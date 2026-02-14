@@ -23,6 +23,12 @@ import com.digiSchool.digiSchool.user.repository.EleveParentRepository;
 import com.digiSchool.digiSchool.user.repository.EleveRepository;
 import com.digiSchool.digiSchool.user.repository.ParentRepository;
 
+/**
+ * Initialisation des donnees de test (Order 2 = apres DataSeeder).
+ *
+ * Tenant = ecole.getTenant() partout → format CM-{REGION}-ECOLE-{ID}
+ * Aucun tenant hardcode : on passe l'objet Ecole directement.
+ */
 @Component
 @Order(2)
 public class DataInitializer implements CommandLineRunner {
@@ -60,127 +66,114 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("   INITIALISATION DES DONNÉES DE TEST");
         System.out.println("=================================================\n");
 
-        // --- INITIALISATION DES ÉCOLES ---
+        // --- 1. ÉCOLES (tenant genere au format CM-{REGION}-ECOLE-{CODE}) ---
 
-        // École 1 - DIGI-001 (Douala)
-        createEcoleIfNotExists(
-                "DIGI-001",
-                "École DigiSchool Bastos I",
-                "Avenue Kennedy, Bastos",
-                "+237 699 123 456",
-                "contact@digischool-bastos.cm",
-                "QBS",
-                "DIGI-001");
+        createEcoleIfNotExists("DIGI-001", "École DigiSchool Bastos I",
+                "Avenue Kennedy, Bastos", "+237 699 123 456",
+                "contact@digischool-bastos.cm", "QBS");
 
-        // École 2 - DIGI-002 (Yaoundé)
-        createEcoleIfNotExists(
-                "DIGI-002",
-                "Lycée Bilingue de Yaoundé",
-                "Quartier Essos, Yaoundé",
-                "+237 222 111 222",
-                "contact@lby-yde.cm",
-                "QES",
-                "DIGI-002");
+        createEcoleIfNotExists("DIGI-002", "Lycée Bilingue de Yaoundé",
+                "Quartier Essos, Yaoundé", "+237 222 111 222",
+                "contact@lby-yde.cm", "QES");
 
-        // École 3 - DIGI-003 (Bafoussam)
-        createEcoleIfNotExists(
-                "DIGI-003",
-                "Collège Saint-Jean",
-                "Quartier Tamdja, Bafoussam",
-                "+237 333 444 555",
-                "info@saintjean-bfs.cm",
-                "QTD",
-                "DIGI-003");
+        createEcoleIfNotExists("DIGI-003", "Collège Saint-Jean",
+                "Quartier Tamdja, Bafoussam", "+237 333 444 555",
+                "info@saintjean-bfs.cm", "QTD");
 
-        // --- INITIALISATION DES CLASSES ---
+        // Recuperer les ecoles avec leur tenant CM-{REGION}-ECOLE-{ID}
+        Ecole ecole1 = ecoleRepository.findByCodeEcole("DIGI-001").orElse(null);
+        Ecole ecole2 = ecoleRepository.findByCodeEcole("DIGI-002").orElse(null);
+        Ecole ecole3 = ecoleRepository.findByCodeEcole("DIGI-003").orElse(null);
 
-        // Classes pour DIGI-001
-        createClasseIfNotExists("Cours Préparatoire", Niveau.PRIMAIRE, "DIGI-001", "DIGI-001");
-        createClasseIfNotExists("Cours Élémentaire 1", Niveau.PRIMAIRE, "DIGI-001", "DIGI-001");
-        createClasseIfNotExists("Cours Élémentaire 2", Niveau.PRIMAIRE, "DIGI-001", "DIGI-001");
-        createClasseIfNotExists("Cours Moyen 1", Niveau.PRIMAIRE, "DIGI-001", "DIGI-001");
-        createClasseIfNotExists("Cours Moyen 2", Niveau.PRIMAIRE, "DIGI-001", "DIGI-001");
+        if (ecole1 == null || ecole2 == null || ecole3 == null) {
+            System.out.println("⚠ Ecoles DIGI introuvables, arret de l'initialisation");
+            return;
+        }
 
-        // Classes pour DIGI-002
-        createClasseIfNotExists("6ème Bilingue", Niveau.COLLEGE, "DIGI-002", "DIGI-002");
-        createClasseIfNotExists("5ème Bilingue", Niveau.COLLEGE, "DIGI-002", "DIGI-002");
+        System.out.println("  Tenants: " + ecole1.getTenant() + ", "
+                + ecole2.getTenant() + ", " + ecole3.getTenant());
 
-        // Classes pour DIGI-003
-        createClasseIfNotExists("Terminale C", Niveau.LYCEE, "DIGI-003", "DIGI-003");
+        // --- 2. CLASSES (tenant = ecole.getTenant()) ---
 
-        // --- INITIALISATION DES UTILISATEURS ---
+        createClasseIfNotExists("Cours Préparatoire", Niveau.PRIMAIRE, ecole1);
+        createClasseIfNotExists("Cours Élémentaire 1", Niveau.PRIMAIRE, ecole1);
+        createClasseIfNotExists("Cours Élémentaire 2", Niveau.PRIMAIRE, ecole1);
+        createClasseIfNotExists("Cours Moyen 1", Niveau.PRIMAIRE, ecole1);
+        createClasseIfNotExists("Cours Moyen 2", Niveau.PRIMAIRE, ecole1);
 
-        // École 1 - DIGI-001
-        createUserIfNotExists("directeur@digi-001.com", "Admin123!", "Mbarga", "Jean-Pierre", RoleType.ADMIN_ECOLE,
-                "DIGI-001");
-        createUserIfNotExists("secretaire@digi-001.com", "Admin123!", "Fotso", "Marie", RoleType.SECRETAIRE,
-                "DIGI-001");
-        createUserIfNotExists("enseignant@digi-001.com", "Admin123!", "Nguemo", "Paul", RoleType.ENSEIGNANT,
-                "DIGI-001");
+        createClasseIfNotExists("6ème Bilingue", Niveau.COLLEGE, ecole2);
+        createClasseIfNotExists("5ème Bilingue", Niveau.COLLEGE, ecole2);
 
-        // École 2 - DIGI-002
-        createUserIfNotExists("directeur@digi-002.com", "Admin123!", "Nkoulou", "François", RoleType.ADMIN_ECOLE,
-                "DIGI-002");
-        createUserIfNotExists("secretaire@digi-002.com", "Admin123!", "Ebanga", "Carine", RoleType.SECRETAIRE,
-                "DIGI-002");
+        createClasseIfNotExists("Terminale C", Niveau.LYCEE, ecole3);
 
-        // École 3 - DIGI-003
-        createUserIfNotExists("directeur@digi-003.com", "Admin123!", "Tchinda", "Albert", RoleType.ADMIN_ECOLE,
-                "DIGI-003");
+        // --- 3. UTILISATEURS (tenant = ecole.getTenant()) ---
 
-        // Super Admin
-        createUserIfNotExists("admin@digischool.com", "SuperAdmin123!", "System", "Admin", RoleType.SUPER_ADMIN,
-                "GLOBAL");
+        createUserIfNotExists("directeur@digi-001.com", "Admin123!", "Mbarga",
+                "Jean-Pierre", RoleType.ADMIN_ECOLE, ecole1);
+        createUserIfNotExists("secretaire@digi-001.com", "Admin123!", "Fotso",
+                "Marie", RoleType.SECRETAIRE, ecole1);
+        createUserIfNotExists("enseignant@digi-001.com", "Admin123!", "Nguemo",
+                "Paul", RoleType.ENSEIGNANT, ecole1);
 
-        // --- INITIALISATION DES PARENTS ---
+        createUserIfNotExists("directeur@digi-002.com", "Admin123!", "Nkoulou",
+                "François", RoleType.ADMIN_ECOLE, ecole2);
+        createUserIfNotExists("secretaire@digi-002.com", "Admin123!", "Ebanga",
+                "Carine", RoleType.SECRETAIRE, ecole2);
 
-        // Parents pour DIGI-001
-        createParentIfNotExists("P001-001", "Mbianda", "Guy", "guy.mbianda@email.com", "677112233", "Bastos, YDE",
-                "QBS", "Ingénieur", "DIGI-001");
-        createParentIfNotExists("P001-002", "Ngassa", "Alice", "alice.ngassa@email.com", "699554433", "Nlongkak, YDE",
-                "QNL", "Commerçante", "DIGI-001");
+        createUserIfNotExists("directeur@digi-003.com", "Admin123!", "Tchinda",
+                "Albert", RoleType.ADMIN_ECOLE, ecole3);
 
-        // Parents pour DIGI-002
-        createParentIfNotExists("P002-001", "Kamga", "Jean", "jean.kamga@email.com", "688001122", "Essos, YDE",
-                "QES", "Avocat", "DIGI-002");
+        // Super Admin (pas d'ecole, tenant global)
+        createSuperAdminIfNotExists("admin@digischool.com", "SuperAdmin123!",
+                "System", "Admin");
 
-        // Parents pour DIGI-003
-        createParentIfNotExists("P003-001", "Wabo", "Claude", "claude.wabo@email.com", "655778899", "Tamdja, BFS",
-                "QTD", "Médecin", "DIGI-003");
+        // --- 4. PARENTS (tenant = ecole.getTenant()) ---
 
-        // --- INITIALISATION DES ÉLÈVES ---
+        createParentIfNotExists("P001-001", "Mbianda", "Guy",
+                "guy.mbianda@email.com", "677112233", "Bastos, YDE",
+                "QBS", "Ingénieur", ecole1);
+        createParentIfNotExists("P001-002", "Ngassa", "Alice",
+                "alice.ngassa@email.com", "699554433", "Nlongkak, YDE",
+                "QNL", "Commerçante", ecole1);
 
-        // Élèves pour DIGI-002 (2 élèves)
-        createEleveIfNotExists("ELV-2024-006", "Biya", "Samuel", "2012-08-20", "QES", "6ème Bilingue",
-                "DIGI-002");
-        createEleveIfNotExists("ELV-2024-007", "Etoa", "Stéphanie", "2013-02-15", "QES", "5ème Bilingue",
-                "DIGI-002");
+        createParentIfNotExists("P002-001", "Kamga", "Jean",
+                "jean.kamga@email.com", "688001122", "Essos, YDE",
+                "QES", "Avocat", ecole2);
 
-        // Élèves pour DIGI-003 (2 élèves)
-        createEleveIfNotExists("ELV-2024-008", "Tchouta", "Rodrigue", "2006-11-10", "QTD", "Terminale C",
-                "DIGI-003");
-        createEleveIfNotExists("ELV-2024-009", "Djeukam", "Patricia", "2007-04-05", "QTD", "Terminale C",
-                "DIGI-003");
+        createParentIfNotExists("P003-001", "Wabo", "Claude",
+                "claude.wabo@email.com", "655778899", "Tamdja, BFS",
+                "QTD", "Médecin", ecole3);
 
-        // --- INITIALISATION DES RELATIONS ÉLÈVE-PARENT ---
+        // --- 5. ÉLÈVES (tenant = ecole.getTenant()) ---
 
-        // Relations pour DIGI-001
-        createEleveParentIfNotExists("ELV-2024-001", "P001-001", TypeRelation.PERE, true, "DIGI-001");
-        createEleveParentIfNotExists("ELV-2024-002", "P001-002", TypeRelation.MERE, true, "DIGI-001");
+        createEleveIfNotExists("ELV-2024-006", "Biya", "Samuel",
+                "2012-08-20", "QES", ecole2);
+        createEleveIfNotExists("ELV-2024-007", "Etoa", "Stéphanie",
+                "2013-02-15", "QES", ecole2);
 
-        // Relations pour DIGI-002
-        createEleveParentIfNotExists("ELV-2024-006", "P002-001", TypeRelation.PERE, true, "DIGI-002");
+        createEleveIfNotExists("ELV-2024-008", "Tchouta", "Rodrigue",
+                "2006-11-10", "QTD", ecole3);
+        createEleveIfNotExists("ELV-2024-009", "Djeukam", "Patricia",
+                "2007-04-05", "QTD", ecole3);
 
-        // Relations pour DIGI-003
-        createEleveParentIfNotExists("ELV-2024-008", "P003-001", TypeRelation.PERE, true, "DIGI-003");
+        // --- 6. RELATIONS ÉLÈVE-PARENT (tenant = eleve.getTenant()) ---
+
+        createEleveParentIfNotExists("ELV-2024-001", "P001-001", TypeRelation.PERE, true);
+        createEleveParentIfNotExists("ELV-2024-002", "P001-002", TypeRelation.MERE, true);
+        createEleveParentIfNotExists("ELV-2024-006", "P002-001", TypeRelation.PERE, true);
+        createEleveParentIfNotExists("ELV-2024-008", "P003-001", TypeRelation.PERE, true);
 
         System.out.println("\n=================================================");
         System.out.println("   INITIALISATION TERMINÉE");
         System.out.println("=================================================\n");
     }
 
-    private void createEcoleIfNotExists(String code, String nom, String adresse, String tel,
-            String email, String quartierCode, String tenantId) {
+    // ──────────────────────────────────────────────────────────────
+    // Ecole : genere le tenant CM-{REGION}-ECOLE-{CODE}
+    // ──────────────────────────────────────────────────────────────
+
+    private void createEcoleIfNotExists(String code, String nom, String adresse,
+            String tel, String email, String quartierCode) {
         if (!ecoleRepository.existsByCodeEcole(code)) {
             Ecole ecole = new Ecole();
             ecole.setCodeEcole(code);
@@ -189,35 +182,51 @@ public class DataInitializer implements CommandLineRunner {
             ecole.setTelephone(tel);
             ecole.setEmail(email);
             ecole.setStatut(true);
-            ecole.setTenant(tenantId);
 
-            quartierRepository.findByCode(quartierCode).ifPresent(ecole::setQuartier);
+            var quartier = quartierRepository.findByCode(quartierCode).orElse(null);
+            if (quartier != null) {
+                ecole.setQuartier(quartier);
+                String regionNom = quartier.getVille().getArrondissement()
+                        .getDepartement().getRegion().getNom();
+                ecole.setTenant("CM-" + regionNom.toUpperCase().replace(" ", "-")
+                        + "-ECOLE-" + code);
+            } else {
+                // Fallback si quartier absent (ne devrait pas arriver apres RegionSeeder)
+                ecole.setTenant("CM-UNKNOWN-ECOLE-" + code);
+            }
 
             ecoleRepository.save(ecole);
-            System.out.println("✓ École créée: " + nom + " [" + code + "]");
+            System.out.println("✓ École créée: " + nom + " [" + code
+                    + "] tenant=" + ecole.getTenant());
         } else {
             System.out.println("• École existe: " + code);
         }
     }
 
-    private void createClasseIfNotExists(String nom, Niveau niveau, String ecoleCode, String tenantId) {
-        ecoleRepository.findByCodeEcole(ecoleCode).ifPresent(ecole -> {
-            if (!classeRepository.existsByNomClasseAndEcoleIdEcole(nom, ecole.getIdEcole())) {
-                Classe classe = new Classe();
-                classe.setNomClasse(nom);
-                classe.setNiveau(niveau);
-                classe.setEcole(ecole);
-                classe.setTenant(tenantId);
-                classeRepository.save(classe);
-                System.out.println("✓ Classe créée: " + nom + " (" + ecoleCode + ")");
-            } else {
-                System.out.println("• Classe existe: " + nom + " (" + ecoleCode + ")");
-            }
-        });
+    // ──────────────────────────────────────────────────────────────
+    // Classe : tenant = ecole.getTenant()
+    // ──────────────────────────────────────────────────────────────
+
+    private void createClasseIfNotExists(String nom, Niveau niveau, Ecole ecole) {
+        if (!classeRepository.existsByNomClasseAndEcoleIdEcole(nom, ecole.getIdEcole())) {
+            Classe classe = new Classe();
+            classe.setNomClasse(nom);
+            classe.setNiveau(niveau);
+            classe.setEcole(ecole);
+            classe.setTenant(ecole.getTenant());
+            classeRepository.save(classe);
+            System.out.println("✓ Classe créée: " + nom + " tenant=" + ecole.getTenant());
+        } else {
+            System.out.println("• Classe existe: " + nom);
+        }
     }
 
+    // ──────────────────────────────────────────────────────────────
+    // User : tenant = ecole.getTenant()
+    // ──────────────────────────────────────────────────────────────
+
     private void createUserIfNotExists(String email, String password, String nom,
-            String prenom, RoleType role, String tenantId) {
+            String prenom, RoleType role, Ecole ecole) {
         if (!userRepository.existsByEmail(email)) {
             User user = new User();
             user.setEmail(email);
@@ -225,24 +234,52 @@ public class DataInitializer implements CommandLineRunner {
             user.setNom(nom);
             user.setPrenom(prenom);
             user.setRole(role);
-            user.setTenantId(tenantId);
             user.setStatus(UserStatus.ACTIVE);
+            user.setTenantId(ecole.getTenant());
+            user.setEcole(ecole);
 
             userRepository.save(user);
-            System.out.println("✓ Utilisateur créé: " + email + " - Tenant: " + tenantId);
+            System.out.println("✓ Utilisateur créé: " + email
+                    + " tenant=" + ecole.getTenant());
         } else {
             System.out.println("• Utilisateur existe: " + email);
         }
     }
 
-    private void createParentIfNotExists(String matricule, String nom, String prenom, String email,
-            String tel, String adresse, String quartierCode, String profession, String tenantId) {
+    private void createSuperAdminIfNotExists(String email, String password,
+            String nom, String prenom) {
+        if (!userRepository.existsByEmail(email)) {
+            User user = new User();
+            user.setEmail(email);
+            user.setPasswordHash(passwordEncoder.encode(password));
+            user.setNom(nom);
+            user.setPrenom(prenom);
+            user.setRole(RoleType.SUPER_ADMIN);
+            user.setStatus(UserStatus.ACTIVE);
+            user.setTenantId("GLOBAL");
+
+            userRepository.save(user);
+            System.out.println("✓ Super Admin créé: " + email + " tenant=GLOBAL");
+        } else {
+            System.out.println("• Utilisateur existe: " + email);
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Parent : tenant = ecole.getTenant()
+    // ──────────────────────────────────────────────────────────────
+
+    private void createParentIfNotExists(String matricule, String nom, String prenom,
+            String email, String tel, String adresse, String quartierCode,
+            String profession, Ecole ecole) {
         if (!parentRepository.existsByMatriculeParent(matricule)) {
             var quartier = quartierRepository.findByCode(quartierCode).orElse(null);
             if (quartier == null) {
-                System.out.println("⚠ Parent ignoré (quartier " + quartierCode + " introuvable): " + matricule);
+                System.out.println("⚠ Parent ignoré (quartier " + quartierCode
+                        + " introuvable): " + matricule);
                 return;
             }
+
             Parent parent = new Parent();
             parent.setMatriculeParent(matricule);
             parent.setNom(nom);
@@ -252,39 +289,47 @@ public class DataInitializer implements CommandLineRunner {
             parent.setAdresse(adresse);
             parent.setProfession(profession);
             parent.setActif(true);
-            parent.setTenant(tenantId);
             parent.setQuartier(quartier);
+            parent.setTenant(ecole.getTenant());
 
             parentRepository.save(parent);
-            System.out.println("✓ Parent créé: " + nom + " " + prenom + " [" + matricule + "]");
+            System.out.println("✓ Parent créé: " + nom + " " + prenom
+                    + " [" + matricule + "] tenant=" + ecole.getTenant());
         } else {
             System.out.println("• Parent existe: " + matricule);
         }
     }
 
-    private void createEleveIfNotExists(String matricule, String nom, String prenom, String dateNaissance,
-            String quartierCode, String classeNom, String tenantId) {
+    // ──────────────────────────────────────────────────────────────
+    // Eleve : tenant = ecole.getTenant()
+    // ──────────────────────────────────────────────────────────────
+
+    private void createEleveIfNotExists(String matricule, String nom, String prenom,
+            String dateNaissance, String quartierCode, Ecole ecole) {
         if (!eleveRepository.existsByMatricule(matricule)) {
             Eleve eleve = new Eleve();
             eleve.setMatricule(matricule);
             eleve.setNom(nom);
             eleve.setPrenom(prenom);
             eleve.setDateNaissance(java.time.LocalDate.parse(dateNaissance));
-            eleve.setTenant(tenantId);
+            eleve.setTenant(ecole.getTenant());
 
-            // Assigner le quartier à l'élève
             quartierRepository.findByCode(quartierCode).ifPresent(eleve::setQuartier);
 
             eleveRepository.save(eleve);
-            System.out.println(
-                    "✓ Élève créé: " + nom + " " + prenom + " [" + matricule + "] - Quartier: " + quartierCode);
+            System.out.println("✓ Élève créé: " + nom + " " + prenom
+                    + " [" + matricule + "] tenant=" + ecole.getTenant());
         } else {
             System.out.println("• Élève existe: " + matricule);
         }
     }
 
-    private void createEleveParentIfNotExists(String eleveMatricule, String parentMatricule,
-            TypeRelation typeRelation, boolean estPrincipal, String tenantId) {
+    // ──────────────────────────────────────────────────────────────
+    // EleveParent : tenant = eleve.getTenant() (herite de l'ecole)
+    // ──────────────────────────────────────────────────────────────
+
+    private void createEleveParentIfNotExists(String eleveMatricule,
+            String parentMatricule, TypeRelation typeRelation, boolean estPrincipal) {
         eleveRepository.findByMatricule(eleveMatricule).ifPresent(eleve -> {
             parentRepository.findByMatriculeParent(parentMatricule).ifPresent(parent -> {
                 if (!eleveParentRepository.existsByEleveIdEleveAndParentIdParent(
@@ -296,13 +341,16 @@ public class DataInitializer implements CommandLineRunner {
                     eleveParent.setEstPrincipal(estPrincipal);
                     eleveParent.setAutorisePriseEnCharge(true);
                     eleveParent.setAutoriseUrgence(true);
-                    eleveParent.setTenant(tenantId);
+                    eleveParent.setTenant(eleve.getTenant());
 
                     eleveParentRepository.save(eleveParent);
-                    System.out.println("✓ Relation créée: " + eleve.getPrenom() + " " + eleve.getNom()
-                            + " → " + parent.getPrenom() + " " + parent.getNom() + " (" + typeRelation + ")");
+                    System.out.println("✓ Relation créée: " + eleve.getPrenom()
+                            + " " + eleve.getNom() + " → " + parent.getPrenom()
+                            + " " + parent.getNom() + " (" + typeRelation
+                            + ") tenant=" + eleve.getTenant());
                 } else {
-                    System.out.println("• Relation existe: " + eleveMatricule + " → " + parentMatricule);
+                    System.out.println("• Relation existe: " + eleveMatricule
+                            + " → " + parentMatricule);
                 }
             });
         });
