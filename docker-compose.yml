@@ -1,0 +1,126 @@
+version: "3.9"
+
+services:
+
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: school_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - backend
+      - monitoring
+    labels:
+      - "service=mysql-db"
+      - "environment=backend"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    depends_on:
+      - mysql-db
+    environment:
+      PMA_HOST: mysql-db
+      PMA_USER: root
+      PMA_PASSWORD: 1234
+    ports:
+      - "8081:80"
+    networks:
+      - backend
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.phpmyadmin.rule=Host(`phpmyadmin.localhost`)"
+      - "traefik.http.routers.phpmyadmin.entrypoints=web"
+      - "traefik.http.services.phpmyadmin.loadbalancer.server.port=80"
+      - "service=phpmyadmin"
+      - "environment=backend"
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "service=redis"
+      - "environment=backend"
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    restart: always
+    depends_on:
+      - redis
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+      - "8084:8081"
+    networks:
+      - backend
+    labels:
+      - "service=redis-commander"
+      - "environment=backend"
+
+  backend:
+    build: .
+    container_name: digischool-backend
+    restart: always
+    depends_on:
+      mysql-db:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+      - traefik
+      - monitoring
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/swagger-ui.html || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.digischool-backend.rule=Host(`api.helpdigischool.localhost`)"
+      - "traefik.http.routers.digischool-backend.entrypoints=web"
+      - "traefik.http.services.digischool-backend.loadbalancer.server.port=8080"
+      - "service=digischool-backend"
+      - "environment=backend"
+
+networks:
+  backend:
+    driver: bridge
+    name: digischool-backend-network
+  traefik:
+    external: true
+    name: traefik-dev
+  monitoring:
+    external: true
+    name: helpdigischool-monitoring
+
+volumes:
+  mysql_data:
+  redis_data:

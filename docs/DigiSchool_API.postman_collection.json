@@ -1,0 +1,1257 @@
+{
+  "info": {
+    "_postman_id": "digischool-api-collection",
+    "name": "DigiSchool API",
+    "description": "Collection complète des API DigiSchool Backend\n\nVersion: 2.0.0\nBase URL: http://localhost:8080/api\n\n## Authentification\nLa plupart des endpoints nécessitent un token JWT.\n1. Utilisez /auth/login pour obtenir un token (email ou téléphone)\n2. Le token est automatiquement stocké dans la variable {{access_token}}\n3. Les requêtes authentifiées utilisent ce token automatiquement\n\n## Login\nLe champ `login` accepte un email ou un numéro de téléphone.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Endpoints d'authentification (login, logout, refresh token, profil)\n\nLe login accepte un email ou un numéro de téléphone via le champ `login`.",
+      "item": [
+        {
+          "name": "Login (Email)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.accessToken) {",
+                  "        pm.collectionVariables.set('access_token', jsonData.accessToken);",
+                  "        console.log('Access token saved:', jsonData.accessToken.substring(0, 20) + '...');",
+                  "    }",
+                  "    if (jsonData.refreshToken) {",
+                  "        pm.collectionVariables.set('refresh_token', jsonData.refreshToken);",
+                  "    }",
+                  "}",
+                  "",
+                  "pm.test('Login successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.accessToken).to.be.a('string');",
+                  "    pm.expect(jsonData.refreshToken).to.be.a('string');",
+                  "    pm.expect(jsonData.user).to.be.an('object');",
+                  "    pm.expect(jsonData.user.email).to.be.a('string');",
+                  "    pm.expect(jsonData.user.role).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"login\": \"admin@digischool.cm\",\n    \"password\": \"Admin@2025\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Connexion avec email ou téléphone.\n\nLe champ `login` accepte :\n- Un email : `admin@digischool.cm`\n- Un téléphone : `+237677123456`\n\n**Comptes de test disponibles:**\n\n| Role | Email | Téléphone | Password |\n|------|-------|-----------|----------|\n| Admin | admin@digischool.cm | +237600000000 | Admin@2025 |\n| Directeur | smbarga@lavictoire.cm | +237677123456 | Directeur@2025 |\n| Enseignant | jpkamga@lavictoire.cm | +237670111222 | Enseignant@2025 |\n| Secrétaire | catangana@lavictoire.cm | +237660555666 | Secretaire@2025 |\n| Parent | fnkoulou@gmail.com | +237691666777 | Parent@2025 |\n| En attente | enattente@test.cm | +237699000111 | Test@2025 |\n| Inactif | inactif@test.cm | +237699000222 | Test@2025 |"
+          },
+          "response": [
+            {
+              "name": "Login Success",
+              "originalRequest": {
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"login\": \"admin@digischool.cm\",\n    \"password\": \"Admin@2025\"\n}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"tokenType\": \"Bearer\",\n    \"expiresIn\": 86400000,\n    \"user\": {\n        \"id\": 1,\n        \"email\": \"admin@digischool.cm\",\n        \"nom\": \"Admin\",\n        \"prenom\": \"Super\",\n        \"telephone\": \"+237600000000\",\n        \"role\": \"SUPER_ADMIN\",\n        \"tenantId\": \"CM-CENTRE-ECOLE-001\",\n        \"ecoleId\": 1,\n        \"ecoleNom\": \"Ecole Bilingue La Victoire\",\n        \"codeEcole\": \"ECB-001\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login (Téléphone)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.accessToken) {",
+                  "        pm.collectionVariables.set('access_token', jsonData.accessToken);",
+                  "    }",
+                  "    if (jsonData.refreshToken) {",
+                  "        pm.collectionVariables.set('refresh_token', jsonData.refreshToken);",
+                  "    }",
+                  "}",
+                  "",
+                  "pm.test('Login with phone successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.accessToken).to.be.a('string');",
+                  "    pm.expect(jsonData.user).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"login\": \"+237677123456\",\n    \"password\": \"Directeur@2025\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Connexion avec numéro de téléphone.\n\nUtilise le champ `login` avec un numéro de téléphone au lieu d'un email."
+          },
+          "response": [
+            {
+              "name": "Login Phone Success",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"tokenType\": \"Bearer\",\n    \"expiresIn\": 86400000,\n    \"user\": {\n        \"id\": 2,\n        \"email\": \"smbarga@lavictoire.cm\",\n        \"nom\": \"Mbarga\",\n        \"prenom\": \"Samuel\",\n        \"telephone\": \"+237677123456\",\n        \"role\": \"ADMIN_ECOLE\",\n        \"tenantId\": \"CM-CENTRE-ECOLE-001\",\n        \"ecoleId\": 1,\n        \"ecoleNom\": \"Ecole Bilingue La Victoire\",\n        \"codeEcole\": \"ECB-001\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Current User (Me)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Get current user successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.exist;",
+                  "    pm.expect(jsonData.email).to.be.a('string');",
+                  "    pm.expect(jsonData.role).to.be.a('string');",
+                  "    pm.expect(jsonData.telephone).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Récupère les informations de l'utilisateur connecté.\n\n**Requiert:** Token JWT valide dans le header Authorization\n\n**Réponse enrichie:** Inclut telephone, ecoleId, ecoleNom, codeEcole"
+          },
+          "response": [
+            {
+              "name": "Current User Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n    \"id\": 2,\n    \"email\": \"smbarga@lavictoire.cm\",\n    \"nom\": \"Mbarga\",\n    \"prenom\": \"Samuel\",\n    \"telephone\": \"+237677123456\",\n    \"role\": \"ADMIN_ECOLE\",\n    \"tenantId\": \"CM-CENTRE-ECOLE-001\",\n    \"ecoleId\": 1,\n    \"ecoleNom\": \"Ecole Bilingue La Victoire\",\n    \"codeEcole\": \"ECB-001\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.accessToken) {",
+                  "        pm.collectionVariables.set('access_token', jsonData.accessToken);",
+                  "    }",
+                  "    if (jsonData.refreshToken) {",
+                  "        pm.collectionVariables.set('refresh_token', jsonData.refreshToken);",
+                  "    }",
+                  "}",
+                  "",
+                  "pm.test('Token refresh successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.accessToken).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/refresh-token",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "refresh-token"]
+            },
+            "description": "Rafraîchit le token d'accès en utilisant le refresh token.\n\nRetourne un nouveau accessToken et refreshToken."
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Logout successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Clear tokens after logout",
+                  "pm.collectionVariables.set('access_token', '');",
+                  "pm.collectionVariables.set('refresh_token', '');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Déconnexion de l'utilisateur. Révoque le refresh token côté serveur.\n\n**Body:** `{ \"refreshToken\": \"...\" }`"
+          },
+          "response": [
+            {
+              "name": "Logout Success",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n    \"message\": \"Déconnexion réussie\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "description": "Gestion des rôles utilisateurs",
+      "item": [
+        {
+          "name": "Get All Roles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Get roles successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/roles",
+              "host": ["{{base_url}}"],
+              "path": ["roles"]
+            },
+            "description": "Récupère la liste de tous les rôles disponibles."
+          },
+          "response": [
+            {
+              "name": "Roles List",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "[\n    { \"id\": 1, \"name\": \"ADMIN\" },\n    { \"id\": 2, \"name\": \"DIRECTEUR\" },\n    { \"id\": 3, \"name\": \"ENSEIGNANT\" },\n    { \"id\": 4, \"name\": \"SECRETAIRE\" },\n    { \"id\": 5, \"name\": \"PARENT\" },\n    { \"id\": 6, \"name\": \"ELEVE\" }\n]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Regions",
+      "description": "Gestion des régions géographiques",
+      "item": [
+        {
+          "name": "Get All Regions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Get regions successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/regions",
+              "host": ["{{base_url}}"],
+              "path": ["regions"]
+            },
+            "description": "Récupère la liste de toutes les régions."
+          },
+          "response": [
+            {
+              "name": "Regions List",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "[\n    { \"id\": 1, \"code\": \"CE\", \"nom\": \"Centre\" },\n    { \"id\": 2, \"code\": \"LT\", \"nom\": \"Littoral\" },\n    { \"id\": 3, \"code\": \"OU\", \"nom\": \"Ouest\" }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Region by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Get region successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.exist;",
+                  "    pm.expect(jsonData.nom).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/regions/1",
+              "host": ["{{base_url}}"],
+              "path": ["regions", "1"]
+            },
+            "description": "Récupère une région par son ID."
+          }
+        },
+        {
+          "name": "Create Region",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Create region successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"NO\",\n    \"nom\": \"Nord\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/regions",
+              "host": ["{{base_url}}"],
+              "path": ["regions"]
+            },
+            "description": "Crée une nouvelle région."
+          }
+        },
+        {
+          "name": "Update Region",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Update region successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"NO\",\n    \"nom\": \"Nord (Modifié)\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/regions/1",
+              "host": ["{{base_url}}"],
+              "path": ["regions", "1"]
+            },
+            "description": "Met à jour une région existante."
+          }
+        },
+        {
+          "name": "Delete Region",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Delete region successful', function() {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/regions/1",
+              "host": ["{{base_url}}"],
+              "path": ["regions", "1"]
+            },
+            "description": "Supprime une région."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Classes",
+      "description": "Gestion des classes scolaires (multi-tenant)",
+      "item": [
+        {
+          "name": "Get All Classes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Get classes successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/classes",
+              "host": ["{{base_url}}"],
+              "path": ["classes"]
+            },
+            "description": "Récupère toutes les classes de l'école de l'utilisateur connecté.\n\n**Multi-tenancy:** L'école est automatiquement déterminée depuis le token JWT."
+          },
+          "response": [
+            {
+              "name": "Classes List",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "[\n    {\n        \"id\": 1,\n        \"nomClasse\": \"6ème A\",\n        \"niveau\": \"COLLEGE\",\n        \"sousSysteme\": \"FRANCOPHONE\",\n        \"section\": \"A\",\n        \"capacite\": 50,\n        \"statut\": \"ACTIVE\",\n        \"effectifActuel\": 45,\n        \"fraisScolarite\": 150000.0,\n        \"description\": \"Classe de 6ème section A\",\n        \"ecoleId\": 1,\n        \"ecoleNom\": \"Lycée Leclerc\",\n        \"anneeScolaireId\": 1,\n        \"anneeScolaireLibelle\": \"2023-2024\",\n        \"titulaireId\": 3,\n        \"titulaireNom\": \"Jean Enseignant\"\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Class by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Get class successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.exist;",
+                  "    pm.expect(jsonData.nomClasse).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/classes/1",
+              "host": ["{{base_url}}"],
+              "path": ["classes", "1"]
+            },
+            "description": "Récupère une classe par son ID.\n\n**Autorisation:** Vérifie que la classe appartient à l'école de l'utilisateur."
+          }
+        },
+        {
+          "name": "Get Classes by School",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Get classes by school successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/classes/ecole/1",
+              "host": ["{{base_url}}"],
+              "path": ["classes", "ecole", "1"]
+            },
+            "description": "Récupère toutes les classes d'une école spécifique.\n\n**Autorisation:** Vérifie que l'utilisateur a accès à cette école."
+          }
+        },
+        {
+          "name": "Create Class",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Create class successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nomClasse\": \"Terminale C\",\n    \"niveau\": \"LYCEE\",\n    \"sousSysteme\": \"FRANCOPHONE\",\n    \"section\": \"C\",\n    \"capacite\": 45,\n    \"statut\": \"ACTIVE\",\n    \"fraisScolarite\": 200000.0,\n    \"description\": \"Classe de Terminale scientifique\",\n    \"anneeScolaireId\": 1,\n    \"titulaireId\": 3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/classes",
+              "host": ["{{base_url}}"],
+              "path": ["classes"]
+            },
+            "description": "Crée une nouvelle classe.\n\n**Note:** L'école (ecoleId) est automatiquement définie depuis le token JWT.\n\n**Niveaux disponibles:**\n- MATERNELLE\n- PRIMAIRE\n- COLLEGE\n- LYCEE\n- NURSERY (anglophone)\n- PRIMARY (anglophone)\n- SECONDARY (anglophone)\n- HIGH_SCHOOL (anglophone)\n\n**Sous-systèmes:**\n- FRANCOPHONE\n- ANGLOPHONE\n- BILINGUE\n\n**Statuts:**\n- ACTIVE\n- INACTIVE\n- ARCHIVEE"
+          }
+        },
+        {
+          "name": "Update Class",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Update class successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nomClasse\": \"Terminale C (Modifié)\",\n    \"niveau\": \"LYCEE\",\n    \"sousSysteme\": \"FRANCOPHONE\",\n    \"section\": \"C\",\n    \"capacite\": 50,\n    \"statut\": \"ACTIVE\",\n    \"fraisScolarite\": 220000.0,\n    \"description\": \"Classe de Terminale scientifique - mise à jour\",\n    \"anneeScolaireId\": 1,\n    \"titulaireId\": 3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/classes/1",
+              "host": ["{{base_url}}"],
+              "path": ["classes", "1"]
+            },
+            "description": "Met à jour une classe existante.\n\n**Autorisation:** Vérifie que la classe appartient à l'école de l'utilisateur."
+          }
+        },
+        {
+          "name": "Delete Class",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Delete class successful', function() {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/classes/1",
+              "host": ["{{base_url}}"],
+              "path": ["classes", "1"]
+            },
+            "description": "Supprime une classe.\n\n**Autorisation:** Vérifie que la classe appartient à l'école de l'utilisateur."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Utilisateurs",
+      "description": "Gestion des utilisateurs (SUPER_ADMIN, ADMIN_ECOLE uniquement)",
+      "item": [
+        {
+          "name": "List Users",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('List users successful', function() { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] },
+            "description": "Liste tous les utilisateurs. Filtrés automatiquement par tenant.\n\nAccès: SUPER_ADMIN, ADMIN_ECOLE"
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Get user successful', function() { pm.response.to.have.status(200); pm.expect(pm.response.json().id).to.exist; });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/users/1", "host": ["{{base_url}}"], "path": ["users", "1"] },
+            "description": "Récupère un utilisateur par son ID."
+          }
+        },
+        {
+          "name": "Create User",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Create user successful', function() { pm.response.to.have.status(200); pm.expect(pm.response.json().id).to.exist; });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"nouveau@ecole.cm\",\n    \"password\": \"Password@2025\",\n    \"nom\": \"Dupont\",\n    \"prenom\": \"Jean\",\n    \"role\": \"ENSEIGNANT\",\n    \"tenantId\": \"CM-CENTRE-ECOLE-001\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] },
+            "description": "Crée un nouvel utilisateur.\n\nAccès: SUPER_ADMIN, ADMIN_ECOLE\n\n**Rôles disponibles:** SUPER_ADMIN, ADMIN_ECOLE, ENSEIGNANT, SECRETAIRE, COMPTABLE, PARENT"
+          }
+        },
+        {
+          "name": "Update User Status",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Update status successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"statut\": \"ACTIVE\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/users/1/status", "host": ["{{base_url}}"], "path": ["users", "1", "status"] },
+            "description": "Met à jour le statut d'un utilisateur.\n\n**Statuts:** ACTIVE, DISABLED, SUSPENDED"
+          }
+        },
+        {
+          "name": "Delete User",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Delete user successful', function() { pm.response.to.have.status(204); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/users/1", "host": ["{{base_url}}"], "path": ["users", "1"] },
+            "description": "Supprime un utilisateur."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Eleves (Students)",
+      "description": "Gestion des élèves (multi-tenant)",
+      "item": [
+        {
+          "name": "List Students",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('List students successful', function() { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/students", "host": ["{{base_url}}"], "path": ["students"] },
+            "description": "Liste tous les élèves de l'école de l'utilisateur connecté."
+          }
+        },
+        {
+          "name": "Get Student by ID",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Get student successful', function() { pm.response.to.have.status(200); pm.expect(pm.response.json().idEleve || pm.response.json().id).to.exist; });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/students/1", "host": ["{{base_url}}"], "path": ["students", "1"] },
+            "description": "Récupère un élève par son ID."
+          }
+        },
+        {
+          "name": "Get Student by Matricule",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Get student by matricule successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/students/matricule/ELV-001", "host": ["{{base_url}}"], "path": ["students", "matricule", "ELV-001"] },
+            "description": "Récupère un élève par son matricule unique."
+          }
+        },
+        {
+          "name": "Search Students",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Search students successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/students/search?query=Talla", "host": ["{{base_url}}"], "path": ["students", "search"], "query": [{ "key": "query", "value": "Talla" }] },
+            "description": "Recherche des élèves par nom, prénom ou matricule."
+          }
+        },
+        {
+          "name": "Create Student",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Create student successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nom\": \"Talla\",\n    \"prenom\": \"Amina\",\n    \"dateNaissance\": \"2012-05-15\",\n    \"sexe\": \"F\",\n    \"lieuNaissance\": \"Yaounde\",\n    \"tenant\": \"CM-CENTRE-ECOLE-001\",\n    \"quartierNom\": \"Omnisports\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/students", "host": ["{{base_url}}"], "path": ["students"] },
+            "description": "Crée un nouvel élève. Le matricule est généré automatiquement.\n\n**Champs requis:** nom, prenom, dateNaissance, sexe, tenant"
+          }
+        },
+        {
+          "name": "Update Student",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Update student successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nom\": \"Talla\",\n    \"prenom\": \"Amina Rose\",\n    \"dateNaissance\": \"2012-05-15\",\n    \"sexe\": \"F\",\n    \"lieuNaissance\": \"Yaounde\",\n    \"quartierNom\": \"Bastos\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/students/1", "host": ["{{base_url}}"], "path": ["students", "1"] },
+            "description": "Met à jour les informations d'un élève."
+          }
+        },
+        {
+          "name": "Delete Student",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Delete student successful', function() { pm.response.to.have.status(204); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/students/1", "host": ["{{base_url}}"], "path": ["students", "1"] },
+            "description": "Supprime un élève."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Enseignants (Teachers)",
+      "description": "Gestion des enseignants",
+      "item": [
+        {
+          "name": "List Teachers",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('List teachers successful', function() { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/teachers", "host": ["{{base_url}}"], "path": ["teachers"] },
+            "description": "Liste tous les enseignants."
+          }
+        },
+        {
+          "name": "Get Teacher by ID",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Get teacher successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/teachers/1", "host": ["{{base_url}}"], "path": ["teachers", "1"] },
+            "description": "Récupère un enseignant par son ID."
+          }
+        },
+        {
+          "name": "Create Teacher",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Create teacher successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nom\": \"Martin\",\n    \"prenom\": \"Pierre\",\n    \"email\": \"pierre.martin@ecole.cm\",\n    \"telephone\": \"+237670123456\",\n    \"specialite\": \"Mathematiques\",\n    \"grade\": \"Professeur Titulaire\",\n    \"experience\": 5\n}"
+            },
+            "url": { "raw": "{{base_url}}/teachers", "host": ["{{base_url}}"], "path": ["teachers"] },
+            "description": "Crée un nouvel enseignant.\n\n**Champs requis:** nom, prenom, email"
+          }
+        },
+        {
+          "name": "Update Teacher",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Update teacher successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nom\": \"Martin\",\n    \"prenom\": \"Pierre\",\n    \"email\": \"pierre.martin@ecole.cm\",\n    \"telephone\": \"+237670123456\",\n    \"specialite\": \"Mathematiques et Physique\",\n    \"grade\": \"Professeur Principal\",\n    \"experience\": 6\n}"
+            },
+            "url": { "raw": "{{base_url}}/teachers/1", "host": ["{{base_url}}"], "path": ["teachers", "1"] },
+            "description": "Met à jour les informations d'un enseignant."
+          }
+        },
+        {
+          "name": "Delete Teacher",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Delete teacher successful', function() { pm.response.to.have.status(204); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/teachers/1", "host": ["{{base_url}}"], "path": ["teachers", "1"] },
+            "description": "Supprime un enseignant."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Parents",
+      "description": "Gestion des parents d'élèves",
+      "item": [
+        {
+          "name": "List Parents",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('List parents successful', function() { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/parents", "host": ["{{base_url}}"], "path": ["parents"] },
+            "description": "Liste tous les parents."
+          }
+        },
+        {
+          "name": "Get Parent by ID",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Get parent successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/parents/1", "host": ["{{base_url}}"], "path": ["parents", "1"] },
+            "description": "Récupère un parent par son ID."
+          }
+        },
+        {
+          "name": "Get Parent by Matricule",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Get parent by matricule successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/parents/matricule/PAR-001", "host": ["{{base_url}}"], "path": ["parents", "matricule", "PAR-001"] },
+            "description": "Récupère un parent par son matricule."
+          }
+        },
+        {
+          "name": "Search Parents",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Search parents successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/parents/search?query=Nkoulou", "host": ["{{base_url}}"], "path": ["parents", "search"], "query": [{ "key": "query", "value": "Nkoulou" }] },
+            "description": "Recherche des parents par nom, prénom ou matricule."
+          }
+        },
+        {
+          "name": "Create Parent",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Create parent successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nom\": \"Talla\",\n    \"prenom\": \"Mariam\",\n    \"email\": \"mariam.talla@gmail.com\",\n    \"telephone\": \"+237234567890\",\n    \"profession\": \"Ingenieur\",\n    \"employeur\": \"Cameroon Telecom\",\n    \"adresse\": \"123 Rue de la Paix, Yaounde\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/parents", "host": ["{{base_url}}"], "path": ["parents"] },
+            "description": "Crée un nouveau parent.\n\nAccès: ADMIN_ECOLE, SECRETAIRE\n\n**Champs requis:** nom, prenom, telephone"
+          }
+        },
+        {
+          "name": "Update Parent",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Update parent successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nom\": \"Talla\",\n    \"prenom\": \"Mariam\",\n    \"telephone\": \"+237234567890\",\n    \"profession\": \"Directrice Technique\",\n    \"employeur\": \"Cameroon Telecom\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/parents/1", "host": ["{{base_url}}"], "path": ["parents", "1"] },
+            "description": "Met à jour les informations d'un parent.\n\nAccès: ADMIN_ECOLE, SECRETAIRE"
+          }
+        },
+        {
+          "name": "Delete Parent",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Delete parent successful', function() { pm.response.to.have.status(204); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/parents/1", "host": ["{{base_url}}"], "path": ["parents", "1"] },
+            "description": "Supprime un parent.\n\nAccès: ADMIN_ECOLE"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Relations Eleve-Parent",
+      "description": "Gestion des relations entre élèves et parents (contacts urgence, responsables légaux)",
+      "item": [
+        {
+          "name": "List Relations",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('List relations successful', function() { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/eleve-parents", "host": ["{{base_url}}"], "path": ["eleve-parents"] },
+            "description": "Liste toutes les relations élève-parent."
+          }
+        },
+        {
+          "name": "Get Relation by ID",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Get relation successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/eleve-parents/1", "host": ["{{base_url}}"], "path": ["eleve-parents", "1"] },
+            "description": "Récupère une relation par son ID."
+          }
+        },
+        {
+          "name": "Get Parents of Student",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Get parents of student successful', function() { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/eleve-parents/eleve/1", "host": ["{{base_url}}"], "path": ["eleve-parents", "eleve", "1"] },
+            "description": "Récupère tous les parents d'un élève."
+          }
+        },
+        {
+          "name": "Get Primary Contact of Student",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Get primary contact successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/eleve-parents/eleve/1/principal", "host": ["{{base_url}}"], "path": ["eleve-parents", "eleve", "1", "principal"] },
+            "description": "Récupère le contact principal d'un élève."
+          }
+        },
+        {
+          "name": "Get Emergency Contacts",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Get emergency contacts successful', function() { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/eleve-parents/eleve/1/contacts-urgence", "host": ["{{base_url}}"], "path": ["eleve-parents", "eleve", "1", "contacts-urgence"] },
+            "description": "Récupère les contacts d'urgence d'un élève."
+          }
+        },
+        {
+          "name": "Get Legal Guardians",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Get legal guardians successful', function() { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/eleve-parents/eleve/1/responsables-legaux", "host": ["{{base_url}}"], "path": ["eleve-parents", "eleve", "1", "responsables-legaux"] },
+            "description": "Récupère les responsables légaux d'un élève."
+          }
+        },
+        {
+          "name": "Get Children of Parent",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Get children successful', function() { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.be.an('array'); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/eleve-parents/parent/1", "host": ["{{base_url}}"], "path": ["eleve-parents", "parent", "1"] },
+            "description": "Récupère tous les enfants d'un parent."
+          }
+        },
+        {
+          "name": "Create Relation",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Create relation successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"eleveId\": 1,\n    \"parentId\": 1,\n    \"typeRelation\": \"MERE\",\n    \"estPrincipal\": true,\n    \"autorisePriseEnCharge\": true,\n    \"autoriseUrgence\": true,\n    \"notes\": \"Contact principal\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/eleve-parents", "host": ["{{base_url}}"], "path": ["eleve-parents"] },
+            "description": "Crée une relation élève-parent.\n\nAccès: ADMIN_ECOLE, SECRETAIRE\n\n**Types de relation:** PERE, MERE, TUTEUR_LEGAL, GRAND_PARENT, ONCLE, TANTE, AUTRE"
+          }
+        },
+        {
+          "name": "Update Relation",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Update relation successful', function() { pm.response.to.have.status(200); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"eleveId\": 1,\n    \"parentId\": 1,\n    \"typeRelation\": \"MERE\",\n    \"estPrincipal\": true,\n    \"autorisePriseEnCharge\": true,\n    \"autoriseUrgence\": true,\n    \"notes\": \"Contact principal - mis à jour\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/eleve-parents/1", "host": ["{{base_url}}"], "path": ["eleve-parents", "1"] },
+            "description": "Met à jour une relation élève-parent.\n\nAccès: ADMIN_ECOLE, SECRETAIRE"
+          }
+        },
+        {
+          "name": "Delete Relation",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Delete relation successful', function() { pm.response.to.have.status(204); });"], "type": "text/javascript" } }],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{base_url}}/eleve-parents/1", "host": ["{{base_url}}"], "path": ["eleve-parents", "1"] },
+            "description": "Supprime une relation élève-parent.\n\nAccès: ADMIN_ECOLE, SECRETAIRE"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Géographie",
+      "description": "Endpoints géographiques (Départements, Arrondissements, Villes, Quartiers, Adresses)",
+      "item": [
+        {
+          "name": "Get Departments by Region",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/departements/region/1", "host": ["{{base_url}}"], "path": ["departements", "region", "1"] },
+            "description": "Récupère les départements d'une région."
+          }
+        },
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/departements", "host": ["{{base_url}}"], "path": ["departements"] },
+            "description": "Liste tous les départements."
+          }
+        },
+        {
+          "name": "Get Arrondissements by Department",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/arrondissements/departement/1", "host": ["{{base_url}}"], "path": ["arrondissements", "departement", "1"] },
+            "description": "Récupère les arrondissements d'un département."
+          }
+        },
+        {
+          "name": "Get All Villes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/villes", "host": ["{{base_url}}"], "path": ["villes"] },
+            "description": "Liste toutes les villes."
+          }
+        },
+        {
+          "name": "Get Villes by Arrondissement",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/villes/arrondissement/1", "host": ["{{base_url}}"], "path": ["villes", "arrondissement", "1"] },
+            "description": "Récupère les villes d'un arrondissement."
+          }
+        },
+        {
+          "name": "Get All Quartiers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/quartiers", "host": ["{{base_url}}"], "path": ["quartiers"] },
+            "description": "Liste tous les quartiers."
+          }
+        },
+        {
+          "name": "Get Quartiers by Ville",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/quartiers/ville/1", "host": ["{{base_url}}"], "path": ["quartiers", "ville", "1"] },
+            "description": "Récupère les quartiers d'une ville."
+          }
+        },
+        {
+          "name": "Get All Adresses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/adresses", "host": ["{{base_url}}"], "path": ["adresses"] },
+            "description": "Liste toutes les adresses."
+          }
+        },
+        {
+          "name": "Get Adresses by Quartier",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/adresses/quartier/1", "host": ["{{base_url}}"], "path": ["adresses", "quartier", "1"] },
+            "description": "Récupère les adresses d'un quartier."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "description": "Vérification de l'état du serveur",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Health check successful', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/actuator/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["actuator", "health"]
+            },
+            "description": "Vérifie que le serveur est en ligne."
+          }
+        }
+      ]
+    }
+  ]
+}
