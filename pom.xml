@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.DigiSchool</groupId>
-	<artifactId>digiSchool2</artifactId>
+	<artifactId>digiSchool</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>digiSchool2</name>
+	<name>digiSchool</name>
 	<description>Projet de gestion d&apos;ecole</description>
 	<url/>
 	<licenses>
