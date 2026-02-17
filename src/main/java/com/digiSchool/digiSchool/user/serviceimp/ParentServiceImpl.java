@@ -2,12 +2,20 @@ package com.digiSchool.digiSchool.user.serviceimp;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.digiSchool.digiSchool.Exceptionconfig.model.Quartier;
 import com.digiSchool.digiSchool.Exceptionconfig.service.TenantContext;
+import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
+import com.digiSchool.digiSchool.academic.organisation.repository.EcoleRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.QuartierRepository;
+import com.digiSchool.digiSchool.auth.model.RoleType;
+import com.digiSchool.digiSchool.auth.model.User;
+import com.digiSchool.digiSchool.auth.model.UserStatus;
+import com.digiSchool.digiSchool.auth.repository.UserRepository;
 import com.digiSchool.digiSchool.user.dto.ParentDto;
 import com.digiSchool.digiSchool.user.model.Parent;
 import com.digiSchool.digiSchool.user.repository.ParentRepository;
@@ -21,10 +29,17 @@ public class ParentServiceImpl implements ParentService {
 
     private final ParentRepository parentRepository;
     private final QuartierRepository quartierRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EcoleRepository ecoleRepository;
 
-    public ParentServiceImpl(ParentRepository parentRepository, QuartierRepository quartierRepository) {
+    public ParentServiceImpl(ParentRepository parentRepository, QuartierRepository quartierRepository,
+            UserRepository userRepository, PasswordEncoder passwordEncoder, EcoleRepository ecoleRepository) {
         this.parentRepository = parentRepository;
         this.quartierRepository = quartierRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.ecoleRepository = ecoleRepository;
     }
 
     @Override
@@ -41,6 +56,11 @@ public class ParentServiceImpl implements ParentService {
             throw new RuntimeException("Un parent avec ce numéro de téléphone existe déjà");
         }
 
+        // Vérifier que l'email n'est pas déjà utilisé dans la table users
+        if (dto.getEmail() != null && userRepository.existsByEmail(dto.getEmail())) {
+            throw new RuntimeException("Un compte utilisateur avec cet email existe déjà");
+        }
+
         // Validation du quartier obligatoire
         if (dto.getQuartierId() == null) {
             throw new RuntimeException("Le quartier est obligatoire");
@@ -52,7 +72,45 @@ public class ParentServiceImpl implements ParentService {
         parent.setActif(true);
 
         Parent saved = parentRepository.save(parent);
-        return toDto(saved);
+
+        // Créer automatiquement un compte utilisateur pour le parent
+        String generatedPassword = generatePassword();
+        createUserAccount(dto, tenant, saved, generatedPassword);
+
+        ParentDto result = toDto(saved);
+        result.setGeneratedPassword(generatedPassword);
+        return result;
+    }
+
+    private String generatePassword() {
+        Random random = new Random();
+        int code = 1000 + random.nextInt(9000);
+        return "Parent@" + code;
+    }
+
+    private void createUserAccount(ParentDto dto, String tenant, Parent parent, String rawPassword) {
+        User user = new User();
+        user.setEmail(dto.getEmail());
+        user.setPasswordHash(passwordEncoder.encode(rawPassword));
+        user.setNom(dto.getNom());
+        user.setPrenom(dto.getPrenom());
+        user.setTelephone(dto.getTelephone());
+        user.setRole(RoleType.PARENT);
+        user.setStatus(UserStatus.ACTIVE);
+        user.setTenantId(tenant);
+
+        // Associer l'école du tenant
+        Ecole ecole = ecoleRepository.findByTenant(tenant).orElse(null);
+        if (ecole != null) {
+            user.setEcole(ecole);
+        }
+
+        // Associer le quartier si renseigné
+        if (parent.getQuartier() != null) {
+            user.setQuartier(parent.getQuartier());
+        }
+
+        userRepository.save(user);
     }
 
     @Override

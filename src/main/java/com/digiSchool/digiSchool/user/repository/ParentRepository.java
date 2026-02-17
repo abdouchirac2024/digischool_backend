@@ -47,7 +47,7 @@ public interface ParentRepository extends JpaRepository<Parent, Long> {
     @Query("SELECT p FROM Parent p WHERE p.tenant = :tenant AND p.deletedAt IS NULL")
     List<Parent> findAllByTenant(@Param("tenant") String tenant);
 
-    @Query("SELECT MAX(CAST(SUBSTRING(p.matriculeParent, 5) AS integer)) FROM Parent p WHERE p.tenant = :tenant")
+    @Query("SELECT MAX(CAST(SUBSTRING(p.matriculeParent, LENGTH(:tenant) + 6) AS integer)) FROM Parent p WHERE p.tenant = :tenant AND p.matriculeParent LIKE CONCAT(:tenant, '-PAR-%')")
     Integer findMaxMatriculeNumber(@Param("tenant") String tenant);
 
     @Query("SELECT p FROM Parent p WHERE p.deletedAt IS NULL AND " +

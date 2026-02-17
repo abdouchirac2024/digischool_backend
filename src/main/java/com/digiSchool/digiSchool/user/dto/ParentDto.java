@@ -23,6 +23,7 @@ public class ParentDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
+    private String generatedPassword;
 
     // Getters and Setters
     public Long getIdParent() {
@@ -175,5 +176,13 @@ public class ParentDto {
 
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
+    }
+
+    public String getGeneratedPassword() {
+        return generatedPassword;
+    }
+
+    public void setGeneratedPassword(String generatedPassword) {
+        this.generatedPassword = generatedPassword;
     }
 }
