@@ -214,10 +214,14 @@ config/seeder/
 ├── EcoleSeeder.java          # Cree 3 ecoles de demonstration
 ├── AnneeScolaireSeeder.java  # Cree 6 annees scolaires (2 par ecole)
 ├── UserSeeder.java           # Cree 14 utilisateurs de test
+<<<<<<< HEAD
 ├── ClasseSeeder.java         # Cree 20 classes
 ├── ParentSeeder.java         # Cree 7 parents d'eleves
 ├── EleveSeeder.java          # Cree 11 eleves
 └── EleveParentSeeder.java    # Cree 11 relations eleve-parent
+=======
+└── ClasseSeeder.java         # Cree 20 classes
+>>>>>>> main
 ```
 
 ### Ordre d'execution
@@ -241,6 +245,7 @@ Les seeders sont appeles dans un ordre precis pour respecter les dependances :
         │
         ▼
 6. ClasseSeeder         Cree: 20 classes (tenant = ecole.getTenant())
+<<<<<<< HEAD
         │
         ▼
 7. ParentSeeder         Cree: 7 parents (tenant = ecole.getTenant())
@@ -250,6 +255,8 @@ Les seeders sont appeles dans un ordre precis pour respecter les dependances :
         │
         ▼
 9. EleveParentSeeder    Cree: 11 relations (tenant = eleve.getTenant())
+=======
+>>>>>>> main
 ```
 
 ### Donnees creees
@@ -262,9 +269,12 @@ Les seeders sont appeles dans un ordre precis pour respecter les dependances :
 | **AnneeScolaireSeeder** | 6 | `ecole.getTenant()` | 2 annees x 3 ecoles |
 | **UserSeeder** | 14 | `ecole.getTenant()` | Admin, directeurs, enseignants, parents, etc. |
 | **ClasseSeeder** | 20 | `ecole.getTenant()` | Maternelle, primaire, college, lycee |
+<<<<<<< HEAD
 | **ParentSeeder** | 7 | `ecole.getTenant()` | 3 (Yaounde) + 2 (Douala) + 2 (Bafoussam) |
 | **EleveSeeder** | 11 | `ecole.getTenant()` | 5 (Yaounde) + 3 (Douala) + 3 (Bafoussam) |
 | **EleveParentSeeder** | 11 | `eleve.getTenant()` | Relations familiales entre eleves et parents |
+=======
+>>>>>>> main
 
 ### Comportement
 
@@ -285,9 +295,12 @@ Les seeders sont appeles dans un ordre precis pour respecter les dependances :
   -> Annees scolaires : 6 annees creees (2 par ecole)
   -> Utilisateurs : 14 utilisateurs crees
   -> Classes : 20 classes creees (19 actives + 1 archivee)
+<<<<<<< HEAD
   -> Parents : 7 parents crees (tenant = ecole.getTenant())
   -> Eleves : 11 eleves crees (tenant = ecole.getTenant())
   -> Relations Eleve-Parent : 11 relations creees (tenant = eleve.getTenant())
+=======
+>>>>>>> main
 
 ╔══════════════════════════════════════════════════════════════╗
 ║                    INITIALISATION TERMINEE                   ║
@@ -862,7 +875,11 @@ curl http://localhost:8080/actuator/health
 - [x] Documentation Swagger / OpenAPI (81 endpoints)
 - [x] Collection Postman complete
 - [x] Multi-tenancy base sur JWT et TenantEntity
+<<<<<<< HEAD
 - [x] Seeders modulaires et organises (roles, geographie, ecoles, utilisateurs, classes, parents, eleves, relations)
+=======
+- [x] Seeders modulaires et organises (roles, geographie, ecoles, utilisateurs, classes)
+>>>>>>> main
 - [x] Docker Compose complet (MySQL, Redis, phpMyAdmin, Redis Commander)
 
 ### A venir
