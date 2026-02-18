@@ -98,10 +98,13 @@ public class SecurityConfig {
         if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
             configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
         } else {
-            // Développement uniquement - ports spécifiques
-            configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",      // Next.js dev
-                "http://127.0.0.1:3000"       // Next.js dev alternative
+            // Développement + Vercel
+            configuration.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "https://*.vercel.app",
+                "https://helpdigischool.com",
+                "https://*.helpdigischool.com"
             ));
         }
 
