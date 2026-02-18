@@ -32,6 +32,12 @@ public class EleveDto {
     @Schema(description = "Sexe (M ou F)", example = "F")
     private String sexe;
 
+    @Schema(description = "Nationalite de l'eleve", example = "Camerounaise")
+    private String nationalite;
+
+    @Schema(description = "ID du quartier de residence")
+    private Long quartierId;
+
     @Schema(description = "Nom du quartier de residence")
     private String quartierNom;
 
@@ -107,5 +113,21 @@ public class EleveDto {
 
     public void setSexe(String sexe) {
         this.sexe = sexe;
+    }
+
+    public String getNationalite() {
+        return nationalite;
+    }
+
+    public void setNationalite(String nationalite) {
+        this.nationalite = nationalite;
+    }
+
+    public Long getQuartierId() {
+        return quartierId;
+    }
+
+    public void setQuartierId(Long quartierId) {
+        this.quartierId = quartierId;
     }
 }

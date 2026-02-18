@@ -36,6 +36,7 @@ public class Eleve extends TenantEntity {
 	private String prenom;
 	private LocalDate dateNaissance;
 	private String lieuNaissance;
+	private String nationalite;
 
 	@Enumerated(EnumType.STRING)
 	private Sexe sexe;
@@ -104,6 +105,14 @@ public class Eleve extends TenantEntity {
 
 	public void setLieuNaissance(String lieuNaissance) {
 		this.lieuNaissance = lieuNaissance;
+	}
+
+	public String getNationalite() {
+		return nationalite;
+	}
+
+	public void setNationalite(String nationalite) {
+		this.nationalite = nationalite;
 	}
 
 	public Sexe getSexe() {

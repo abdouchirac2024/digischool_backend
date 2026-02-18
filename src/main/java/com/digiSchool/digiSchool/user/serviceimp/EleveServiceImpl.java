@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.digiSchool.digiSchool.Exceptionconfig.model.Quartier;
 import com.digiSchool.digiSchool.Exceptionconfig.service.TenantContext;
+import com.digiSchool.digiSchool.academic.organisation.repository.QuartierRepository;
 import com.digiSchool.digiSchool.user.dto.EleveDto;
 import com.digiSchool.digiSchool.user.model.Eleve;
 import com.digiSchool.digiSchool.user.model.Sexe;
@@ -18,9 +20,11 @@ import jakarta.transaction.Transactional;
 public class EleveServiceImpl implements EleveService {
 
     private final EleveRepository eleveRepository;
+    private final QuartierRepository quartierRepository;
 
-    public EleveServiceImpl(EleveRepository eleveRepository) {
+    public EleveServiceImpl(EleveRepository eleveRepository, QuartierRepository quartierRepository) {
         this.eleveRepository = eleveRepository;
+        this.quartierRepository = quartierRepository;
     }
 
     @Override
@@ -67,8 +71,14 @@ public class EleveServiceImpl implements EleveService {
         eleve.setPrenom(dto.getPrenom());
         eleve.setDateNaissance(dto.getDateNaissance());
         eleve.setLieuNaissance(dto.getLieuNaissance());
+        eleve.setNationalite(dto.getNationalite());
         if (dto.getSexe() != null) {
             eleve.setSexe(Sexe.valueOf(dto.getSexe()));
+        }
+        if (dto.getQuartierId() != null) {
+            Quartier quartier = quartierRepository.findById(dto.getQuartierId())
+                    .orElseThrow(() -> new RuntimeException("Quartier introuvable"));
+            eleve.setQuartier(quartier);
         }
 
         // Generation matricule simple
@@ -102,6 +112,14 @@ public class EleveServiceImpl implements EleveService {
         if (dto.getSexe() != null) {
             eleve.setSexe(Sexe.valueOf(dto.getSexe()));
         }
+        if (dto.getNationalite() != null) {
+            eleve.setNationalite(dto.getNationalite());
+        }
+        if (dto.getQuartierId() != null) {
+            Quartier quartier = quartierRepository.findById(dto.getQuartierId())
+                    .orElseThrow(() -> new RuntimeException("Quartier introuvable"));
+            eleve.setQuartier(quartier);
+        }
 
         Eleve saved = eleveRepository.save(eleve);
         return toDto(saved);
@@ -131,8 +149,10 @@ public class EleveServiceImpl implements EleveService {
             dto.setSexe(eleve.getSexe().name());
         }
         dto.setTenant(eleve.getTenant());
+        dto.setNationalite(eleve.getNationalite());
 
         if (eleve.getQuartier() != null) {
+            dto.setQuartierId(eleve.getQuartier().getId());
             dto.setQuartierNom(eleve.getQuartier().getNom());
         }
 
