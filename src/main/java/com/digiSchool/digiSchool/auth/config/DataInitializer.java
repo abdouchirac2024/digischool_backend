@@ -5,9 +5,12 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.digiSchool.digiSchool.academic.organisation.model.Anneescolaire;
 import com.digiSchool.digiSchool.academic.organisation.model.Classe;
 import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
 import com.digiSchool.digiSchool.academic.organisation.model.Niveau;
+import com.digiSchool.digiSchool.academic.organisation.model.StatutClasse;
+import com.digiSchool.digiSchool.academic.organisation.repository.AnneescolaireRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.ClasseRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.EcoleRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.QuartierRepository;
@@ -40,6 +43,7 @@ public class DataInitializer implements CommandLineRunner {
     private final EleveParentRepository eleveParentRepository;
     private final QuartierRepository quartierRepository;
     private final ClasseRepository classeRepository;
+    private final AnneescolaireRepository anneescolaireRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(UserRepository userRepository,
@@ -49,6 +53,7 @@ public class DataInitializer implements CommandLineRunner {
             EleveParentRepository eleveParentRepository,
             QuartierRepository quartierRepository,
             ClasseRepository classeRepository,
+            AnneescolaireRepository anneescolaireRepository,
             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.ecoleRepository = ecoleRepository;
@@ -57,6 +62,7 @@ public class DataInitializer implements CommandLineRunner {
         this.eleveParentRepository = eleveParentRepository;
         this.quartierRepository = quartierRepository;
         this.classeRepository = classeRepository;
+        this.anneescolaireRepository = anneescolaireRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -93,20 +99,28 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("  Tenants: " + ecole1.getTenant() + ", "
                 + ecole2.getTenant() + ", " + ecole3.getTenant());
 
-        // --- 2. CLASSES (tenant = ecole.getTenant()) ---
+        // --- 2. ANNÉE SCOLAIRE ACTIVE ---
 
-        createClasseIfNotExists("Cours Préparatoire", Niveau.PRIMAIRE, ecole1);
-        createClasseIfNotExists("Cours Élémentaire 1", Niveau.PRIMAIRE, ecole1);
-        createClasseIfNotExists("Cours Élémentaire 2", Niveau.PRIMAIRE, ecole1);
-        createClasseIfNotExists("Cours Moyen 1", Niveau.PRIMAIRE, ecole1);
-        createClasseIfNotExists("Cours Moyen 2", Niveau.PRIMAIRE, ecole1);
+        Anneescolaire anneeScolaire = createAnneeScolaireIfNotExists("2025-2026",
+                "2025-09-01", "2026-06-30", ecole1.getTenant());
 
-        createClasseIfNotExists("6ème Bilingue", Niveau.COLLEGE, ecole2);
-        createClasseIfNotExists("5ème Bilingue", Niveau.COLLEGE, ecole2);
+        // --- 3. CLASSES (tenant = ecole.getTenant()) ---
 
-        createClasseIfNotExists("Terminale C", Niveau.LYCEE, ecole3);
+        createClasseIfNotExists("Cours Préparatoire", Niveau.PRIMAIRE, ecole1, anneeScolaire, 40, 75000.0);
+        createClasseIfNotExists("Cours Élémentaire 1", Niveau.PRIMAIRE, ecole1, anneeScolaire, 40, 75000.0);
+        createClasseIfNotExists("Cours Élémentaire 2", Niveau.PRIMAIRE, ecole1, anneeScolaire, 35, 80000.0);
+        createClasseIfNotExists("Cours Moyen 1", Niveau.PRIMAIRE, ecole1, anneeScolaire, 35, 85000.0);
+        createClasseIfNotExists("Cours Moyen 2", Niveau.PRIMAIRE, ecole1, anneeScolaire, 35, 85000.0);
 
-        // --- 3. UTILISATEURS (tenant = ecole.getTenant()) ---
+        createClasseIfNotExists("6ème Bilingue", Niveau.COLLEGE, ecole2, anneeScolaire, 50, 120000.0);
+        createClasseIfNotExists("5ème Bilingue", Niveau.COLLEGE, ecole2, anneeScolaire, 50, 120000.0);
+
+        createClasseIfNotExists("Terminale C", Niveau.LYCEE, ecole3, anneeScolaire, 45, 150000.0);
+
+        // --- 3b. Mise a jour des classes existantes sans frais/capacite ---
+        updateClassesWithMissingData(anneeScolaire);
+
+        // --- 4. UTILISATEURS (tenant = ecole.getTenant()) ---
 
         createUserIfNotExists("directeur@digi-001.com", "Admin123!", "Mbarga",
                 "Jean-Pierre", RoleType.ADMIN_ECOLE, ecole1);
@@ -127,7 +141,7 @@ public class DataInitializer implements CommandLineRunner {
         createSuperAdminIfNotExists("admin@digischool.com", "SuperAdmin123!",
                 "System", "Admin");
 
-        // --- 4. PARENTS (tenant = ecole.getTenant()) ---
+        // --- 5. PARENTS (tenant = ecole.getTenant()) ---
 
         createParentIfNotExists("P001-001", "Mbianda", "Guy",
                 "guy.mbianda@email.com", "677112233", "Bastos, YDE",
@@ -144,7 +158,7 @@ public class DataInitializer implements CommandLineRunner {
                 "claude.wabo@email.com", "655778899", "Tamdja, BFS",
                 "QTD", "Médecin", ecole3);
 
-        // --- 5. ÉLÈVES (tenant = ecole.getTenant()) ---
+        // --- 6. ÉLÈVES (tenant = ecole.getTenant()) ---
 
         createEleveIfNotExists("ELV-2024-006", "Biya", "Samuel",
                 "2012-08-20", "QES", ecole2);
@@ -156,7 +170,7 @@ public class DataInitializer implements CommandLineRunner {
         createEleveIfNotExists("ELV-2024-009", "Djeukam", "Patricia",
                 "2007-04-05", "QTD", ecole3);
 
-        // --- 6. RELATIONS ÉLÈVE-PARENT (tenant = eleve.getTenant()) ---
+        // --- 7. RELATIONS ÉLÈVE-PARENT (tenant = eleve.getTenant()) ---
 
         createEleveParentIfNotExists("ELV-2024-001", "P001-001", TypeRelation.PERE, true);
         createEleveParentIfNotExists("ELV-2024-002", "P001-002", TypeRelation.MERE, true);
@@ -204,20 +218,62 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     // ──────────────────────────────────────────────────────────────
+    // Annee Scolaire
+    // ──────────────────────────────────────────────────────────────
+
+    private Anneescolaire createAnneeScolaireIfNotExists(String libelle,
+            String dateDebut, String dateFin, String tenant) {
+        return anneescolaireRepository.findByLibelle(libelle).orElseGet(() -> {
+            Anneescolaire annee = new Anneescolaire();
+            annee.setLibelle(libelle);
+            annee.setDateDebut(java.time.LocalDate.parse(dateDebut));
+            annee.setDateFin(java.time.LocalDate.parse(dateFin));
+            annee.setStatut(true); // Annee active
+            annee.setTenant(tenant);
+            Anneescolaire saved = anneescolaireRepository.save(annee);
+            System.out.println("✓ Année scolaire créée: " + libelle + " (active)");
+            return saved;
+        });
+    }
+
+    // ──────────────────────────────────────────────────────────────
     // Classe : tenant = ecole.getTenant()
     // ──────────────────────────────────────────────────────────────
 
-    private void createClasseIfNotExists(String nom, Niveau niveau, Ecole ecole) {
+    private void createClasseIfNotExists(String nom, Niveau niveau, Ecole ecole,
+            Anneescolaire anneeScolaire, Integer capacite, Double fraisScolarite) {
         if (!classeRepository.existsByNomClasseAndEcoleIdEcole(nom, ecole.getIdEcole())) {
             Classe classe = new Classe();
             classe.setNomClasse(nom);
             classe.setNiveau(niveau);
             classe.setEcole(ecole);
+            classe.setAnneeScolaire(anneeScolaire);
+            classe.setCapacite(capacite);
+            classe.setFraisScolarite(fraisScolarite);
+            classe.setStatut(StatutClasse.ACTIVE);
             classe.setTenant(ecole.getTenant());
             classeRepository.save(classe);
-            System.out.println("✓ Classe créée: " + nom + " tenant=" + ecole.getTenant());
+            System.out.println("✓ Classe créée: " + nom + " capacite=" + capacite
+                    + " frais=" + fraisScolarite + " tenant=" + ecole.getTenant());
         } else {
-            System.out.println("• Classe existe: " + nom);
+            // Mettre a jour les classes existantes si frais/capacite manquants
+            classeRepository.findAll().stream()
+                    .filter(c -> c.getNomClasse().equals(nom) && c.getEcole().getIdEcole().equals(ecole.getIdEcole()))
+                    .findFirst()
+                    .ifPresent(c -> {
+                        boolean updated = false;
+                        if (c.getFraisScolarite() == null) { c.setFraisScolarite(fraisScolarite); updated = true; }
+                        if (c.getCapacite() == null) { c.setCapacite(capacite); updated = true; }
+                        if (c.getStatut() == null) { c.setStatut(StatutClasse.ACTIVE); updated = true; }
+                        if (c.getAnneeScolaire() == null) { c.setAnneeScolaire(anneeScolaire); updated = true; }
+                        if (updated) {
+                            classeRepository.save(c);
+                            System.out.println("↻ Classe mise à jour: " + nom + " frais=" + fraisScolarite
+                                    + " capacite=" + capacite);
+                        } else {
+                            System.out.println("• Classe existe: " + nom);
+                        }
+                    });
         }
     }
 
@@ -354,5 +410,33 @@ public class DataInitializer implements CommandLineRunner {
                 }
             });
         });
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Mise a jour globale des classes sans frais/capacite/statut
+    // ──────────────────────────────────────────────────────────────
+
+    private void updateClassesWithMissingData(Anneescolaire anneeScolaire) {
+        classeRepository.findAll().stream()
+                .filter(c -> c.getFraisScolarite() == null || c.getCapacite() == null || c.getStatut() == null)
+                .forEach(c -> {
+                    if (c.getFraisScolarite() == null) {
+                        // Definir des frais par defaut selon le niveau
+                        double frais = switch (c.getNiveau()) {
+                            case MATERNELLE -> 50000.0;
+                            case PRIMAIRE, PRIMARY -> 75000.0;
+                            case COLLEGE, SECONDARY -> 100000.0;
+                            case LYCEE, HIGH_SCHOOL -> 120000.0;
+                            default -> 75000.0;
+                        };
+                        c.setFraisScolarite(frais);
+                    }
+                    if (c.getCapacite() == null) c.setCapacite(40);
+                    if (c.getStatut() == null) c.setStatut(StatutClasse.ACTIVE);
+                    if (c.getAnneeScolaire() == null) c.setAnneeScolaire(anneeScolaire);
+                    classeRepository.save(c);
+                    System.out.println("↻ Classe corrigée: " + c.getNomClasse()
+                            + " frais=" + c.getFraisScolarite() + " capacite=" + c.getCapacite());
+                });
     }
 }

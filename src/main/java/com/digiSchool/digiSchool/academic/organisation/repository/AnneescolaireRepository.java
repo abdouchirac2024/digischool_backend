@@ -13,4 +13,6 @@ public interface AnneescolaireRepository extends JpaRepository<Anneescolaire, Lo
 	 Optional<Anneescolaire> findByLibelle(String libelle);
 
 	 boolean existsByLibelle(String libelle);
+
+	 Optional<Anneescolaire> findFirstByStatutTrue();
 }

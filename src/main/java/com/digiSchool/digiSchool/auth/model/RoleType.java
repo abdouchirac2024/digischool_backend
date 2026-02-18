@@ -10,5 +10,6 @@ public enum RoleType {
     ENSEIGNANT,       // Professeur
     PARENT,           // Parent d'élève
     SECRETAIRE,       // Secrétaire de l'école
-    COMPTABLE         // Comptable de l'école
+    COMPTABLE,        // Comptable de l'école
+    ELEVE             // Élève
 }
