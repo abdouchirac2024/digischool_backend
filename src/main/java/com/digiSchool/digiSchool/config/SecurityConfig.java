@@ -63,7 +63,6 @@ public class SecurityConfig {
                     "/api/auth/refresh-token", // Rafraîchir token
                     "/api/auth/forgot-password", // Mot de passe oublié
                     "/api/auth/reset-password",  // Réinitialisation mot de passe
-                    "/api/files/*/download",  // Téléchargement photos (public)
                     "/api/public/**",         // Endpoints publics
                     "/swagger-ui/**",         // Documentation Swagger
                     "/swagger-ui.html",

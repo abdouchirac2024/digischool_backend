@@ -1,33 +1,36 @@
 package com.digiSchool.digiSchool.config.file;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.UUID;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+
 @Service
 public class FileStorageService {
 
-    private final Path uploadDir;
+    private final Cloudinary cloudinary;
 
-    public FileStorageService(@Value("${file.upload-dir:uploads}") String uploadDir) {
-        this.uploadDir = Paths.get(uploadDir).toAbsolutePath().normalize();
-        try {
-            Files.createDirectories(this.uploadDir);
-        } catch (IOException e) {
-            throw new RuntimeException("Impossible de créer le répertoire d'upload: " + uploadDir, e);
-        }
+    public FileStorageService(
+            @Value("${cloudinary.cloud-name}") String cloudName,
+            @Value("${cloudinary.api-key}") String apiKey,
+            @Value("${cloudinary.api-secret}") String apiSecret) {
+        this.cloudinary = new Cloudinary(ObjectUtils.asMap(
+                "cloud_name", cloudName,
+                "api_key", apiKey,
+                "api_secret", apiSecret,
+                "secure", true
+        ));
     }
 
     /**
-     * Stocke un fichier et retourne le nom généré
+     * Upload un fichier sur Cloudinary et retourne l'URL publique
      */
+    @SuppressWarnings("unchecked")
     public String store(MultipartFile file) {
         if (file.isEmpty()) {
             throw new RuntimeException("Le fichier est vide");
@@ -44,39 +47,25 @@ public class FileStorageService {
             throw new RuntimeException("Le fichier ne doit pas dépasser 5MB");
         }
 
-        // Générer un nom unique
-        String originalFilename = file.getOriginalFilename();
-        String extension = "";
-        if (originalFilename != null && originalFilename.contains(".")) {
-            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        }
-        String storedFilename = UUID.randomUUID().toString() + extension;
-
         try {
-            Path targetLocation = this.uploadDir.resolve(storedFilename);
-            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-            return storedFilename;
+            Map<String, Object> result = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+                    "folder", "digischool/photos",
+                    "resource_type", "image"
+            ));
+            return (String) result.get("secure_url");
         } catch (IOException e) {
-            throw new RuntimeException("Erreur lors du stockage du fichier", e);
+            throw new RuntimeException("Erreur lors de l'upload sur Cloudinary", e);
         }
     }
 
     /**
-     * Charge un fichier par son nom
+     * Supprime un fichier de Cloudinary par son public_id
      */
-    public Path load(String filename) {
-        return uploadDir.resolve(filename).normalize();
-    }
-
-    /**
-     * Supprime un fichier
-     */
-    public void delete(String filename) {
+    public void delete(String publicId) {
         try {
-            Path filePath = uploadDir.resolve(filename).normalize();
-            Files.deleteIfExists(filePath);
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
         } catch (IOException e) {
-            throw new RuntimeException("Erreur lors de la suppression du fichier", e);
+            throw new RuntimeException("Erreur lors de la suppression sur Cloudinary", e);
         }
     }
 }
