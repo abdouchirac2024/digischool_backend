@@ -44,6 +44,9 @@ public class Eleve extends TenantEntity {
 	@Enumerated(EnumType.STRING)
 	private StatutEleve statut;
 
+	@Column(name = "photo_url", length = 500)
+	private String photoUrl;
+
 	@OneToMany(mappedBy = "eleve")
 	private List<Inscription> inscriptions;
 
@@ -161,6 +164,14 @@ public class Eleve extends TenantEntity {
 
 	public void setQuartier(Quartier quartier) {
 		this.quartier = quartier;
+	}
+
+	public String getPhotoUrl() {
+		return photoUrl;
+	}
+
+	public void setPhotoUrl(String photoUrl) {
+		this.photoUrl = photoUrl;
 	}
 
 	public List<EleveParent> getEleveParents() {

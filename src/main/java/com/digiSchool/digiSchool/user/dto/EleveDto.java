@@ -41,6 +41,9 @@ public class EleveDto {
     @Schema(description = "Nom du quartier de residence")
     private String quartierNom;
 
+    @Schema(description = "URL de la photo de l'eleve")
+    private String photoUrl;
+
     // Getters and Setters
     @JsonProperty("id")
     public Long getIdEleve() {
@@ -129,5 +132,13 @@ public class EleveDto {
 
     public void setQuartierId(Long quartierId) {
         this.quartierId = quartierId;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 }

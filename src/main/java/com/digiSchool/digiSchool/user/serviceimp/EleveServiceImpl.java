@@ -75,6 +75,7 @@ public class EleveServiceImpl implements EleveService {
         if (dto.getSexe() != null) {
             eleve.setSexe(Sexe.valueOf(dto.getSexe()));
         }
+        eleve.setPhotoUrl(dto.getPhotoUrl());
         if (dto.getQuartierId() != null) {
             Quartier quartier = quartierRepository.findById(dto.getQuartierId())
                     .orElseThrow(() -> new RuntimeException("Quartier introuvable"));
@@ -115,6 +116,9 @@ public class EleveServiceImpl implements EleveService {
         if (dto.getNationalite() != null) {
             eleve.setNationalite(dto.getNationalite());
         }
+        if (dto.getPhotoUrl() != null) {
+            eleve.setPhotoUrl(dto.getPhotoUrl());
+        }
         if (dto.getQuartierId() != null) {
             Quartier quartier = quartierRepository.findById(dto.getQuartierId())
                     .orElseThrow(() -> new RuntimeException("Quartier introuvable"));
@@ -150,6 +154,7 @@ public class EleveServiceImpl implements EleveService {
         }
         dto.setTenant(eleve.getTenant());
         dto.setNationalite(eleve.getNationalite());
+        dto.setPhotoUrl(eleve.getPhotoUrl());
 
         if (eleve.getQuartier() != null) {
             dto.setQuartierId(eleve.getQuartier().getId());
