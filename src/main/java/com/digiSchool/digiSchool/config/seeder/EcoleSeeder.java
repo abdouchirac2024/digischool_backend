@@ -87,10 +87,21 @@ public class EcoleSeeder {
     }
 
     /**
-     * Recupere une ecole par son code
+     * Recupere une ecole par son code.
+     * Tente d'abord dans la map, puis en base de données.
      */
     public Ecole getEcole(String codeEcole) {
-        return ecolesMap.get(codeEcole);
+        if (ecolesMap.containsKey(codeEcole)) {
+            return ecolesMap.get(codeEcole);
+        }
+
+        // Fallback: Recherche en base si non présent dans la map
+        return ecoleRepository.findByCodeEcole(codeEcole)
+                .map(e -> {
+                    ecolesMap.put(codeEcole, e);
+                    return e;
+                })
+                .orElse(null);
     }
 
     private void loadExistingEcoles() {
@@ -108,7 +119,8 @@ public class EcoleSeeder {
         e.setStatut(statut);
         e.setQuartier(quartier);
 
-        // Set a temporary tenant to satisfy NOT NULL constraint, will be updated after save
+        // Set a temporary tenant to satisfy NOT NULL constraint, will be updated after
+        // save
         e.setTenant("TEMP");
         Ecole saved = ecoleRepository.save(e);
 

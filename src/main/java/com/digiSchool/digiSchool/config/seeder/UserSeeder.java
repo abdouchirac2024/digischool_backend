@@ -162,6 +162,23 @@ public class UserSeeder {
                 if (userRepository.existsByEmail(email)) {
                         return userRepository.findByEmail(email).orElse(null);
                 }
+
+                // Sécurité: Si l'école est null (ex: seeder conflict), on tente de récupérer la
+                // première dispo
+                if (ecole == null) {
+                        ecole = ecoleSeeder.getEcole("ECB-001"); // Tente le code par défaut
+                        if (ecole == null) {
+                                // Ultime recours: n'importe quelle école en base
+                                ecole = ecoleSeeder.getEcole("DIGI-001");
+                                if (ecole == null) {
+                                        // Si toujours rien, on ne peut pas créer l'utilisateur (tenant_id est requis)
+                                        System.out.println("⚠ Impossible de créer l'utilisateur " + email
+                                                        + " : Aucune école trouvée");
+                                        return null;
+                                }
+                        }
+                }
+
                 User user = new User();
                 user.setPrenom(prenom);
                 user.setNom(nom);
