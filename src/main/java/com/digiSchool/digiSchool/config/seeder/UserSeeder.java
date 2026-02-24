@@ -38,11 +38,10 @@ public class UserSeeder {
          * Cree tous les comptes utilisateurs
          */
         public void seed() {
-                if (userRepository.count() > 0) {
-                        System.out.println("  -> Users : deja presents, skip");
-                        loadExistingUsers();
-                        return;
-                }
+                // On ne saute plus le seed si userRepository.count() > 0
+                // car on veut s'assurer que les nouveaux comptes de test (ex: eleves)
+                // sont bien créés. La méthode createUser gère déjà l'existence par email.
+                loadExistingUsers();
 
                 // Recuperer les ecoles
                 Ecole ecoleBilingue = ecoleSeeder.getEcole("ECB-001");
