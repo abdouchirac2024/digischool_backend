@@ -14,147 +14,167 @@ import com.digiSchool.digiSchool.auth.repository.UserRepository;
 
 /**
  * Seeder pour les utilisateurs du systeme.
- * Cree tous les comptes (admin, directeurs, enseignants, secretaires, parents, tests).
+ * Cree tous les comptes (admin, directeurs, enseignants, secretaires, parents,
+ * eleves de test).
  */
 @Component
 public class UserSeeder {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final EcoleSeeder ecoleSeeder;
+        private final UserRepository userRepository;
+        private final PasswordEncoder passwordEncoder;
+        private final EcoleSeeder ecoleSeeder;
 
-    private Map<String, User> usersMap = new HashMap<>();
+        private Map<String, User> usersMap = new HashMap<>();
 
-    public UserSeeder(UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            EcoleSeeder ecoleSeeder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.ecoleSeeder = ecoleSeeder;
-    }
-
-    /**
-     * Cree tous les comptes utilisateurs
-     */
-    public void seed() {
-        if (userRepository.count() > 0) {
-            System.out.println("  -> Users : deja presents, skip");
-            loadExistingUsers();
-            return;
+        public UserSeeder(UserRepository userRepository,
+                        PasswordEncoder passwordEncoder,
+                        EcoleSeeder ecoleSeeder) {
+                this.userRepository = userRepository;
+                this.passwordEncoder = passwordEncoder;
+                this.ecoleSeeder = ecoleSeeder;
         }
 
-        // Recuperer les ecoles
-        Ecole ecoleBilingue = ecoleSeeder.getEcole("ECB-001");
-        Ecole ecoleAnglo = ecoleSeeder.getEcole("ECA-001");
-        Ecole ecoleFranco = ecoleSeeder.getEcole("ECF-001");
+        /**
+         * Cree tous les comptes utilisateurs
+         */
+        public void seed() {
+                if (userRepository.count() > 0) {
+                        System.out.println("  -> Users : deja presents, skip");
+                        loadExistingUsers();
+                        return;
+                }
 
-        // ============ SUPER ADMIN (acces global) ============
-        createUser("Super", "Admin", "admin@digischool.cm", "+237600000000",
-                "Admin@2025", RoleType.SUPER_ADMIN, UserStatus.ACTIVE,
-                ecoleBilingue);
+                // Recuperer les ecoles
+                Ecole ecoleBilingue = ecoleSeeder.getEcole("ECB-001");
+                Ecole ecoleAnglo = ecoleSeeder.getEcole("ECA-001");
+                Ecole ecoleFranco = ecoleSeeder.getEcole("ECF-001");
 
-        // ============ Directeurs par ecole ============
-        createUser("Samuel", "Mbarga", "smbarga@lavictoire.cm", "+237677123456",
-                "Directeur@2025", RoleType.ADMIN_ECOLE, UserStatus.ACTIVE,
-                ecoleBilingue);
+                // ============ SUPER ADMIN (acces global) ============
+                createUser("Super", "Admin", "admin@digischool.cm", "+237600000000",
+                                "Admin@2025", RoleType.SUPER_ADMIN, UserStatus.ACTIVE,
+                                ecoleBilingue);
 
-        createUser("John", "Tamba", "jtamba@progressive.cm", "+237699987654",
-                "Directeur@2025", RoleType.ADMIN_ECOLE, UserStatus.ACTIVE,
-                ecoleAnglo);
+                // ============ Directeurs par ecole ============
+                createUser("Samuel", "Mbarga", "smbarga@lavictoire.cm", "+237677123456",
+                                "Directeur@2025", RoleType.ADMIN_ECOLE, UserStatus.ACTIVE,
+                                ecoleBilingue);
 
-        createUser("Pierre", "Nguemo", "pnguemo@leschampions.cm", "+237655456789",
-                "Directeur@2025", RoleType.ADMIN_ECOLE, UserStatus.ACTIVE,
-                ecoleFranco);
+                createUser("John", "Tamba", "jtamba@progressive.cm", "+237699987654",
+                                "Directeur@2025", RoleType.ADMIN_ECOLE, UserStatus.ACTIVE,
+                                ecoleAnglo);
 
-        // ============ Enseignants ============
-        User enseignant1 = createUser("Jean-Pierre", "Kamga", "jpkamga@lavictoire.cm", "+237670111222",
-                "Enseignant@2025", RoleType.ENSEIGNANT, UserStatus.ACTIVE,
-                ecoleBilingue);
-        usersMap.put("enseignant1", enseignant1);
+                createUser("Pierre", "Nguemo", "pnguemo@leschampions.cm", "+237655456789",
+                                "Directeur@2025", RoleType.ADMIN_ECOLE, UserStatus.ACTIVE,
+                                ecoleFranco);
 
-        User enseignant2 = createUser("Marie", "Ngo Bassa", "mngo@lavictoire.cm", "+237680222333",
-                "Enseignant@2025", RoleType.ENSEIGNANT, UserStatus.ACTIVE,
-                ecoleBilingue);
-        usersMap.put("enseignant2", enseignant2);
+                // ============ Enseignants ============
+                User enseignant1 = createUser("Jean-Pierre", "Kamga", "jpkamga@lavictoire.cm", "+237670111222",
+                                "Enseignant@2025", RoleType.ENSEIGNANT, UserStatus.ACTIVE,
+                                ecoleBilingue);
+                usersMap.put("enseignant1", enseignant1);
 
-        User enseignant3 = createUser("Paul", "Fotso", "pfotso@leschampions.cm", "+237690333444",
-                "Enseignant@2025", RoleType.ENSEIGNANT, UserStatus.ACTIVE,
-                ecoleFranco);
-        usersMap.put("enseignant3", enseignant3);
+                User enseignant2 = createUser("Marie", "Ngo Bassa", "mngo@lavictoire.cm", "+237680222333",
+                                "Enseignant@2025", RoleType.ENSEIGNANT, UserStatus.ACTIVE,
+                                ecoleBilingue);
+                usersMap.put("enseignant2", enseignant2);
 
-        User enseignant4 = createUser("Grace", "Njoya", "gnjoya@progressive.cm", "+237650444555",
-                "Enseignant@2025", RoleType.ENSEIGNANT, UserStatus.ACTIVE,
-                ecoleAnglo);
-        usersMap.put("enseignant4", enseignant4);
+                User enseignant3 = createUser("Paul", "Fotso", "pfotso@leschampions.cm", "+237690333444",
+                                "Enseignant@2025", RoleType.ENSEIGNANT, UserStatus.ACTIVE,
+                                ecoleFranco);
+                usersMap.put("enseignant3", enseignant3);
 
-        // ============ Secretaires ============
-        createUser("Chantal", "Atangana", "catangana@lavictoire.cm", "+237660555666",
-                "Secretaire@2025", RoleType.SECRETAIRE, UserStatus.ACTIVE,
-                ecoleBilingue);
+                User enseignant4 = createUser("Grace", "Njoya", "gnjoya@progressive.cm", "+237650444555",
+                                "Enseignant@2025", RoleType.ENSEIGNANT, UserStatus.ACTIVE,
+                                ecoleAnglo);
+                usersMap.put("enseignant4", enseignant4);
 
-        // ============ Parents ============
-        createUser("Francois", "Nkoulou", "fnkoulou@gmail.com", "+237691666777",
-                "Parent@2025", RoleType.PARENT, UserStatus.ACTIVE,
-                ecoleBilingue);
+                // ============ Secretaires ============
+                createUser("Chantal", "Atangana", "catangana@lavictoire.cm", "+237660555666",
+                                "Secretaire@2025", RoleType.SECRETAIRE, UserStatus.ACTIVE,
+                                ecoleBilingue);
 
-        createUser("Beatrice", "Manga", "bmanga@yahoo.fr", "+237682777888",
-                "Parent@2025", RoleType.PARENT, UserStatus.ACTIVE,
-                ecoleBilingue);
+                // ============ Parents ============
+                createUser("Francois", "Nkoulou", "fnkoulou@gmail.com", "+237691666777",
+                                "Parent@2025", RoleType.PARENT, UserStatus.ACTIVE,
+                                ecoleBilingue);
 
-        createUser("Martin", "Ebogo", "mebogo@gmail.com", "+237673888999",
-                "Parent@2025", RoleType.PARENT, UserStatus.ACTIVE,
-                ecoleAnglo);
+                createUser("Beatrice", "Manga", "bmanga@yahoo.fr", "+237682777888",
+                                "Parent@2025", RoleType.PARENT, UserStatus.ACTIVE,
+                                ecoleBilingue);
 
-        // ============ Utilisateur en attente (pour test) ============
-        createUser("EnAttente", "Test", "enattente@test.cm", "+237699000111",
-                "Test@2025", RoleType.PARENT, UserStatus.PENDING,
-                ecoleBilingue);
+                createUser("Martin", "Ebogo", "mebogo@gmail.com", "+237673888999",
+                                "Parent@2025", RoleType.PARENT, UserStatus.ACTIVE,
+                                ecoleAnglo);
 
-        // ============ Utilisateur inactif (pour test) ============
-        createUser("Inactif", "Test", "inactif@test.cm", "+237699000222",
-                "Test@2025", RoleType.PARENT, UserStatus.INACTIVE,
-                ecoleBilingue);
+                // ============ Utilisateur en attente (pour test) ============
+                createUser("EnAttente", "Test", "enattente@test.cm", "+237699000111",
+                                "Test@2025", RoleType.PARENT, UserStatus.PENDING,
+                                ecoleBilingue);
 
-        System.out.println("  -> Users : 14 utilisateurs crees");
-        System.out.println("     Comptes de connexion:");
-        System.out.println("     - Admin: admin@digischool.cm / Admin@2025");
-        System.out.println("     - Directeur: smbarga@lavictoire.cm / Directeur@2025");
-        System.out.println("     - Enseignant: jpkamga@lavictoire.cm / Enseignant@2025");
-        System.out.println("     - Secretaire: catangana@lavictoire.cm / Secretaire@2025");
-        System.out.println("     - Parent: fnkoulou@gmail.com / Parent@2025");
-        System.out.println("     - En attente: enattente@test.cm (statut PENDING)");
-        System.out.println("     - Inactif: inactif@test.cm (statut INACTIVE)");
-    }
+                // ============ Utilisateur inactif (pour test) ============
+                createUser("Inactif", "Test", "inactif@test.cm", "+237699000222",
+                                "Test@2025", RoleType.PARENT, UserStatus.INACTIVE,
+                                ecoleBilingue);
 
-    /**
-     * Recupere un utilisateur par sa cle
-     */
-    public User getUser(String key) {
-        return usersMap.get(key);
-    }
+                // ============ ÉLÈVES de test (pour tester le login élève) ============
+                // Eleve ecole bilingue (Yaounde) - matricule ELV-ECB-001
+                createUser("Paul", "Nkoulou", "elv-ecb-001@eleve.digischool.cm", null,
+                                "Eleve@2025", RoleType.ELEVE, UserStatus.ACTIVE,
+                                ecoleBilingue);
 
-    private void loadExistingUsers() {
-        userRepository.findAll().forEach(u -> {
-            if (u.getEmail().contains("jpkamga")) usersMap.put("enseignant1", u);
-            if (u.getEmail().contains("mngo")) usersMap.put("enseignant2", u);
-            if (u.getEmail().contains("pfotso")) usersMap.put("enseignant3", u);
-            if (u.getEmail().contains("gnjoya")) usersMap.put("enseignant4", u);
-        });
-    }
+                // Eleve Progressive College (Douala) - matricule ELV-ECA-001
+                createUser("Samuel", "Ebogo", "elv-eca-001@eleve.digischool.cm", null,
+                                "Eleve@2025", RoleType.ELEVE, UserStatus.ACTIVE,
+                                ecoleAnglo);
 
-    private User createUser(String prenom, String nom, String email, String telephone,
-            String password, RoleType role, UserStatus status, Ecole ecole) {
-        User user = new User();
-        user.setPrenom(prenom);
-        user.setNom(nom);
-        user.setEmail(email);
-        user.setTelephone(telephone);
-        user.setPasswordHash(passwordEncoder.encode(password));
-        user.setRole(role);
-        user.setStatus(status);
-        user.setEcole(ecole);
-        user.setTenantId(ecole.getTenant());
+                System.out.println("  -> Users : 16 utilisateurs crees");
+                System.out.println("     Comptes de connexion:");
+                System.out.println("     - Admin: admin@digischool.cm / Admin@2025");
+                System.out.println("     - Directeur: smbarga@lavictoire.cm / Directeur@2025");
+                System.out.println("     - Enseignant: jpkamga@lavictoire.cm / Enseignant@2025");
+                System.out.println("     - Secretaire: catangana@lavictoire.cm / Secretaire@2025");
+                System.out.println("     - Parent: fnkoulou@gmail.com / Parent@2025");
+                System.out.println("     - Eleve (Yaounde): elv-ecb-001@eleve.digischool.cm / Eleve@2025");
+                System.out.println("     - Eleve (Douala): elv-eca-001@eleve.digischool.cm / Eleve@2025");
+        }
 
-        return userRepository.save(user);
-    }
+        /**
+         * Recupere un utilisateur par sa cle
+         */
+        public User getUser(String key) {
+                return usersMap.get(key);
+        }
+
+        private void loadExistingUsers() {
+                userRepository.findAll().forEach(u -> {
+                        if (u.getEmail().contains("jpkamga"))
+                                usersMap.put("enseignant1", u);
+                        if (u.getEmail().contains("mngo"))
+                                usersMap.put("enseignant2", u);
+                        if (u.getEmail().contains("pfotso"))
+                                usersMap.put("enseignant3", u);
+                        if (u.getEmail().contains("gnjoya"))
+                                usersMap.put("enseignant4", u);
+                });
+        }
+
+        private User createUser(String prenom, String nom, String email, String telephone,
+                        String password, RoleType role, UserStatus status, Ecole ecole) {
+                if (userRepository.existsByEmail(email)) {
+                        return userRepository.findByEmail(email).orElse(null);
+                }
+                User user = new User();
+                user.setPrenom(prenom);
+                user.setNom(nom);
+                user.setEmail(email);
+                if (telephone != null)
+                        user.setTelephone(telephone);
+                user.setPasswordHash(passwordEncoder.encode(password));
+                user.setRole(role);
+                user.setStatus(status);
+                user.setEcole(ecole);
+                user.setTenantId(ecole.getTenant());
+
+                return userRepository.save(user);
+        }
 }

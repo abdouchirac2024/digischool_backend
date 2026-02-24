@@ -10,9 +10,9 @@ import com.digiSchool.digiSchool.academic.organisation.model.Anneescolaire;
 @Repository
 public interface AnneescolaireRepository extends JpaRepository<Anneescolaire, Long> {
 
-	 Optional<Anneescolaire> findByLibelle(String libelle);
+	Optional<Anneescolaire> findFirstByLibelle(String libelle);
 
-	 boolean existsByLibelle(String libelle);
+	boolean existsByLibelle(String libelle);
 
-	 Optional<Anneescolaire> findFirstByStatutTrue();
+	Optional<Anneescolaire> findFirstByStatutTrue();
 }

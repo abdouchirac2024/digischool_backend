@@ -101,8 +101,15 @@ public class DataInitializer implements CommandLineRunner {
 
         // --- 2. ANNÉE SCOLAIRE ACTIVE ---
 
-        Anneescolaire anneeScolaire = createAnneeScolaireIfNotExists("2025-2026",
-                "2025-09-01", "2026-06-30", ecole1.getTenant());
+        // Récupérer l'année scolaire active déjà créée par AnneeScolaireSeeder
+        // (On ne crée pas de nouvelle année ici pour éviter les doublons)
+        Anneescolaire anneeScolaire = anneescolaireRepository.findFirstByStatutTrue()
+                .orElse(null);
+
+        if (anneeScolaire == null) {
+            System.out.println("⚠ Aucune année scolaire active trouvée, arret du DataInitializer");
+            return;
+        }
 
         // --- 3. CLASSES (tenant = ecole.getTenant()) ---
 
@@ -218,25 +225,6 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     // ──────────────────────────────────────────────────────────────
-    // Annee Scolaire
-    // ──────────────────────────────────────────────────────────────
-
-    private Anneescolaire createAnneeScolaireIfNotExists(String libelle,
-            String dateDebut, String dateFin, String tenant) {
-        return anneescolaireRepository.findByLibelle(libelle).orElseGet(() -> {
-            Anneescolaire annee = new Anneescolaire();
-            annee.setLibelle(libelle);
-            annee.setDateDebut(java.time.LocalDate.parse(dateDebut));
-            annee.setDateFin(java.time.LocalDate.parse(dateFin));
-            annee.setStatut(true); // Annee active
-            annee.setTenant(tenant);
-            Anneescolaire saved = anneescolaireRepository.save(annee);
-            System.out.println("✓ Année scolaire créée: " + libelle + " (active)");
-            return saved;
-        });
-    }
-
-    // ──────────────────────────────────────────────────────────────
     // Classe : tenant = ecole.getTenant()
     // ──────────────────────────────────────────────────────────────
 
@@ -262,10 +250,22 @@ public class DataInitializer implements CommandLineRunner {
                     .findFirst()
                     .ifPresent(c -> {
                         boolean updated = false;
-                        if (c.getFraisScolarite() == null) { c.setFraisScolarite(fraisScolarite); updated = true; }
-                        if (c.getCapacite() == null) { c.setCapacite(capacite); updated = true; }
-                        if (c.getStatut() == null) { c.setStatut(StatutClasse.ACTIVE); updated = true; }
-                        if (c.getAnneeScolaire() == null) { c.setAnneeScolaire(anneeScolaire); updated = true; }
+                        if (c.getFraisScolarite() == null) {
+                            c.setFraisScolarite(fraisScolarite);
+                            updated = true;
+                        }
+                        if (c.getCapacite() == null) {
+                            c.setCapacite(capacite);
+                            updated = true;
+                        }
+                        if (c.getStatut() == null) {
+                            c.setStatut(StatutClasse.ACTIVE);
+                            updated = true;
+                        }
+                        if (c.getAnneeScolaire() == null) {
+                            c.setAnneeScolaire(anneeScolaire);
+                            updated = true;
+                        }
                         if (updated) {
                             classeRepository.save(c);
                             System.out.println("↻ Classe mise à jour: " + nom + " frais=" + fraisScolarite
@@ -431,9 +431,12 @@ public class DataInitializer implements CommandLineRunner {
                         };
                         c.setFraisScolarite(frais);
                     }
-                    if (c.getCapacite() == null) c.setCapacite(40);
-                    if (c.getStatut() == null) c.setStatut(StatutClasse.ACTIVE);
-                    if (c.getAnneeScolaire() == null) c.setAnneeScolaire(anneeScolaire);
+                    if (c.getCapacite() == null)
+                        c.setCapacite(40);
+                    if (c.getStatut() == null)
+                        c.setStatut(StatutClasse.ACTIVE);
+                    if (c.getAnneeScolaire() == null)
+                        c.setAnneeScolaire(anneeScolaire);
                     classeRepository.save(c);
                     System.out.println("↻ Classe corrigée: " + c.getNomClasse()
                             + " frais=" + c.getFraisScolarite() + " capacite=" + c.getCapacite());
