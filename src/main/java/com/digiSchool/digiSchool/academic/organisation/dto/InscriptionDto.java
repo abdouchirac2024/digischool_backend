@@ -11,6 +11,12 @@ public class InscriptionDto {
     private String statutInscription;
     private String motifAnnulation;
 
+    // Finances
+    private Double remise;
+    private Double fraisTransport;
+    private Double fraisCantine;
+    private Double fraisAssurance;
+
     // Eleve
     private Long eleveId;
     private String eleveMatricule;
@@ -186,5 +192,37 @@ public class InscriptionDto {
 
     public void setGeneratedEmail(String generatedEmail) {
         this.generatedEmail = generatedEmail;
+    }
+
+    public Double getRemise() {
+        return remise;
+    }
+
+    public void setRemise(Double remise) {
+        this.remise = remise;
+    }
+
+    public Double getFraisTransport() {
+        return fraisTransport;
+    }
+
+    public void setFraisTransport(Double fraisTransport) {
+        this.fraisTransport = fraisTransport;
+    }
+
+    public Double getFraisCantine() {
+        return fraisCantine;
+    }
+
+    public void setFraisCantine(Double fraisCantine) {
+        this.fraisCantine = fraisCantine;
+    }
+
+    public Double getFraisAssurance() {
+        return fraisAssurance;
+    }
+
+    public void setFraisAssurance(Double fraisAssurance) {
+        this.fraisAssurance = fraisAssurance;
     }
 }

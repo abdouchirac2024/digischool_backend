@@ -47,6 +47,15 @@ public class Eleve extends TenantEntity {
 	@Column(name = "photo_url", length = 500)
 	private String photoUrl;
 
+	@Column(name = "acte_naissance_url", length = 500)
+	private String acteNaissanceUrl;
+
+	@Column(name = "certificat_medical_url", length = 500)
+	private String certificatMedicalUrl;
+
+	@Column(name = "bulletin_url", length = 500)
+	private String bulletinUrl;
+
 	@OneToMany(mappedBy = "eleve")
 	private List<Inscription> inscriptions;
 
@@ -180,6 +189,30 @@ public class Eleve extends TenantEntity {
 
 	public void setEleveParents(List<EleveParent> eleveParents) {
 		this.eleveParents = eleveParents;
+	}
+
+	public String getActeNaissanceUrl() {
+		return acteNaissanceUrl;
+	}
+
+	public void setActeNaissanceUrl(String acteNaissanceUrl) {
+		this.acteNaissanceUrl = acteNaissanceUrl;
+	}
+
+	public String getCertificatMedicalUrl() {
+		return certificatMedicalUrl;
+	}
+
+	public void setCertificatMedicalUrl(String certificatMedicalUrl) {
+		this.certificatMedicalUrl = certificatMedicalUrl;
+	}
+
+	public String getBulletinUrl() {
+		return bulletinUrl;
+	}
+
+	public void setBulletinUrl(String bulletinUrl) {
+		this.bulletinUrl = bulletinUrl;
 	}
 
 }

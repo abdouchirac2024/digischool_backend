@@ -44,6 +44,15 @@ public class EleveDto {
     @Schema(description = "URL de la photo de l'eleve")
     private String photoUrl;
 
+    @Schema(description = "URL de l'acte de naissance numérisé")
+    private String acteNaissanceUrl;
+
+    @Schema(description = "URL du certificat médical numérisé")
+    private String certificatMedicalUrl;
+
+    @Schema(description = "URL du dernier bulletin numérisé")
+    private String bulletinUrl;
+
     // Getters and Setters
     @JsonProperty("id")
     public Long getIdEleve() {
@@ -140,5 +149,29 @@ public class EleveDto {
 
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
+    }
+
+    public String getActeNaissanceUrl() {
+        return acteNaissanceUrl;
+    }
+
+    public void setActeNaissanceUrl(String acteNaissanceUrl) {
+        this.acteNaissanceUrl = acteNaissanceUrl;
+    }
+
+    public String getCertificatMedicalUrl() {
+        return certificatMedicalUrl;
+    }
+
+    public void setCertificatMedicalUrl(String certificatMedicalUrl) {
+        this.certificatMedicalUrl = certificatMedicalUrl;
+    }
+
+    public String getBulletinUrl() {
+        return bulletinUrl;
+    }
+
+    public void setBulletinUrl(String bulletinUrl) {
+        this.bulletinUrl = bulletinUrl;
     }
 }

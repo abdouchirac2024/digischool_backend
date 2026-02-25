@@ -91,6 +91,9 @@ public class EleveServiceImpl implements EleveService {
             eleve.setSexe(Sexe.valueOf(dto.getSexe()));
         }
         eleve.setPhotoUrl(dto.getPhotoUrl());
+        eleve.setActeNaissanceUrl(dto.getActeNaissanceUrl());
+        eleve.setCertificatMedicalUrl(dto.getCertificatMedicalUrl());
+        eleve.setBulletinUrl(dto.getBulletinUrl());
         if (dto.getQuartierId() != null) {
             Quartier quartier = quartierRepository.findById(dto.getQuartierId())
                     .orElseThrow(() -> new RuntimeException("Quartier introuvable"));
@@ -142,6 +145,15 @@ public class EleveServiceImpl implements EleveService {
         if (dto.getPhotoUrl() != null) {
             eleve.setPhotoUrl(dto.getPhotoUrl());
         }
+        if (dto.getActeNaissanceUrl() != null) {
+            eleve.setActeNaissanceUrl(dto.getActeNaissanceUrl());
+        }
+        if (dto.getCertificatMedicalUrl() != null) {
+            eleve.setCertificatMedicalUrl(dto.getCertificatMedicalUrl());
+        }
+        if (dto.getBulletinUrl() != null) {
+            eleve.setBulletinUrl(dto.getBulletinUrl());
+        }
         if (dto.getQuartierId() != null) {
             Quartier quartier = quartierRepository.findById(dto.getQuartierId())
                     .orElseThrow(() -> new RuntimeException("Quartier introuvable"));
@@ -178,6 +190,9 @@ public class EleveServiceImpl implements EleveService {
         dto.setTenant(eleve.getTenant());
         dto.setNationalite(eleve.getNationalite());
         dto.setPhotoUrl(eleve.getPhotoUrl());
+        dto.setActeNaissanceUrl(eleve.getActeNaissanceUrl());
+        dto.setCertificatMedicalUrl(eleve.getCertificatMedicalUrl());
+        dto.setBulletinUrl(eleve.getBulletinUrl());
 
         if (eleve.getQuartier() != null) {
             dto.setQuartierId(eleve.getQuartier().getId());

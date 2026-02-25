@@ -34,6 +34,11 @@ public class Inscription extends TenantEntity {
     private LocalDate dateInscription;
     private Double montantTotal;
 
+    private Double remise = 0.0;
+    private Double fraisTransport = 0.0;
+    private Double fraisCantine = 0.0;
+    private Double fraisAssurance = 0.0;
+
     // Ancien champ garde pour compatibilite
     private Boolean statut;
 
@@ -161,5 +166,37 @@ public class Inscription extends TenantEntity {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public Double getRemise() {
+        return remise;
+    }
+
+    public void setRemise(Double remise) {
+        this.remise = remise;
+    }
+
+    public Double getFraisTransport() {
+        return fraisTransport;
+    }
+
+    public void setFraisTransport(Double fraisTransport) {
+        this.fraisTransport = fraisTransport;
+    }
+
+    public Double getFraisCantine() {
+        return fraisCantine;
+    }
+
+    public void setFraisCantine(Double fraisCantine) {
+        this.fraisCantine = fraisCantine;
+    }
+
+    public Double getFraisAssurance() {
+        return fraisAssurance;
+    }
+
+    public void setFraisAssurance(Double fraisAssurance) {
+        this.fraisAssurance = fraisAssurance;
     }
 }

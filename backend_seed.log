@@ -153,3 +153,103 @@
    INITIALISATION TERMINÉE
 =================================================
 
+2026-02-25T08:05:25.096+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-02-25T08:05:25.097+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-02-25T08:05:25.098+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-02-25T08:10:09.848+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] Path: /api/classes | Auth header: 'Bearer eyJhbGciOiJIU...'
+2026-02-25T08:10:09.854+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ Token valid | Email: smbarga@lavictoire.cm | TenantId: DIGI-001
+2026-02-25T08:10:09.855+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ TenantContext set to: DIGI-001
+2026-02-25T08:10:11.173+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ User authenticated: smbarga@lavictoire.cm
+2026-02-25T08:10:11.173+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] TenantContext before filterChain: DIGI-001
+2026-02-25T08:10:11.185+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: UserContextService.getCurrentUserEcoleId() | Tenant from context: DIGI-001
+2026-02-25T08:10:11.185+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:10:11.466+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: ClasseServiceImpl.getAll() | Tenant from context: DIGI-001
+2026-02-25T08:10:11.466+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:10:59.062+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] Path: /api/classes | Auth header: 'Bearer eyJhbGciOiJIU...'
+2026-02-25T08:10:59.068+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ Token valid | Email: smbarga@lavictoire.cm | TenantId: DIGI-001
+2026-02-25T08:10:59.068+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ TenantContext set to: DIGI-001
+2026-02-25T08:11:00.199+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ User authenticated: smbarga@lavictoire.cm
+2026-02-25T08:11:00.199+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] TenantContext before filterChain: DIGI-001
+2026-02-25T08:11:00.200+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: UserContextService.getCurrentUserEcoleId() | Tenant from context: DIGI-001
+2026-02-25T08:11:00.200+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:11:00.603+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: ClasseServiceImpl.getAll() | Tenant from context: DIGI-001
+2026-02-25T08:11:00.603+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:11:32.345+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-8] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] Path: /api/parents | Auth header: 'Bearer eyJhbGciOiJIU...'
+2026-02-25T08:11:32.349+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-8] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ Token valid | Email: smbarga@lavictoire.cm | TenantId: DIGI-001
+2026-02-25T08:11:32.349+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-8] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ TenantContext set to: DIGI-001
+2026-02-25T08:11:33.506+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-8] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ User authenticated: smbarga@lavictoire.cm
+2026-02-25T08:11:33.507+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-8] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] TenantContext before filterChain: DIGI-001
+2026-02-25T08:11:33.864+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-8] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: ParentServiceImpl.create(..) | Tenant from context: DIGI-001
+2026-02-25T08:11:33.864+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-8] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:11:45.357+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-9] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] Path: /api/v1/locations/quartiers | Auth header: 'Bearer eyJhbGciOiJIU...'
+2026-02-25T08:11:45.365+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-9] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ Token valid | Email: smbarga@lavictoire.cm | TenantId: DIGI-001
+2026-02-25T08:11:45.365+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-9] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ TenantContext set to: DIGI-001
+2026-02-25T08:11:46.508+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-9] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ User authenticated: smbarga@lavictoire.cm
+2026-02-25T08:11:46.508+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-9] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] TenantContext before filterChain: DIGI-001
+2026-02-25T08:11:56.878+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] Path: /api/v1/locations/quartiers | Auth header: 'Bearer eyJhbGciOiJIU...'
+2026-02-25T08:11:56.882+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ Token valid | Email: smbarga@lavictoire.cm | TenantId: DIGI-001
+2026-02-25T08:11:56.882+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ TenantContext set to: DIGI-001
+2026-02-25T08:11:58.025+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ User authenticated: smbarga@lavictoire.cm
+2026-02-25T08:11:58.025+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] TenantContext before filterChain: DIGI-001
+2026-02-25T08:12:52.192+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-2] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] Path: /api/quartiers | Auth header: 'Bearer eyJhbGciOiJIU...'
+2026-02-25T08:12:52.197+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-2] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ Token valid | Email: smbarga@lavictoire.cm | TenantId: DIGI-001
+2026-02-25T08:12:52.197+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-2] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ TenantContext set to: DIGI-001
+2026-02-25T08:12:53.337+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-2] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ User authenticated: smbarga@lavictoire.cm
+2026-02-25T08:12:53.337+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-2] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] TenantContext before filterChain: DIGI-001
+2026-02-25T08:12:53.684+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-2] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: QuartierServiceImpl.getAll() | Tenant from context: DIGI-001
+2026-02-25T08:12:53.684+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-2] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:13:32.779+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-4] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] Path: /api/quartiers | Auth header: 'Bearer eyJhbGciOiJIU...'
+2026-02-25T08:13:32.784+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-4] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ Token valid | Email: smbarga@lavictoire.cm | TenantId: DIGI-001
+2026-02-25T08:13:32.785+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-4] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ TenantContext set to: DIGI-001
+2026-02-25T08:13:33.940+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-4] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ User authenticated: smbarga@lavictoire.cm
+2026-02-25T08:13:33.940+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-4] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] TenantContext before filterChain: DIGI-001
+2026-02-25T08:13:34.270+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-4] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: QuartierServiceImpl.getAll() | Tenant from context: DIGI-001
+2026-02-25T08:13:34.270+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-4] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:13:55.762+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] Path: /api/parents | Auth header: 'Bearer eyJhbGciOiJIU...'
+2026-02-25T08:13:55.768+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ Token valid | Email: smbarga@lavictoire.cm | TenantId: DIGI-001
+2026-02-25T08:13:55.768+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ TenantContext set to: DIGI-001
+2026-02-25T08:13:56.898+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ User authenticated: smbarga@lavictoire.cm
+2026-02-25T08:13:56.899+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] TenantContext before filterChain: DIGI-001
+2026-02-25T08:13:57.171+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: ParentServiceImpl.create(..) | Tenant from context: DIGI-001
+2026-02-25T08:13:57.172+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:13:58.961+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: IdentifierGeneratorService.generateParentMatricule(..) | Tenant from context: DIGI-001
+2026-02-25T08:13:58.961+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-6] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:14:18.565+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-8] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] Path: /api/students | Auth header: 'Bearer eyJhbGciOiJIU...'
+2026-02-25T08:14:18.569+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-8] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ Token valid | Email: smbarga@lavictoire.cm | TenantId: DIGI-001
+2026-02-25T08:14:18.569+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-8] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ TenantContext set to: DIGI-001
+2026-02-25T08:14:19.704+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-8] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ User authenticated: smbarga@lavictoire.cm
+2026-02-25T08:14:19.704+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-8] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] TenantContext before filterChain: DIGI-001
+2026-02-25T08:14:19.998+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-8] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: EleveServiceImpl.create(..) | Tenant from context: DIGI-001
+2026-02-25T08:14:19.998+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-8] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:14:37.832+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-9] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] Path: /api/students | Auth header: 'Bearer eyJhbGciOiJIU...'
+2026-02-25T08:14:37.836+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-9] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ Token valid | Email: smbarga@lavictoire.cm | TenantId: DIGI-001
+2026-02-25T08:14:37.836+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-9] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ TenantContext set to: DIGI-001
+2026-02-25T08:14:38.986+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-9] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ User authenticated: smbarga@lavictoire.cm
+2026-02-25T08:14:38.986+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-9] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] TenantContext before filterChain: DIGI-001
+2026-02-25T08:14:39.285+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-9] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: EleveServiceImpl.create(..) | Tenant from context: DIGI-001
+2026-02-25T08:14:39.285+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-9] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:14:40.565+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-9] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: IdentifierGeneratorService.generateEleveMatricule(..) | Tenant from context: DIGI-001
+2026-02-25T08:14:40.565+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-9] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:14:51.490+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] Path: /api/students | Auth header: 'Bearer eyJhbGciOiJIU...'
+2026-02-25T08:14:51.494+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ Token valid | Email: smbarga@lavictoire.cm | TenantId: DIGI-001
+2026-02-25T08:14:51.494+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ TenantContext set to: DIGI-001
+2026-02-25T08:14:52.711+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ User authenticated: smbarga@lavictoire.cm
+2026-02-25T08:14:52.712+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] TenantContext before filterChain: DIGI-001
+2026-02-25T08:14:53.064+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: EleveServiceImpl.getAll() | Tenant from context: DIGI-001
+2026-02-25T08:14:53.065+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-1] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:15:46.754+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-3] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] Path: /api/eleve-parents | Auth header: 'Bearer eyJhbGciOiJIU...'
+2026-02-25T08:15:46.758+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-3] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ Token valid | Email: smbarga@lavictoire.cm | TenantId: DIGI-001
+2026-02-25T08:15:46.759+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-3] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ TenantContext set to: DIGI-001
+2026-02-25T08:15:47.955+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-3] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ User authenticated: smbarga@lavictoire.cm
+2026-02-25T08:15:47.955+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-3] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] TenantContext before filterChain: DIGI-001
+2026-02-25T08:15:48.256+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-3] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: EleveParentServiceImpl.create(..) | Tenant from context: DIGI-001
+2026-02-25T08:15:48.257+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-3] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:16:29.940+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] Path: /api/inscriptions | Auth header: 'Bearer eyJhbGciOiJIU...'
+2026-02-25T08:16:29.943+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ Token valid | Email: smbarga@lavictoire.cm | TenantId: DIGI-001
+2026-02-25T08:16:29.943+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ TenantContext set to: DIGI-001
+2026-02-25T08:16:31.226+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] ✓ User authenticated: smbarga@lavictoire.cm
+2026-02-25T08:16:31.226+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.auth.filter.JwtAuthFilter          : [JwtAuthFilter] TenantContext before filterChain: DIGI-001
+2026-02-25T08:16:31.546+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: InscriptionServiceImpl.creerInscription(..) | Tenant from context: DIGI-001
+2026-02-25T08:16:31.546+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001
+2026-02-25T08:16:33.043+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.E.service.TenantAspect             : [TenantAspect] Method: ClasseServiceImpl.verifierCapacite(..) | Tenant from context: DIGI-001
+2026-02-25T08:16:33.044+01:00  INFO 26415 --- [digiSchool] [nio-8081-exec-5] c.d.d.E.service.TenantAspect             : [TenantAspect] ✓ Filter enabled for tenant: DIGI-001

@@ -39,6 +39,7 @@ import com.digiSchool.digiSchool.user.model.EleveParent;
 import com.digiSchool.digiSchool.user.model.StatutEleve;
 import com.digiSchool.digiSchool.user.repository.EleveParentRepository;
 import com.digiSchool.digiSchool.user.repository.EleveRepository;
+import com.digiSchool.digiSchool.user.service.SmsService;
 
 import jakarta.transaction.Transactional;
 
@@ -57,6 +58,7 @@ public class InscriptionServiceImpl implements InscriptionService {
     private final EcoleRepository ecoleRepository;
     private final NotificationRepository notificationRepository;
     private final ClasseService classeService;
+    private final SmsService smsService;
 
     public InscriptionServiceImpl(
             InscriptionRepository inscriptionRepository,
@@ -69,7 +71,8 @@ public class InscriptionServiceImpl implements InscriptionService {
             PasswordEncoder passwordEncoder,
             EcoleRepository ecoleRepository,
             NotificationRepository notificationRepository,
-            ClasseService classeService) {
+            ClasseService classeService,
+            SmsService smsService) {
         this.inscriptionRepository = inscriptionRepository;
         this.echeanceRepository = echeanceRepository;
         this.eleveRepository = eleveRepository;
@@ -81,6 +84,7 @@ public class InscriptionServiceImpl implements InscriptionService {
         this.ecoleRepository = ecoleRepository;
         this.notificationRepository = notificationRepository;
         this.classeService = classeService;
+        this.smsService = smsService;
     }
 
     @Override
@@ -127,12 +131,22 @@ public class InscriptionServiceImpl implements InscriptionService {
                 : LocalDate.now();
 
         // 8. Creer l'inscription
-        Double montantTotal = classe.getFraisScolarite() != null ? classe.getFraisScolarite() : 0.0;
+        Double fraisScolarite = classe.getFraisScolarite() != null ? classe.getFraisScolarite() : 0.0;
+        Double remise = request.getRemise() != null ? request.getRemise() : 0.0;
+        Double transport = request.getFraisTransport() != null ? request.getFraisTransport() : 0.0;
+        Double cantine = request.getFraisCantine() != null ? request.getFraisCantine() : 0.0;
+        Double assurance = request.getFraisAssurance() != null ? request.getFraisAssurance() : 0.0;
+
+        Double montantTotal = (fraisScolarite - remise) + transport + cantine + assurance;
 
         Inscription inscription = new Inscription();
         inscription.setNumeroInscription(numeroInscription);
         inscription.setDateInscription(dateInscription);
         inscription.setMontantTotal(montantTotal);
+        inscription.setRemise(remise);
+        inscription.setFraisTransport(transport);
+        inscription.setFraisCantine(cantine);
+        inscription.setFraisAssurance(assurance);
         inscription.setStatut(true);
         inscription.setStatutInscription(StatutInscription.VALIDEE);
         inscription.setEleve(eleve);
@@ -230,7 +244,8 @@ public class InscriptionServiceImpl implements InscriptionService {
         return inscriptionRepository.findAllByTenant(tenant).stream()
                 .map(inscription -> {
                     InscriptionDto dto = toDto(inscription);
-                    List<Echeance> echeances = echeanceRepository.findByInscriptionIdInscription(inscription.getIdInscription());
+                    List<Echeance> echeances = echeanceRepository
+                            .findByInscriptionIdInscription(inscription.getIdInscription());
                     dto.setEcheances(echeances.stream().map(this::toEcheanceDto).collect(Collectors.toList()));
                     return dto;
                 })
@@ -249,7 +264,8 @@ public class InscriptionServiceImpl implements InscriptionService {
     private String generateNumeroInscription(String tenant, String anneeLibelle) {
         // Format: INS-{TENANT}-{ANNEE}-{NUMERO}
         // ex: INS-DIGI-001-2025-2026-00001
-        String anneeShort = anneeLibelle != null ? anneeLibelle.replace("/", "-") : String.valueOf(LocalDate.now().getYear());
+        String anneeShort = anneeLibelle != null ? anneeLibelle.replace("/", "-")
+                : String.valueOf(LocalDate.now().getYear());
         String prefix = "INS-" + tenant + "-" + anneeShort + "-";
 
         Integer maxNum = inscriptionRepository.findMaxNumeroByTenantAndPrefix(tenant, prefix);
@@ -257,7 +273,8 @@ public class InscriptionServiceImpl implements InscriptionService {
         return prefix + String.format("%05d", nextNum);
     }
 
-    private List<Echeance> creerEcheances(Inscription inscription, Double montantTotal, LocalDate dateInscription, String tenant) {
+    private List<Echeance> creerEcheances(Inscription inscription, Double montantTotal, LocalDate dateInscription,
+            String tenant) {
         List<Echeance> echeances = new ArrayList<>();
 
         // Tranche 1: 40% - Frais d'inscription (a la date d'inscription)
@@ -329,7 +346,7 @@ public class InscriptionServiceImpl implements InscriptionService {
     }
 
     private void notifyParentPrincipal(Eleve eleve, Classe classe, Anneescolaire annee,
-                                        Double montantTotal, List<Echeance> echeances, String tenant) {
+            Double montantTotal, List<Echeance> echeances, String tenant) {
         // Trouver le parent principal
         EleveParent parentPrincipal = eleveParentRepository.findPrincipalByEleve(eleve.getIdEleve())
                 .orElse(null);
@@ -363,8 +380,8 @@ public class InscriptionServiceImpl implements InscriptionService {
         msg.append(".\n\nEcheancier de paiement (").append(String.format("%.0f", montantTotal)).append(" FCFA):\n");
         for (Echeance e : echeances) {
             msg.append("- ").append(e.getLibelle()).append(": ")
-               .append(String.format("%.0f", e.getMontant())).append(" FCFA (echeance: ")
-               .append(e.getDateEcheance()).append(")\n");
+                    .append(String.format("%.0f", e.getMontant())).append(" FCFA (echeance: ")
+                    .append(e.getDateEcheance()).append(")\n");
         }
 
         Notification notification = new Notification();
@@ -375,6 +392,15 @@ public class InscriptionServiceImpl implements InscriptionService {
         notification.setType("INSCRIPTION");
         notification.setLue(false);
         notificationRepository.save(notification);
+
+        // Envoi SMS Mock
+        String parentPhone = parentPrincipal.getParent().getTelephone();
+        if (parentPhone != null && !parentPhone.isEmpty()) {
+            String smsText = "DigiSchool: Inscription confirmee pour " + eleve.getPrenom() + " " + eleve.getNom() +
+                    " en classe de " + classe.getNomClasse() + ". Montant: " + String.format("%.0f", montantTotal)
+                    + " FCFA.";
+            smsService.sendSms(parentPhone, smsText);
+        }
     }
 
     // =====================
@@ -387,6 +413,10 @@ public class InscriptionServiceImpl implements InscriptionService {
         dto.setNumeroInscription(inscription.getNumeroInscription());
         dto.setDateInscription(inscription.getDateInscription());
         dto.setMontantTotal(inscription.getMontantTotal());
+        dto.setRemise(inscription.getRemise());
+        dto.setFraisTransport(inscription.getFraisTransport());
+        dto.setFraisCantine(inscription.getFraisCantine());
+        dto.setFraisAssurance(inscription.getFraisAssurance());
         dto.setMotifAnnulation(inscription.getMotifAnnulation());
 
         if (inscription.getStatutInscription() != null) {
