@@ -150,39 +150,37 @@ public class DataInitializer implements CommandLineRunner {
 
         // --- 5. PARENTS (tenant = ecole.getTenant()) ---
 
-        createParentIfNotExists("P001-001", "Mbianda", "Guy",
+        createParentIfNotExists("PAR-DIGI-001-677112233", "Mbianda", "Guy",
                 "guy.mbianda@email.com", "677112233", "Bastos, YDE",
                 "QBS", "Ingénieur", ecole1);
-        createParentIfNotExists("P001-002", "Ngassa", "Alice",
+        createParentIfNotExists("PAR-DIGI-001-699554433", "Ngassa", "Alice",
                 "alice.ngassa@email.com", "699554433", "Nlongkak, YDE",
                 "QNL", "Commerçante", ecole1);
 
-        createParentIfNotExists("P002-001", "Kamga", "Jean",
+        createParentIfNotExists("PAR-DIGI-002-688001122", "Kamga", "Jean",
                 "jean.kamga@email.com", "688001122", "Essos, YDE",
                 "QES", "Avocat", ecole2);
 
-        createParentIfNotExists("P003-001", "Wabo", "Claude",
+        createParentIfNotExists("PAR-DIGI-003-655778899", "Wabo", "Claude",
                 "claude.wabo@email.com", "655778899", "Tamdja, BFS",
                 "QTD", "Médecin", ecole3);
 
         // --- 6. ÉLÈVES (tenant = ecole.getTenant()) ---
 
-        createEleveIfNotExists("ELV-2024-006", "Biya", "Samuel",
+        createEleveIfNotExists("ELV-DIGI-002-2024-0001", "Biya", "Samuel",
                 "2012-08-20", "QES", ecole2);
-        createEleveIfNotExists("ELV-2024-007", "Etoa", "Stéphanie",
+        createEleveIfNotExists("ELV-DIGI-002-2024-0002", "Etoa", "Stéphanie",
                 "2013-02-15", "QES", ecole2);
 
-        createEleveIfNotExists("ELV-2024-008", "Tchouta", "Rodrigue",
+        createEleveIfNotExists("ELV-DIGI-003-2024-0001", "Tchouta", "Rodrigue",
                 "2006-11-10", "QTD", ecole3);
-        createEleveIfNotExists("ELV-2024-009", "Djeukam", "Patricia",
+        createEleveIfNotExists("ELV-DIGI-003-2024-0002", "Djeukam", "Patricia",
                 "2007-04-05", "QTD", ecole3);
 
         // --- 7. RELATIONS ÉLÈVE-PARENT (tenant = eleve.getTenant()) ---
 
-        createEleveParentIfNotExists("ELV-2024-001", "P001-001", TypeRelation.PERE, true);
-        createEleveParentIfNotExists("ELV-2024-002", "P001-002", TypeRelation.MERE, true);
-        createEleveParentIfNotExists("ELV-2024-006", "P002-001", TypeRelation.PERE, true);
-        createEleveParentIfNotExists("ELV-2024-008", "P003-001", TypeRelation.PERE, true);
+        createEleveParentIfNotExists("ELV-DIGI-002-2024-0001", "PAR-DIGI-002-688001122", TypeRelation.PERE, true);
+        createEleveParentIfNotExists("ELV-DIGI-003-2024-0001", "PAR-DIGI-003-655778899", TypeRelation.PERE, true);
 
         System.out.println("\n=================================================");
         System.out.println("   INITIALISATION TERMINÉE");

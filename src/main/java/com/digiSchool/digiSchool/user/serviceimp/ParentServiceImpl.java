@@ -19,6 +19,7 @@ import com.digiSchool.digiSchool.auth.repository.UserRepository;
 import com.digiSchool.digiSchool.user.dto.ParentDto;
 import com.digiSchool.digiSchool.user.model.Parent;
 import com.digiSchool.digiSchool.user.repository.ParentRepository;
+import com.digiSchool.digiSchool.user.service.IdentifierGeneratorService;
 import com.digiSchool.digiSchool.user.service.ParentService;
 
 import jakarta.transaction.Transactional;
@@ -32,14 +33,17 @@ public class ParentServiceImpl implements ParentService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EcoleRepository ecoleRepository;
+    private final IdentifierGeneratorService identifierGeneratorService;
 
     public ParentServiceImpl(ParentRepository parentRepository, QuartierRepository quartierRepository,
-            UserRepository userRepository, PasswordEncoder passwordEncoder, EcoleRepository ecoleRepository) {
+            UserRepository userRepository, PasswordEncoder passwordEncoder,
+            EcoleRepository ecoleRepository, IdentifierGeneratorService identifierGeneratorService) {
         this.parentRepository = parentRepository;
         this.quartierRepository = quartierRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.ecoleRepository = ecoleRepository;
+        this.identifierGeneratorService = identifierGeneratorService;
     }
 
     @Override
@@ -68,7 +72,11 @@ public class ParentServiceImpl implements ParentService {
 
         Parent parent = toEntity(dto);
         parent.setTenant(tenant);
-        parent.setMatriculeParent(generateMatricule(tenant));
+
+        Ecole ecole = ecoleRepository.findByTenant(tenant)
+                .orElseThrow(() -> new RuntimeException("Ecole introuvable pour ce tenant"));
+
+        parent.setMatriculeParent(identifierGeneratorService.generateParentMatricule(ecole, dto.getTelephone()));
         parent.setActif(true);
 
         Parent saved = parentRepository.save(parent);
@@ -203,18 +211,6 @@ public class ParentServiceImpl implements ParentService {
         parent.setDeletedAt(LocalDateTime.now());
         parent.setActif(false);
         parentRepository.save(parent);
-    }
-
-    // =====================
-    // Génération du matricule
-    // =====================
-
-    private String generateMatricule(String tenant) {
-        // Générer un matricule unique globalement en utilisant le tenant comme préfixe
-        Integer maxNumber = parentRepository.findMaxMatriculeNumber(tenant);
-        int nextNumber = (maxNumber != null ? maxNumber : 0) + 1;
-        // Format: {TENANT}-PAR-{NUMBER} pour garantir l'unicité globale
-        return String.format("%s-PAR-%05d", tenant, nextNumber);
     }
 
     // =====================

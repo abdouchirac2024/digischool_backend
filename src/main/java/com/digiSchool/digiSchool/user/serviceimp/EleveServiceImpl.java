@@ -6,12 +6,17 @@ import org.springframework.stereotype.Service;
 
 import com.digiSchool.digiSchool.Exceptionconfig.model.Quartier;
 import com.digiSchool.digiSchool.Exceptionconfig.service.TenantContext;
+import com.digiSchool.digiSchool.academic.organisation.model.Anneescolaire;
+import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
+import com.digiSchool.digiSchool.academic.organisation.repository.AnneescolaireRepository;
+import com.digiSchool.digiSchool.academic.organisation.repository.EcoleRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.QuartierRepository;
 import com.digiSchool.digiSchool.user.dto.EleveDto;
 import com.digiSchool.digiSchool.user.model.Eleve;
 import com.digiSchool.digiSchool.user.model.Sexe;
 import com.digiSchool.digiSchool.user.repository.EleveRepository;
 import com.digiSchool.digiSchool.user.service.EleveService;
+import com.digiSchool.digiSchool.user.service.IdentifierGeneratorService;
 
 import jakarta.transaction.Transactional;
 
@@ -21,10 +26,20 @@ public class EleveServiceImpl implements EleveService {
 
     private final EleveRepository eleveRepository;
     private final QuartierRepository quartierRepository;
+    private final IdentifierGeneratorService identifierGeneratorService;
+    private final EcoleRepository ecoleRepository;
+    private final AnneescolaireRepository anneescolaireRepository;
 
-    public EleveServiceImpl(EleveRepository eleveRepository, QuartierRepository quartierRepository) {
+    public EleveServiceImpl(EleveRepository eleveRepository,
+            QuartierRepository quartierRepository,
+            IdentifierGeneratorService identifierGeneratorService,
+            EcoleRepository ecoleRepository,
+            AnneescolaireRepository anneescolaireRepository) {
         this.eleveRepository = eleveRepository;
         this.quartierRepository = quartierRepository;
+        this.identifierGeneratorService = identifierGeneratorService;
+        this.ecoleRepository = ecoleRepository;
+        this.anneescolaireRepository = anneescolaireRepository;
     }
 
     @Override
@@ -82,8 +97,16 @@ public class EleveServiceImpl implements EleveService {
             eleve.setQuartier(quartier);
         }
 
-        // Generation matricule simple
-        String matricule = "E" + System.currentTimeMillis();
+        // Generation matricule professionnel
+        String libelleAnnee = anneescolaireRepository.findFirstByStatutTrue()
+                .map(Anneescolaire::getLibelle)
+                .orElse(String.valueOf(java.time.LocalDate.now().getYear()));
+
+        Ecole ecole = ecoleRepository.findByTenant(tenant)
+                .orElseThrow(() -> new RuntimeException(
+                        "Ecole introuvable pour ce tenant. Impossible de générer le matricule."));
+
+        String matricule = identifierGeneratorService.generateEleveMatricule(ecole, libelleAnnee);
         eleve.setMatricule(matricule);
 
         eleve.setTenant(tenant);
