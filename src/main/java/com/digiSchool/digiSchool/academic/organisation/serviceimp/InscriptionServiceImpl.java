@@ -14,6 +14,7 @@ import com.digiSchool.digiSchool.academic.organisation.dto.AnnulationRequest;
 import com.digiSchool.digiSchool.academic.organisation.dto.EcheanceDto;
 import com.digiSchool.digiSchool.academic.organisation.dto.InscriptionCreateRequest;
 import com.digiSchool.digiSchool.academic.organisation.dto.InscriptionDto;
+import com.digiSchool.digiSchool.academic.organisation.dto.ParentSummaryDto;
 import com.digiSchool.digiSchool.academic.organisation.model.Anneescolaire;
 import com.digiSchool.digiSchool.academic.organisation.model.Classe;
 import com.digiSchool.digiSchool.academic.organisation.model.Echeance;
@@ -459,6 +460,44 @@ public class InscriptionServiceImpl implements InscriptionService {
         if (annee != null) {
             dto.setAnneeScolaireId(annee.getIdAnnee());
             dto.setAnneeScolaireLibelle(annee.getLibelle());
+        }
+
+        // Bio & Location
+        if (eleve != null) {
+            dto.setEleveDateNaissance(eleve.getDateNaissance());
+            dto.setEleveLieuNaissance(eleve.getLieuNaissance());
+            dto.setEleveNationalite(eleve.getNationalite());
+            if (eleve.getSexe() != null) {
+                dto.setEleveSexe(eleve.getSexe().name());
+            }
+            if (eleve.getQuartier() != null) {
+                dto.setEleveQuartier(eleve.getQuartier().getNom());
+                if (eleve.getQuartier().getVille() != null) {
+                    dto.setEleveVille(eleve.getQuartier().getVille().getNom());
+                }
+            }
+
+            // Parents
+            if (eleve.getEleveParents() != null) {
+                List<ParentSummaryDto> parentDtos = eleve.getEleveParents().stream()
+                        .map(ep -> {
+                            ParentSummaryDto pDto = new ParentSummaryDto();
+                            if (ep.getParent() != null) {
+                                pDto.setMatricule(ep.getParent().getMatriculeParent());
+                                pDto.setNom(ep.getParent().getNom());
+                                pDto.setPrenom(ep.getParent().getPrenom());
+                                pDto.setEmail(ep.getParent().getEmail());
+                                pDto.setTelephone(ep.getParent().getTelephone());
+                            }
+                            if (ep.getTypeRelation() != null) {
+                                pDto.setRelation(ep.getTypeRelation().name());
+                            }
+                            pDto.setPrincipal(ep.getEstPrincipal() != null && ep.getEstPrincipal());
+                            return pDto;
+                        })
+                        .collect(Collectors.toList());
+                dto.setParents(parentDtos);
+            }
         }
 
         return dto;

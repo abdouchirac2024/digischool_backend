@@ -26,6 +26,15 @@ public class InscriptionDto {
     private String eleveActeNaissanceUrl;
     private String eleveCertificatMedicalUrl;
     private String eleveBulletinUrl;
+    private LocalDate eleveDateNaissance;
+    private String eleveLieuNaissance;
+    private String eleveNationalite;
+    private String eleveSexe;
+    private String eleveQuartier;
+    private String eleveVille;
+
+    // Parents
+    private List<ParentSummaryDto> parents;
 
     // Classe
     private Long classeId;
@@ -260,5 +269,61 @@ public class InscriptionDto {
 
     public void setEleveBulletinUrl(String eleveBulletinUrl) {
         this.eleveBulletinUrl = eleveBulletinUrl;
+    }
+
+    public LocalDate getEleveDateNaissance() {
+        return eleveDateNaissance;
+    }
+
+    public void setEleveDateNaissance(LocalDate eleveDateNaissance) {
+        this.eleveDateNaissance = eleveDateNaissance;
+    }
+
+    public String getEleveLieuNaissance() {
+        return eleveLieuNaissance;
+    }
+
+    public void setEleveLieuNaissance(String eleveLieuNaissance) {
+        this.eleveLieuNaissance = eleveLieuNaissance;
+    }
+
+    public String getEleveNationalite() {
+        return eleveNationalite;
+    }
+
+    public void setEleveNationalite(String eleveNationalite) {
+        this.eleveNationalite = eleveNationalite;
+    }
+
+    public String getEleveSexe() {
+        return eleveSexe;
+    }
+
+    public void setEleveSexe(String eleveSexe) {
+        this.eleveSexe = eleveSexe;
+    }
+
+    public String getEleveQuartier() {
+        return eleveQuartier;
+    }
+
+    public void setEleveQuartier(String eleveQuartier) {
+        this.eleveQuartier = eleveQuartier;
+    }
+
+    public String getEleveVille() {
+        return eleveVille;
+    }
+
+    public void setEleveVille(String eleveVille) {
+        this.eleveVille = eleveVille;
+    }
+
+    public List<ParentSummaryDto> getParents() {
+        return parents;
+    }
+
+    public void setParents(List<ParentSummaryDto> parents) {
+        this.parents = parents;
     }
 }
