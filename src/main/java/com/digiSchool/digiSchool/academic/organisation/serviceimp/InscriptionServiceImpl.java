@@ -332,6 +332,7 @@ public class InscriptionServiceImpl implements InscriptionService {
         user.setPrenom(eleve.getPrenom());
         user.setRole(RoleType.ELEVE);
         user.setStatus(UserStatus.ACTIVE);
+        user.setUsernameField(eleve.getMatricule());
         user.setTenantId(tenant);
 
         Ecole ecole = ecoleRepository.findByTenant(tenant).orElse(null);

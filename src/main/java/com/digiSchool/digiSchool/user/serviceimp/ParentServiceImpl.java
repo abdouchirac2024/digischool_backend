@@ -105,6 +105,7 @@ public class ParentServiceImpl implements ParentService {
         user.setTelephone(dto.getTelephone());
         user.setRole(RoleType.PARENT);
         user.setStatus(UserStatus.ACTIVE);
+        user.setUsernameField(dto.getTelephone());
         user.setTenantId(tenant);
 
         // Associer l'école du tenant

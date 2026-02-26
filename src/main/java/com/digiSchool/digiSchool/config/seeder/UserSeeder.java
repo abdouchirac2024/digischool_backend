@@ -191,6 +191,13 @@ public class UserSeeder {
                 user.setEcole(ecole);
                 user.setTenantId(ecole.getTenant());
 
+                // Peupler le username (Matricule pour élève, Téléphone pour parent)
+                if (role == RoleType.ELEVE) {
+                        user.setUsernameField(email.split("@")[0].toUpperCase());
+                } else if (role == RoleType.PARENT && telephone != null) {
+                        user.setUsernameField(telephone);
+                }
+
                 return userRepository.save(user);
         }
 }

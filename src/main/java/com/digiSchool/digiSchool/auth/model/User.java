@@ -31,10 +31,12 @@ import jakarta.persistence.UniqueConstraint;
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenant")
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "email"),
-        @UniqueConstraint(columnNames = "telephone")
+        @UniqueConstraint(columnNames = "telephone"),
+        @UniqueConstraint(columnNames = "username")
 }, indexes = {
         @Index(name = "idx_user_email", columnList = "email"),
         @Index(name = "idx_user_telephone", columnList = "telephone"),
+        @Index(name = "idx_user_username", columnList = "username"),
         @Index(name = "idx_user_tenant", columnList = "tenant_id"),
         @Index(name = "idx_user_role", columnList = "role")
 })
@@ -61,6 +63,9 @@ public class User implements UserDetails {
 
     @Column(unique = true)
     private String telephone;
+
+    @Column(unique = true)
+    private String username;
 
     @ManyToOne
     @JoinColumn(name = "ecole_id")
@@ -120,7 +125,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return username != null ? username : email;
     }
 
     @Override
@@ -204,6 +209,14 @@ public class User implements UserDetails {
 
     public void setTelephone(String telephone) {
         this.telephone = telephone;
+    }
+
+    public String getUsernameField() {
+        return username;
+    }
+
+    public void setUsernameField(String username) {
+        this.username = username;
     }
 
     public Ecole getEcole() {

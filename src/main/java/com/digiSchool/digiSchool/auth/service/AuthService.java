@@ -66,24 +66,14 @@ public class AuthService {
         // Vérifier le rate limiting
         checkRateLimit(login, ipAddress);
 
-        // Détecter si c'est un email (contient @) ou un téléphone
-        boolean isEmail = login.contains("@");
-
-        // Trouver l'utilisateur
-        User user;
-        if (isEmail) {
-            user = userRepository.findByEmail(login.toLowerCase())
-                    .orElseThrow(() -> {
-                        logFailedAttempt(login, ipAddress, "Utilisateur non trouvé");
-                        return new AuthenticationException("Identifiant ou mot de passe incorrect");
-                    });
-        } else {
-            user = userRepository.findByTelephone(login)
-                    .orElseThrow(() -> {
-                        logFailedAttempt(login, ipAddress, "Utilisateur non trouvé");
-                        return new AuthenticationException("Identifiant ou mot de passe incorrect");
-                    });
-        }
+        // Trouver l'utilisateur (Email, Téléphone ou Matricule/Username)
+        User user = userRepository.findByEmail(login.toLowerCase())
+                .orElseGet(() -> userRepository.findByTelephone(login)
+                        .orElseGet(() -> userRepository.findByUsername(login)
+                                .orElseThrow(() -> {
+                                    logFailedAttempt(login, ipAddress, "Utilisateur non trouvé");
+                                    return new AuthenticationException("Identifiant ou mot de passe incorrect");
+                                })));
 
         // Vérifier si le compte est verrouillé
         if (user.getStatus() == UserStatus.LOCKED) {
