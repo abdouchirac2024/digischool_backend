@@ -23,8 +23,7 @@ public class FileStorageService {
                 "cloud_name", cloudName,
                 "api_key", apiKey,
                 "api_secret", apiSecret,
-                "secure", true
-        ));
+                "secure", true));
     }
 
     /**
@@ -36,22 +35,21 @@ public class FileStorageService {
             throw new RuntimeException("Le fichier est vide");
         }
 
-        // Valider le type de fichier (images seulement)
+        // Valider le type de fichier (images et PDF)
         String contentType = file.getContentType();
-        if (contentType == null || !contentType.startsWith("image/")) {
-            throw new RuntimeException("Seules les images sont acceptées (JPG, PNG, WebP)");
+        if (contentType == null || (!contentType.startsWith("image/") && !contentType.equals("application/pdf"))) {
+            throw new RuntimeException("Seules les images et les documents PDF sont acceptés (JPG, PNG, WebP, PDF)");
         }
 
-        // Valider la taille (max 5MB)
-        if (file.getSize() > 5 * 1024 * 1024) {
-            throw new RuntimeException("Le fichier ne doit pas dépasser 5MB");
+        // Valider la taille (max 10MB pour accommoder les PDF)
+        if (file.getSize() > 10 * 1024 * 1024) {
+            throw new RuntimeException("Le fichier ne doit pas dépasser 10MB");
         }
 
         try {
             Map<String, Object> result = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
-                    "folder", "digischool/photos",
-                    "resource_type", "image"
-            ));
+                    "folder", "digischool/documents",
+                    "resource_type", "auto"));
             return (String) result.get("secure_url");
         } catch (IOException e) {
             throw new RuntimeException("Erreur lors de l'upload sur Cloudinary", e);
