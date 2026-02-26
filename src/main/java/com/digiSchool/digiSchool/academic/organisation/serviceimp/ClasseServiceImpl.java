@@ -48,6 +48,10 @@ public class ClasseServiceImpl implements ClasseService {
     public ClasseDto create(ClasseDto dto, Long ecoleIdOverride) {
         Long ecoleId = ecoleIdOverride != null ? ecoleIdOverride : dto.getEcoleId();
 
+        if (ecoleId == null) {
+            throw new RuntimeException("Erreur d'identification de l'établissement. Veuillez vous reconnecter.");
+        }
+
         if (ecoleId != null && classeRepository.existsByNomClasseAndEcoleIdEcole(dto.getNomClasse(), ecoleId)) {
             throw new RuntimeException("Une classe avec ce nom existe deja dans cette ecole");
         }
