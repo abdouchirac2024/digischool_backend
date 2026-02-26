@@ -22,6 +22,10 @@ public class InscriptionDto {
     private String eleveMatricule;
     private String eleveNom;
     private String elevePrenom;
+    private String elevePhotoUrl;
+    private String eleveActeNaissanceUrl;
+    private String eleveCertificatMedicalUrl;
+    private String eleveBulletinUrl;
 
     // Classe
     private Long classeId;
@@ -224,5 +228,37 @@ public class InscriptionDto {
 
     public void setFraisAssurance(Double fraisAssurance) {
         this.fraisAssurance = fraisAssurance;
+    }
+
+    public String getElevePhotoUrl() {
+        return elevePhotoUrl;
+    }
+
+    public void setElevePhotoUrl(String elevePhotoUrl) {
+        this.elevePhotoUrl = elevePhotoUrl;
+    }
+
+    public String getEleveActeNaissanceUrl() {
+        return eleveActeNaissanceUrl;
+    }
+
+    public void setEleveActeNaissanceUrl(String eleveActeNaissanceUrl) {
+        this.eleveActeNaissanceUrl = eleveActeNaissanceUrl;
+    }
+
+    public String getEleveCertificatMedicalUrl() {
+        return eleveCertificatMedicalUrl;
+    }
+
+    public void setEleveCertificatMedicalUrl(String eleveCertificatMedicalUrl) {
+        this.eleveCertificatMedicalUrl = eleveCertificatMedicalUrl;
+    }
+
+    public String getEleveBulletinUrl() {
+        return eleveBulletinUrl;
+    }
+
+    public void setEleveBulletinUrl(String eleveBulletinUrl) {
+        this.eleveBulletinUrl = eleveBulletinUrl;
     }
 }

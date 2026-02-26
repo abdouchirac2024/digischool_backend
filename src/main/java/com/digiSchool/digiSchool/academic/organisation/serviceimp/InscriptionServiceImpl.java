@@ -439,6 +439,10 @@ public class InscriptionServiceImpl implements InscriptionService {
             dto.setEleveMatricule(eleve.getMatricule());
             dto.setEleveNom(eleve.getNom());
             dto.setElevePrenom(eleve.getPrenom());
+            dto.setElevePhotoUrl(eleve.getPhotoUrl());
+            dto.setEleveActeNaissanceUrl(eleve.getActeNaissanceUrl());
+            dto.setEleveCertificatMedicalUrl(eleve.getCertificatMedicalUrl());
+            dto.setEleveBulletinUrl(eleve.getBulletinUrl());
         }
 
         Classe classe = inscription.getClasse();
