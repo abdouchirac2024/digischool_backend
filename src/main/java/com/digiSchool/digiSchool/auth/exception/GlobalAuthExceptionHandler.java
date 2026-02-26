@@ -53,11 +53,35 @@ public class GlobalAuthExceptionHandler {
         body.put("error", "Bad Request");
 
         String message = "Erreur de validation des données";
-        if (ex.getMessage() != null) {
-            if (ex.getMessage().contains("cannot be null")) {
+        String detailedMessage = ex.getMostSpecificCause().getMessage();
+
+        if (detailedMessage != null) {
+            if (detailedMessage.contains("cannot be null")) {
                 message = "Un champ obligatoire est manquant";
-            } else if (ex.getMessage().contains("Duplicate entry")) {
-                message = "Cette donnée existe déjà";
+            } else if (detailedMessage.contains("Duplicate entry")) {
+                // Essayer d'extraire la valeur et la clé (ex: Duplicate entry 'test@gmail.com'
+                // for key 'users.UK_6dotkott26782v78n8yyf7v59')
+                try {
+                    String[] parts = detailedMessage.split("'");
+                    if (parts.length >= 4) {
+                        String value = parts[1];
+                        String keyName = parts[3];
+
+                        if (keyName.contains("email")) {
+                            message = "L'adresse email '" + value + "' est déjà utilisée";
+                        } else if (keyName.contains("telephone") || keyName.contains("phone")) {
+                            message = "Le numéro de téléphone '" + value + "' est déjà utilisé";
+                        } else if (keyName.contains("username") || keyName.contains("matricule")) {
+                            message = "L'identifiant ou matricule '" + value + "' existe déjà";
+                        } else {
+                            message = "La valeur '" + value + "' existe déjà pour le champ " + keyName;
+                        }
+                    } else {
+                        message = "Cette donnée existe déjà dans le système";
+                    }
+                } catch (Exception e) {
+                    message = "Cette donnée existe déjà";
+                }
             }
         }
         body.put("message", message);

@@ -175,7 +175,16 @@ public class InscriptionServiceImpl implements InscriptionService {
         eleveRepository.save(eleve);
 
         // 11. Creer compte User ELEVE
+        if (userRepository.existsByUsername(eleve.getMatricule())) {
+            throw new RuntimeException("Un compte utilisateur existe déjà pour le matricule " + eleve.getMatricule());
+        }
+
         String generatedEmail = eleve.getMatricule().toLowerCase() + "@eleve.digischool.cm";
+        if (userRepository.existsByEmail(generatedEmail)) {
+            throw new RuntimeException(
+                    "L'adresse email '" + generatedEmail + "' est déjà utilisée par un autre compte");
+        }
+
         String generatedPassword = generatePassword();
         createUserAccount(eleve, tenant, generatedEmail, generatedPassword);
 
