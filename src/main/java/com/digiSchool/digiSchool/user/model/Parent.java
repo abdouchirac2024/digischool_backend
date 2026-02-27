@@ -25,21 +25,17 @@ import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Filter(name = "tenantFilter", condition = "tenant = :tenant")
-@Table(
-    name = "parent",
-    uniqueConstraints = {
+@Table(name = "parent", uniqueConstraints = {
         @UniqueConstraint(columnNames = "matricule_parent"),
-        @UniqueConstraint(columnNames = {"email", "tenant"}),
-        @UniqueConstraint(columnNames = {"telephone", "tenant"})
-    },
-    indexes = {
+        @UniqueConstraint(columnNames = { "email", "tenant" }),
+        @UniqueConstraint(columnNames = { "telephone", "tenant" })
+}, indexes = {
         @Index(name = "idx_parent_matricule", columnList = "matricule_parent"),
         @Index(name = "idx_parent_email", columnList = "email"),
         @Index(name = "idx_parent_telephone", columnList = "telephone"),
         @Index(name = "idx_parent_quartier", columnList = "quartier_id"),
         @Index(name = "idx_parent_tenant", columnList = "tenant")
-    }
-)
+})
 public class Parent extends TenantEntity {
 
     @Id
@@ -55,7 +51,7 @@ public class Parent extends TenantEntity {
     @Column(nullable = false, length = 100)
     private String prenom;
 
-    @Column(nullable = false, unique = true, length = 255)
+    @Column(nullable = true, unique = true, length = 255)
     private String email;
 
     @Column(nullable = false, unique = true, length = 20)
