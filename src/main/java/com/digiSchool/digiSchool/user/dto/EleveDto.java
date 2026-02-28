@@ -53,6 +53,15 @@ public class EleveDto {
     @Schema(description = "URL du dernier bulletin numérisé")
     private String bulletinUrl;
 
+    @Schema(description = "Statut de l'élève (ACTIF, EXCLU, ABANDON, TRANSFERE, DIPLOME)")
+    private String statut;
+
+    @Schema(description = "Nom de la classe actuelle (dérivé de l'inscription VALIDEE)")
+    private String classeActuelle;
+
+    @Schema(description = "ID de la classe actuelle")
+    private Long classeId;
+
     // Getters and Setters
     @JsonProperty("id")
     public Long getIdEleve() {
@@ -173,5 +182,29 @@ public class EleveDto {
 
     public void setBulletinUrl(String bulletinUrl) {
         this.bulletinUrl = bulletinUrl;
+    }
+
+    public String getStatut() {
+        return statut;
+    }
+
+    public void setStatut(String statut) {
+        this.statut = statut;
+    }
+
+    public String getClasseActuelle() {
+        return classeActuelle;
+    }
+
+    public void setClasseActuelle(String classeActuelle) {
+        this.classeActuelle = classeActuelle;
+    }
+
+    public Long getClasseId() {
+        return classeId;
+    }
+
+    public void setClasseId(Long classeId) {
+        this.classeId = classeId;
     }
 }

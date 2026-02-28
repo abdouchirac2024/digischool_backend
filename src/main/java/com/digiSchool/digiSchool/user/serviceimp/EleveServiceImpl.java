@@ -1,11 +1,13 @@
 package com.digiSchool.digiSchool.user.serviceimp;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import com.digiSchool.digiSchool.Exceptionconfig.model.Quartier;
 import com.digiSchool.digiSchool.Exceptionconfig.service.TenantContext;
+import com.digiSchool.digiSchool.academic.organisation.model.StatutInscription;
 import com.digiSchool.digiSchool.academic.organisation.model.Anneescolaire;
 import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
 import com.digiSchool.digiSchool.academic.organisation.repository.AnneescolaireRepository;
@@ -197,6 +199,21 @@ public class EleveServiceImpl implements EleveService {
         if (eleve.getQuartier() != null) {
             dto.setQuartierId(eleve.getQuartier().getId());
             dto.setQuartierNom(eleve.getQuartier().getNom());
+        }
+
+        if (eleve.getStatut() != null) {
+            dto.setStatut(eleve.getStatut().name());
+        }
+
+        if (eleve.getInscriptions() != null) {
+            eleve.getInscriptions().stream()
+                .filter(i -> StatutInscription.VALIDEE.equals(i.getStatutInscription())
+                        && i.getClasse() != null)
+                .max(Comparator.comparingLong(i -> i.getIdInscription() != null ? i.getIdInscription() : 0L))
+                .ifPresent(ins -> {
+                    dto.setClasseActuelle(ins.getClasse().getNomClasse());
+                    dto.setClasseId(ins.getClasse().getIdClasse());
+                });
         }
 
         return dto;
