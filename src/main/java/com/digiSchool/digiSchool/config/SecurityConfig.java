@@ -68,7 +68,9 @@ public class SecurityConfig {
                     "/swagger-ui.html",
                     "/v3/api-docs/**",        // OpenAPI docs
                     "/actuator/health",       // Health check uniquement
-                    "/error"                  // Page d'erreur Spring
+                    "/error",                 // Page d'erreur Spring
+                    "/api/files/*/info",      // Infos fichier (lecture publique)
+                    "/api/files/*"            // Téléchargement fichiers MongoDB GridFS (IDs ObjectId = non-devinables)
                 ).permitAll()
 
                 // Tous les autres endpoints /api/** nécessitent une authentification
