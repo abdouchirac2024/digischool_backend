@@ -50,6 +50,15 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public void marquerToutesLues(Long userId) {
+        List<Notification> nonLues = notificationRepository.findByDestinataireIdAndLueFalse(userId);
+        for (Notification n : nonLues) {
+            n.setLue(true);
+        }
+        notificationRepository.saveAll(nonLues);
+    }
+
+    @Override
     public long countUnread(Long userId) {
         return notificationRepository.countByDestinataireIdAndLueFalse(userId);
     }

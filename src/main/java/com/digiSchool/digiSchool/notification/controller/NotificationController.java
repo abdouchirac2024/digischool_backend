@@ -37,10 +37,23 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.getNotifications(user.getId()));
     }
 
+    @Operation(summary = "Obtenir mes notifications non lues")
+    @GetMapping("/unread")
+    public ResponseEntity<List<Notification>> getUnreadNotifications(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(notificationService.getUnreadNotifications(user.getId()));
+    }
+
     @Operation(summary = "Marquer une notification comme lue")
-    @PutMapping("/{id}/lue")
+    @PutMapping("/{id}/read")
     public ResponseEntity<Void> marquerLue(@PathVariable Long id) {
         notificationService.marquerLue(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Marquer toutes mes notifications comme lues")
+    @PutMapping("/read-all")
+    public ResponseEntity<Void> marquerToutesLues(@AuthenticationPrincipal User user) {
+        notificationService.marquerToutesLues(user.getId());
         return ResponseEntity.ok().build();
     }
 

@@ -11,6 +11,18 @@ public class InscriptionDto {
     private String statutInscription;
     private String motifAnnulation;
 
+    // Fichiers MongoDB GridFS (IDs ObjectId stockés en MySQL)
+    private String photoEleveMongoId;
+    private String acteNaissanceMongoId;
+    private String certificatMedicalMongoId;
+    private String bulletinAncienMongoId;
+
+    // URLs de téléchargement générées dynamiquement
+    private String photoEleveUrl;
+    private String acteNaissanceUrl;
+    private String certificatMedicalUrl;
+    private String bulletinAncienUrl;
+
     // Finances
     private Double remise;
     private Double fraisTransport;
@@ -52,6 +64,32 @@ public class InscriptionDto {
     // Identifiants generes (retournes uniquement lors de la creation)
     private String generatedPassword;
     private String generatedEmail;
+
+    // Getters & Setters - Fichiers MongoDB
+
+    public String getPhotoEleveMongoId() { return photoEleveMongoId; }
+    public void setPhotoEleveMongoId(String photoEleveMongoId) { this.photoEleveMongoId = photoEleveMongoId; }
+
+    public String getActeNaissanceMongoId() { return acteNaissanceMongoId; }
+    public void setActeNaissanceMongoId(String acteNaissanceMongoId) { this.acteNaissanceMongoId = acteNaissanceMongoId; }
+
+    public String getCertificatMedicalMongoId() { return certificatMedicalMongoId; }
+    public void setCertificatMedicalMongoId(String certificatMedicalMongoId) { this.certificatMedicalMongoId = certificatMedicalMongoId; }
+
+    public String getBulletinAncienMongoId() { return bulletinAncienMongoId; }
+    public void setBulletinAncienMongoId(String bulletinAncienMongoId) { this.bulletinAncienMongoId = bulletinAncienMongoId; }
+
+    public String getPhotoEleveUrl() { return photoEleveUrl; }
+    public void setPhotoEleveUrl(String photoEleveUrl) { this.photoEleveUrl = photoEleveUrl; }
+
+    public String getActeNaissanceUrl() { return acteNaissanceUrl; }
+    public void setActeNaissanceUrl(String acteNaissanceUrl) { this.acteNaissanceUrl = acteNaissanceUrl; }
+
+    public String getCertificatMedicalUrl() { return certificatMedicalUrl; }
+    public void setCertificatMedicalUrl(String certificatMedicalUrl) { this.certificatMedicalUrl = certificatMedicalUrl; }
+
+    public String getBulletinAncienUrl() { return bulletinAncienUrl; }
+    public void setBulletinAncienUrl(String bulletinAncienUrl) { this.bulletinAncienUrl = bulletinAncienUrl; }
 
     // Getters & Setters
 

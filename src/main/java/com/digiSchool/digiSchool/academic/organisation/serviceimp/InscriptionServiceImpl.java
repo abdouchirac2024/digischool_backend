@@ -434,6 +434,21 @@ public class InscriptionServiceImpl implements InscriptionService {
             dto.setStatutInscription(inscription.getStatutInscription().name());
         }
 
+        // Fichiers MongoDB GridFS
+        dto.setPhotoEleveMongoId(inscription.getPhotoEleveMongoId());
+        dto.setActeNaissanceMongoId(inscription.getActeNaissanceMongoId());
+        dto.setCertificatMedicalMongoId(inscription.getCertificatMedicalMongoId());
+        dto.setBulletinAncienMongoId(inscription.getBulletinAncienMongoId());
+
+        if (inscription.getPhotoEleveMongoId() != null)
+            dto.setPhotoEleveUrl("/api/files/" + inscription.getPhotoEleveMongoId());
+        if (inscription.getActeNaissanceMongoId() != null)
+            dto.setActeNaissanceUrl("/api/files/" + inscription.getActeNaissanceMongoId());
+        if (inscription.getCertificatMedicalMongoId() != null)
+            dto.setCertificatMedicalUrl("/api/files/" + inscription.getCertificatMedicalMongoId());
+        if (inscription.getBulletinAncienMongoId() != null)
+            dto.setBulletinAncienUrl("/api/files/" + inscription.getBulletinAncienMongoId());
+
         Eleve eleve = inscription.getEleve();
         if (eleve != null) {
             dto.setEleveId(eleve.getIdEleve());

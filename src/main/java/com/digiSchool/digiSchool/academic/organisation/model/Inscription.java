@@ -47,6 +47,21 @@ public class Inscription extends TenantEntity {
 
     private String motifAnnulation;
 
+    // -------------------------------------------------------
+    // Fichiers stockés dans MongoDB GridFS (IDs ObjectId)
+    // -------------------------------------------------------
+    @Column(name = "photo_eleve_mongo_id", length = 50)
+    private String photoEleveMongoId;
+
+    @Column(name = "acte_naissance_mongo_id", length = 50)
+    private String acteNaissanceMongoId;
+
+    @Column(name = "certificat_medical_mongo_id", length = 50)
+    private String certificatMedicalMongoId;
+
+    @Column(name = "bulletin_ancien_mongo_id", length = 50)
+    private String bulletinAncienMongoId;
+
     @ManyToOne
     @JoinColumn(name = "eleve_id")
     private Eleve eleve;
@@ -167,6 +182,18 @@ public class Inscription extends TenantEntity {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
+
+    public String getPhotoEleveMongoId() { return photoEleveMongoId; }
+    public void setPhotoEleveMongoId(String photoEleveMongoId) { this.photoEleveMongoId = photoEleveMongoId; }
+
+    public String getActeNaissanceMongoId() { return acteNaissanceMongoId; }
+    public void setActeNaissanceMongoId(String acteNaissanceMongoId) { this.acteNaissanceMongoId = acteNaissanceMongoId; }
+
+    public String getCertificatMedicalMongoId() { return certificatMedicalMongoId; }
+    public void setCertificatMedicalMongoId(String certificatMedicalMongoId) { this.certificatMedicalMongoId = certificatMedicalMongoId; }
+
+    public String getBulletinAncienMongoId() { return bulletinAncienMongoId; }
+    public void setBulletinAncienMongoId(String bulletinAncienMongoId) { this.bulletinAncienMongoId = bulletinAncienMongoId; }
 
     public Double getRemise() {
         return remise;

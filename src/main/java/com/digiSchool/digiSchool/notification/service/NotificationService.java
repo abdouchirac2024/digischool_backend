@@ -14,5 +14,7 @@ public interface NotificationService {
 
     void marquerLue(Long notificationId);
 
+    void marquerToutesLues(Long userId);
+
     long countUnread(Long userId);
 }
