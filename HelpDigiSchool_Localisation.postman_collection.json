@@ -1,0 +1,2433 @@
+{
+	"info": {
+		"_postman_id": "helpdigischool-localisation-2026",
+		"name": "HelpDigiSchool - Localisation & Parents",
+		"description": "Collection complète pour tester les APIs de HelpDigiSchool.\n\n📍 Localisation: Région → Département → Arrondissement → Ville → Quartier → Adresse\n\n👨‍👩‍👧‍👦 Parents: Gestion des parents d'élèves et relations élève-parent\n\n⚠️ Header obligatoire: X-Tenant-ID: default",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api",
+			"type": "string"
+		},
+		{
+			"key": "tenantId",
+			"value": "default",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1 - Régions",
+			"item": [
+				{
+					"name": "GET Toutes les régions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/regions",
+							"host": ["{{baseUrl}}"],
+							"path": ["regions"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Retourne un tableau', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    pm.expect(jsonData.length).to.be.above(0);",
+									"});",
+									"pm.test('10 régions du Cameroun', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.eql(10);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Région par ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/regions/2",
+							"host": ["{{baseUrl}}"],
+							"path": ["regions", "2"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Région Centre', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Centre');",
+									"    pm.expect(jsonData.code).to.eql('CE');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST Créer une région",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"TS\",\n    \"nom\": \"Région Test\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/regions",
+							"host": ["{{baseUrl}}"],
+							"path": ["regions"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Région créée', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Région Test');",
+									"    pm.collectionVariables.set('testRegionId', jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "PUT Modifier une région",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"TS\",\n    \"nom\": \"Région Test Modifiée\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/regions/{{testRegionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["regions", "{{testRegionId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Nom modifié', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Région Test Modifiée');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "DELETE Supprimer une région",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/regions/{{testRegionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["regions", "{{testRegionId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "2 - Départements",
+			"item": [
+				{
+					"name": "GET Tous les départements",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/departements",
+							"host": ["{{baseUrl}}"],
+							"path": ["departements"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Retourne un tableau avec départements', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    pm.expect(jsonData.length).to.eql(58);",
+									"});",
+									"pm.test('Contient chefLieu et regionNom', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData[0]).to.have.property('chefLieu');",
+									"    pm.expect(jsonData[0]).to.have.property('regionNom');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Départements par Région (Centre)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/departements/region/2",
+							"host": ["{{baseUrl}}"],
+							"path": ["departements", "region", "2"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('10 départements dans le Centre', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.eql(10);",
+									"});",
+									"pm.test('Tous appartiennent à Centre', function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.forEach(function(d) {",
+									"        pm.expect(d.regionNom).to.eql('Centre');",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Départements par Région (Littoral)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/departements/region/5",
+							"host": ["{{baseUrl}}"],
+							"path": ["departements", "region", "5"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('4 départements dans le Littoral', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.eql(4);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Département par ID (Mfoundi)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/departements/12",
+							"host": ["{{baseUrl}}"],
+							"path": ["departements", "12"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Mfoundi - Yaoundé', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Mfoundi');",
+									"    pm.expect(jsonData.chefLieu).to.eql('Yaoundé');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST Créer un département",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"TS-DP\",\n    \"nom\": \"Département Test\",\n    \"chefLieu\": \"Ville Test\",\n    \"regionId\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/departements",
+							"host": ["{{baseUrl}}"],
+							"path": ["departements"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Département créé avec région', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Département Test');",
+									"    pm.expect(jsonData.regionNom).to.eql('Centre');",
+									"    pm.collectionVariables.set('testDepartementId', jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "PUT Modifier un département",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"TS-DP\",\n    \"nom\": \"Département Modifié\",\n    \"chefLieu\": \"Nouvelle Ville\",\n    \"regionId\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/departements/{{testDepartementId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["departements", "{{testDepartementId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Nom modifié', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Département Modifié');",
+									"    pm.expect(jsonData.chefLieu).to.eql('Nouvelle Ville');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "DELETE Supprimer un département",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/departements/{{testDepartementId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["departements", "{{testDepartementId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 204', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "3 - Arrondissements",
+			"item": [
+				{
+					"name": "GET Tous les arrondissements",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/arrondissements",
+							"host": ["{{baseUrl}}"],
+							"path": ["arrondissements"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Retourne des arrondissements', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    pm.expect(jsonData.length).to.be.above(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Arrondissements par Département (Mfoundi = Yaoundé)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/arrondissements/departement/12",
+							"host": ["{{baseUrl}}"],
+							"path": ["arrondissements", "departement", "12"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('7 arrondissements à Yaoundé', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.eql(7);",
+									"});",
+									"pm.test('Tous dans Mfoundi', function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.forEach(function(a) {",
+									"        pm.expect(a.departementNom).to.eql('Mfoundi');",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Arrondissements par Département (Wouri = Douala)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/arrondissements/departement/29",
+							"host": ["{{baseUrl}}"],
+							"path": ["arrondissements", "departement", "29"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('6 arrondissements à Douala', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.eql(6);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Arrondissement par ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/arrondissements/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["arrondissements", "1"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Yaoundé 1er', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Yaoundé 1er');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST Créer un arrondissement",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"TS-AR\",\n    \"nom\": \"Arrondissement Test\",\n    \"departementId\": 12\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/arrondissements",
+							"host": ["{{baseUrl}}"],
+							"path": ["arrondissements"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Créé dans Mfoundi', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.departementNom).to.eql('Mfoundi');",
+									"    pm.collectionVariables.set('testArrondissementId', jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "DELETE Supprimer un arrondissement",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/arrondissements/{{testArrondissementId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["arrondissements", "{{testArrondissementId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 204', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "4 - Villes",
+			"item": [
+				{
+					"name": "GET Toutes les villes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/villes",
+							"host": ["{{baseUrl}}"],
+							"path": ["villes"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('20 villes principales', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.eql(20);",
+									"});",
+									"pm.test('Contient codePostal', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData[0]).to.have.property('codePostal');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Villes par Arrondissement (Yaoundé 1er)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/villes/arrondissement/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["villes", "arrondissement", "1"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Yaoundé dans Yaoundé 1er', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.be.above(0);",
+									"    pm.expect(jsonData[0].nom).to.eql('Yaoundé');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Ville par ID (Douala)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/villes/2",
+							"host": ["{{baseUrl}}"],
+							"path": ["villes", "2"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Douala', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Douala');",
+									"    pm.expect(jsonData.code).to.eql('DLA');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST Créer une ville",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"TS-VL\",\n    \"nom\": \"Ville Test\",\n    \"codePostal\": \"99999\",\n    \"arrondissementId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/villes",
+							"host": ["{{baseUrl}}"],
+							"path": ["villes"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Ville créée', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Ville Test');",
+									"    pm.expect(jsonData.codePostal).to.eql('99999');",
+									"    pm.collectionVariables.set('testVilleId', jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "DELETE Supprimer une ville",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/villes/{{testVilleId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["villes", "{{testVilleId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 204', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "5 - Quartiers",
+			"item": [
+				{
+					"name": "GET Tous les quartiers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/quartiers",
+							"host": ["{{baseUrl}}"],
+							"path": ["quartiers"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('50 quartiers', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.eql(50);",
+									"});",
+									"pm.test('Contient description', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData[0]).to.have.property('description');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Quartiers par Ville (Yaoundé)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/quartiers/ville/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["quartiers", "ville", "1"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('20 quartiers à Yaoundé', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.eql(20);",
+									"});",
+									"pm.test('Bastos présent', function () {",
+									"    var jsonData = pm.response.json();",
+									"    var bastos = jsonData.find(q => q.nom === 'Bastos');",
+									"    pm.expect(bastos).to.not.be.undefined;",
+									"    pm.expect(bastos.description).to.include('diplomatique');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Quartiers par Ville (Douala)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/quartiers/ville/2",
+							"host": ["{{baseUrl}}"],
+							"path": ["quartiers", "ville", "2"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('15 quartiers à Douala', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.eql(15);",
+									"});",
+									"pm.test('Akwa et Bonanjo présents', function () {",
+									"    var jsonData = pm.response.json();",
+									"    var noms = jsonData.map(q => q.nom);",
+									"    pm.expect(noms).to.include('Akwa');",
+									"    pm.expect(noms).to.include('Bonanjo');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Quartier par ID (Mendong)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/quartiers/5",
+							"host": ["{{baseUrl}}"],
+							"path": ["quartiers", "5"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Mendong à Yaoundé', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Mendong');",
+									"    pm.expect(jsonData.villeNom).to.eql('Yaoundé');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST Créer un quartier",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"TS-QT\",\n    \"nom\": \"Quartier Test\",\n    \"description\": \"Un quartier de test\",\n    \"villeId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/quartiers",
+							"host": ["{{baseUrl}}"],
+							"path": ["quartiers"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Quartier créé à Yaoundé', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Quartier Test');",
+									"    pm.expect(jsonData.villeNom).to.eql('Yaoundé');",
+									"    pm.collectionVariables.set('testQuartierId', jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "DELETE Supprimer un quartier",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/quartiers/{{testQuartierId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["quartiers", "{{testQuartierId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 204', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "6 - Adresses",
+			"item": [
+				{
+					"name": "POST Créer une adresse (Mendong)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quartierId\": 5,\n    \"rue\": \"Rue de l'École Publique\",\n    \"repere\": \"Face au marché de Mendong\",\n    \"latitude\": 3.8480,\n    \"longitude\": 11.4975\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/adresses",
+							"host": ["{{baseUrl}}"],
+							"path": ["adresses"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Adresse créée à Mendong', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.quartierNom).to.eql('Mendong');",
+									"    pm.expect(jsonData.latitude).to.eql(3.848);",
+									"    pm.collectionVariables.set('testAdresseId', jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST Créer une adresse (Akwa Douala)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quartierId\": 21,\n    \"rue\": \"Boulevard de la Liberté\",\n    \"repere\": \"À côté de la Cathédrale\",\n    \"latitude\": 4.0511,\n    \"longitude\": 9.7679\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/adresses",
+							"host": ["{{baseUrl}}"],
+							"path": ["adresses"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Adresse créée à Akwa', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.quartierNom).to.eql('Akwa');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Toutes les adresses",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/adresses",
+							"host": ["{{baseUrl}}"],
+							"path": ["adresses"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Retourne des adresses', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    pm.expect(jsonData.length).to.be.above(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Adresse par ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/adresses/{{testAdresseId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["adresses", "{{testAdresseId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Adresse correcte', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.rue).to.include('École');",
+									"    pm.expect(jsonData.quartierNom).to.eql('Mendong');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Adresses par Quartier (Mendong)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/adresses/quartier/5",
+							"host": ["{{baseUrl}}"],
+							"path": ["adresses", "quartier", "5"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Adresses à Mendong', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.be.above(0);",
+									"    jsonData.forEach(function(a) {",
+									"        pm.expect(a.quartierNom).to.eql('Mendong');",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "PUT Modifier une adresse",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quartierId\": 5,\n    \"rue\": \"Rue Modifiée\",\n    \"repere\": \"Nouveau repère\",\n    \"latitude\": 3.8500,\n    \"longitude\": 11.5000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/adresses/{{testAdresseId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["adresses", "{{testAdresseId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Adresse modifiée', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.rue).to.eql('Rue Modifiée');",
+									"    pm.expect(jsonData.repere).to.eql('Nouveau repère');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "DELETE Supprimer une adresse",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/adresses/{{testAdresseId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["adresses", "{{testAdresseId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 204', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "7 - Cascade complète (Scénario)",
+			"item": [
+				{
+					"name": "STEP 1 - Sélectionner Région Centre",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/regions/2",
+							"host": ["{{baseUrl}}"],
+							"path": ["regions", "2"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Centre sélectionné', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Centre');",
+									"    pm.collectionVariables.set('selectedRegionId', jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "STEP 2 - Départements du Centre",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/departements/region/{{selectedRegionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["departements", "region", "{{selectedRegionId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Départements chargés', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.be.above(0);",
+									"    // Sélectionner Mfoundi (Yaoundé)",
+									"    var mfoundi = jsonData.find(d => d.nom === 'Mfoundi');",
+									"    pm.expect(mfoundi).to.not.be.undefined;",
+									"    pm.collectionVariables.set('selectedDepartementId', mfoundi.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "STEP 3 - Arrondissements de Mfoundi",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/arrondissements/departement/{{selectedDepartementId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["arrondissements", "departement", "{{selectedDepartementId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Arrondissements chargés', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.eql(7);",
+									"    pm.collectionVariables.set('selectedArrondissementId', jsonData[0].id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "STEP 4 - Villes de l'arrondissement",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/villes/arrondissement/{{selectedArrondissementId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["villes", "arrondissement", "{{selectedArrondissementId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Villes chargées', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.be.above(0);",
+									"    pm.collectionVariables.set('selectedVilleId', jsonData[0].id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "STEP 5 - Quartiers de la ville",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/quartiers/ville/{{selectedVilleId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["quartiers", "ville", "{{selectedVilleId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Quartiers chargés', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.be.above(0);",
+									"    pm.collectionVariables.set('selectedQuartierId', jsonData[0].id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "STEP 6 - Créer adresse dans le quartier",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quartierId\": {{selectedQuartierId}},\n    \"rue\": \"Rue de l'école HelpDigiSchool\",\n    \"repere\": \"En face de la pharmacie\",\n    \"latitude\": 3.8660,\n    \"longitude\": 11.5210\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/adresses",
+							"host": ["{{baseUrl}}"],
+							"path": ["adresses"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Adresse créée via cascade', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.not.be.undefined;",
+									"    pm.expect(jsonData.quartierNom).to.not.be.undefined;",
+									"    console.log('CASCADE COMPLÈTE: Adresse créée dans ' + jsonData.quartierNom);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "8 - Parents",
+			"item": [
+				{
+					"name": "GET Tous les parents",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/parents",
+							"host": ["{{baseUrl}}"],
+							"path": ["parents"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Retourne un tableau', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST Créer un parent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nom\": \"Kamga\",\n    \"prenom\": \"Paul\",\n    \"email\": \"paul.kamga@email.com\",\n    \"telephone\": \"+237698765432\",\n    \"profession\": \"Ingénieur\",\n    \"quartierId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/parents",
+							"host": ["{{baseUrl}}"],
+							"path": ["parents"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Parent créé avec matricule', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Kamga');",
+									"    pm.expect(jsonData.matriculeParent).to.match(/^PAR-\\d{5}$/);",
+									"    pm.collectionVariables.set('testParentId', jsonData.idParent);",
+									"    pm.collectionVariables.set('testParentMatricule', jsonData.matriculeParent);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST Créer un second parent (mère)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nom\": \"Mballa\",\n    \"prenom\": \"Marie\",\n    \"email\": \"marie.mballa@email.com\",\n    \"telephone\": \"+237612345678\",\n    \"profession\": \"Médecin\",\n    \"quartierId\": 5\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/parents",
+							"host": ["{{baseUrl}}"],
+							"path": ["parents"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Second parent créé', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Mballa');",
+									"    pm.expect(jsonData.quartierNom).to.eql('Mendong');",
+									"    pm.collectionVariables.set('testParent2Id', jsonData.idParent);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Parent par ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/parents/{{testParentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["parents", "{{testParentId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Parent trouvé', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nom).to.eql('Kamga');",
+									"    pm.expect(jsonData.email).to.eql('paul.kamga@email.com');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Parent par matricule",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/parents/matricule/{{testParentMatricule}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["parents", "matricule", "{{testParentMatricule}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Parent trouvé par matricule', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.matriculeParent).to.eql(pm.collectionVariables.get('testParentMatricule'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Rechercher parents",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/parents/search?query=kamga",
+							"host": ["{{baseUrl}}"],
+							"path": ["parents", "search"],
+							"query": [
+								{
+									"key": "query",
+									"value": "kamga"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Recherche retourne des résultats', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "PUT Modifier un parent",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nom\": \"Kamga\",\n    \"prenom\": \"Paul-Henri\",\n    \"email\": \"paul.kamga@email.com\",\n    \"telephone\": \"+237698765433\",\n    \"profession\": \"Directeur Technique\",\n    \"quartierId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/parents/{{testParentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["parents", "{{testParentId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Parent modifié', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.prenom).to.eql('Paul-Henri');",
+									"    pm.expect(jsonData.profession).to.eql('Directeur Technique');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST Créer parent à supprimer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nom\": \"Test\",\n    \"prenom\": \"Delete\",\n    \"email\": \"test.delete@email.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/parents",
+							"host": ["{{baseUrl}}"],
+							"path": ["parents"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Parent créé pour suppression', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('testParentDeleteId', jsonData.idParent);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "DELETE Supprimer un parent",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/parents/{{testParentDeleteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["parents", "{{testParentDeleteId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "9 - Élève-Parents (Relations)",
+			"item": [
+				{
+					"name": "GET Toutes les relations élève-parent",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/eleve-parents",
+							"host": ["{{baseUrl}}"],
+							"path": ["eleve-parents"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Retourne un tableau', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST Créer relation élève-parent (Père)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"eleveId\": 1,\n    \"parentId\": {{testParentId}},\n    \"typeRelation\": \"PERE\",\n    \"estContactUrgence\": true,\n    \"estResponsableLegal\": true,\n    \"peutRecupererEnfant\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/eleve-parents",
+							"host": ["{{baseUrl}}"],
+							"path": ["eleve-parents"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Relation créée', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.typeRelation).to.eql('PERE');",
+									"    pm.expect(jsonData.estContactUrgence).to.be.true;",
+									"    pm.expect(jsonData.estResponsableLegal).to.be.true;",
+									"    pm.collectionVariables.set('testEleveParentId', jsonData.idEleveParent);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "POST Créer relation élève-parent (Mère)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"eleveId\": 1,\n    \"parentId\": {{testParent2Id}},\n    \"typeRelation\": \"MERE\",\n    \"estContactUrgence\": true,\n    \"estResponsableLegal\": true,\n    \"peutRecupererEnfant\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/eleve-parents",
+							"host": ["{{baseUrl}}"],
+							"path": ["eleve-parents"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Relation mère créée', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.typeRelation).to.eql('MERE');",
+									"    pm.collectionVariables.set('testEleveParent2Id', jsonData.idEleveParent);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Relation par ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/eleve-parents/{{testEleveParentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["eleve-parents", "{{testEleveParentId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Relation trouvée avec détails', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.typeRelation).to.eql('PERE');",
+									"    pm.expect(jsonData.parentNom).to.not.be.undefined;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Relations par élève",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/eleve-parents/eleve/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["eleve-parents", "eleve", "1"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Parents de l élève', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    pm.expect(jsonData.length).to.be.at.least(1);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Relations par parent",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/eleve-parents/parent/{{testParentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["eleve-parents", "parent", "{{testParentId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Enfants du parent', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Contacts d'urgence d'un élève",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/eleve-parents/eleve/1/contacts-urgence",
+							"host": ["{{baseUrl}}"],
+							"path": ["eleve-parents", "eleve", "1", "contacts-urgence"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Contacts urgence retournés', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    jsonData.forEach(function(c) {",
+									"        pm.expect(c.estContactUrgence).to.be.true;",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "GET Responsables légaux d'un élève",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/eleve-parents/eleve/1/responsables-legaux",
+							"host": ["{{baseUrl}}"],
+							"path": ["eleve-parents", "eleve", "1", "responsables-legaux"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Responsables légaux retournés', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    jsonData.forEach(function(r) {",
+									"        pm.expect(r.estResponsableLegal).to.be.true;",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "PUT Modifier une relation",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"eleveId\": 1,\n    \"parentId\": {{testParentId}},\n    \"typeRelation\": \"PERE\",\n    \"estContactUrgence\": false,\n    \"estResponsableLegal\": true,\n    \"peutRecupererEnfant\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/eleve-parents/{{testEleveParentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["eleve-parents", "{{testEleveParentId}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Relation modifiée', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.estContactUrgence).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "PUT Désactiver une relation",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"motif\": \"Parents séparés\",\n    \"modifiePar\": \"Admin\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/eleve-parents/{{testEleveParent2Id}}/deactivate",
+							"host": ["{{baseUrl}}"],
+							"path": ["eleve-parents", "{{testEleveParent2Id}}", "deactivate"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "PUT Réactiver une relation",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"motif\": \"Réconciliation\",\n    \"modifiePar\": \"Admin\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/eleve-parents/{{testEleveParent2Id}}/reactivate",
+							"host": ["{{baseUrl}}"],
+							"path": ["eleve-parents", "{{testEleveParent2Id}}", "reactivate"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "DELETE Supprimer une relation",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-Tenant-ID",
+								"value": "{{tenantId}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/eleve-parents/{{testEleveParent2Id}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["eleve-parents", "{{testEleveParent2Id}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "10 - Types de Relation (Enum)",
+			"item": [
+				{
+					"name": "INFO - Types de relation disponibles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/parents",
+							"host": ["{{baseUrl}}"],
+							"path": ["parents"]
+						},
+						"description": "Types de relation disponibles pour l'enum TypeRelation:\n\n- PERE: Père biologique ou adoptif\n- MERE: Mère biologique ou adoptive\n- TUTEUR_LEGAL: Tuteur légal désigné\n- GRAND_PARENT: Grand-père ou grand-mère\n- ONCLE_TANTE: Oncle ou tante\n- AUTRE: Autre relation"
+					}
+				}
+			]
+		}
+	]
+}

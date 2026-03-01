@@ -1,0 +1,190 @@
+package com.digiSchool.digiSchool.academic.organisation.dto;
+
+import java.time.LocalDate;
+import java.util.List;
+
+public class InscriptionDto {
+    private Long idInscription;
+    private String numeroInscription;
+    private LocalDate dateInscription;
+    private Double montantTotal;
+    private String statutInscription;
+    private String motifAnnulation;
+
+    // Eleve
+    private Long eleveId;
+    private String eleveMatricule;
+    private String eleveNom;
+    private String elevePrenom;
+
+    // Classe
+    private Long classeId;
+    private String classeNom;
+    private String classeNiveau;
+    private Double fraisScolarite;
+
+    // Annee scolaire
+    private Long anneeScolaireId;
+    private String anneeScolaireLibelle;
+
+    // Echeancier
+    private List<EcheanceDto> echeances;
+
+    // Identifiants generes (retournes uniquement lors de la creation)
+    private String generatedPassword;
+    private String generatedEmail;
+
+    // Getters & Setters
+
+    public Long getIdInscription() {
+        return idInscription;
+    }
+
+    public void setIdInscription(Long idInscription) {
+        this.idInscription = idInscription;
+    }
+
+    public String getNumeroInscription() {
+        return numeroInscription;
+    }
+
+    public void setNumeroInscription(String numeroInscription) {
+        this.numeroInscription = numeroInscription;
+    }
+
+    public LocalDate getDateInscription() {
+        return dateInscription;
+    }
+
+    public void setDateInscription(LocalDate dateInscription) {
+        this.dateInscription = dateInscription;
+    }
+
+    public Double getMontantTotal() {
+        return montantTotal;
+    }
+
+    public void setMontantTotal(Double montantTotal) {
+        this.montantTotal = montantTotal;
+    }
+
+    public String getStatutInscription() {
+        return statutInscription;
+    }
+
+    public void setStatutInscription(String statutInscription) {
+        this.statutInscription = statutInscription;
+    }
+
+    public String getMotifAnnulation() {
+        return motifAnnulation;
+    }
+
+    public void setMotifAnnulation(String motifAnnulation) {
+        this.motifAnnulation = motifAnnulation;
+    }
+
+    public Long getEleveId() {
+        return eleveId;
+    }
+
+    public void setEleveId(Long eleveId) {
+        this.eleveId = eleveId;
+    }
+
+    public String getEleveMatricule() {
+        return eleveMatricule;
+    }
+
+    public void setEleveMatricule(String eleveMatricule) {
+        this.eleveMatricule = eleveMatricule;
+    }
+
+    public String getEleveNom() {
+        return eleveNom;
+    }
+
+    public void setEleveNom(String eleveNom) {
+        this.eleveNom = eleveNom;
+    }
+
+    public String getElevePrenom() {
+        return elevePrenom;
+    }
+
+    public void setElevePrenom(String elevePrenom) {
+        this.elevePrenom = elevePrenom;
+    }
+
+    public Long getClasseId() {
+        return classeId;
+    }
+
+    public void setClasseId(Long classeId) {
+        this.classeId = classeId;
+    }
+
+    public String getClasseNom() {
+        return classeNom;
+    }
+
+    public void setClasseNom(String classeNom) {
+        this.classeNom = classeNom;
+    }
+
+    public String getClasseNiveau() {
+        return classeNiveau;
+    }
+
+    public void setClasseNiveau(String classeNiveau) {
+        this.classeNiveau = classeNiveau;
+    }
+
+    public Double getFraisScolarite() {
+        return fraisScolarite;
+    }
+
+    public void setFraisScolarite(Double fraisScolarite) {
+        this.fraisScolarite = fraisScolarite;
+    }
+
+    public Long getAnneeScolaireId() {
+        return anneeScolaireId;
+    }
+
+    public void setAnneeScolaireId(Long anneeScolaireId) {
+        this.anneeScolaireId = anneeScolaireId;
+    }
+
+    public String getAnneeScolaireLibelle() {
+        return anneeScolaireLibelle;
+    }
+
+    public void setAnneeScolaireLibelle(String anneeScolaireLibelle) {
+        this.anneeScolaireLibelle = anneeScolaireLibelle;
+    }
+
+    public List<EcheanceDto> getEcheances() {
+        return echeances;
+    }
+
+    public void setEcheances(List<EcheanceDto> echeances) {
+        this.echeances = echeances;
+    }
+
+    public String getGeneratedPassword() {
+        return generatedPassword;
+    }
+
+    public void setGeneratedPassword(String generatedPassword) {
+        this.generatedPassword = generatedPassword;
+    }
+
+    public String getGeneratedEmail() {
+        return generatedEmail;
+    }
+
+    public void setGeneratedEmail(String generatedEmail) {
+        this.generatedEmail = generatedEmail;
+    }
+}

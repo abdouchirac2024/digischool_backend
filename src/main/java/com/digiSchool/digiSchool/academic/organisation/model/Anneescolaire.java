@@ -1,12 +1,14 @@
 package com.digiSchool.digiSchool.academic.organisation.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.digiSchool.digiSchool.Exceptionconfig.model.TenantEntity;
 import com.digiSchool.digiSchool.academic.evaluation.model.Evaluation;
 import com.digiSchool.digiSchool.academic.pedagogique.model.Discipline;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -35,6 +37,18 @@ public class Anneescolaire extends TenantEntity{
 
     @OneToMany(mappedBy = "anneeScolaire")
     private List<Discipline> disciplines;
+    
+    @OneToMany(mappedBy = "anneeScolaire", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Periode> periodes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "anneeScolaire", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Examen> examens = new ArrayList<>();;
+
+    @OneToMany(mappedBy = "anneeScolaire", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Vacance> vacances = new ArrayList<>();;
+
+    @OneToMany(mappedBy = "anneeScolaire", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<JourFerie> joursFeries = new ArrayList<>();;
 
 	public String getLibelle() {
 		return libelle;
@@ -67,5 +81,78 @@ public class Anneescolaire extends TenantEntity{
 	public void setStatut(Boolean statut) {
 		this.statut = statut;
 	}
+
+	public Long getIdAnnee() {
+		return idAnnee;
+	}
+
+	public void setIdAnnee(Long idAnnee) {
+		this.idAnnee = idAnnee;
+	}
+
+	public List<Inscription> getInscriptions() {
+		return inscriptions;
+	}
+
+	public void setInscriptions(List<Inscription> inscriptions) {
+		this.inscriptions = inscriptions;
+	}
+
+	public List<Evaluation> getEvaluations() {
+		return evaluations;
+	}
+
+	public void setEvaluations(List<Evaluation> evaluations) {
+		this.evaluations = evaluations;
+	}
+
+	public List<EmploiDuTemps> getEmploisDuTemps() {
+		return emploisDuTemps;
+	}
+
+	public void setEmploisDuTemps(List<EmploiDuTemps> emploisDuTemps) {
+		this.emploisDuTemps = emploisDuTemps;
+	}
+
+	public List<Discipline> getDisciplines() {
+		return disciplines;
+	}
+
+	public void setDisciplines(List<Discipline> disciplines) {
+		this.disciplines = disciplines;
+	}
+
+	public List<Periode> getPeriodes() {
+		return periodes;
+	}
+
+	public void setPeriodes(List<Periode> periodes) {
+		this.periodes = periodes;
+	}
+
+	public List<Examen> getExamens() {
+		return examens;
+	}
+
+	public void setExamens(List<Examen> examens) {
+		this.examens = examens;
+	}
+
+	public List<Vacance> getVacances() {
+		return vacances;
+	}
+
+	public void setVacances(List<Vacance> vacances) {
+		this.vacances = vacances;
+	}
+
+	public List<JourFerie> getJoursFeries() {
+		return joursFeries;
+	}
+
+	public void setJoursFeries(List<JourFerie> joursFeries) {
+		this.joursFeries = joursFeries;
+	}
+	
 }
 
