@@ -20,7 +20,7 @@ public class Notification {
     private String tenantId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "destinataire_id", nullable = false)
     private User destinataire;
 
     private String titre;
