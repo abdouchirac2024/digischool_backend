@@ -30,9 +30,6 @@ public class Classe extends TenantEntity {
 	private String section;
 	private Integer capacite;
 	private Double fraisScolarite;
-	private Double fraisInscription;
-	private Double premierVersement;
-	private Double deuxiemeVersement;
 	private String description;
 
 	@jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
@@ -113,30 +110,6 @@ public class Classe extends TenantEntity {
 
 	public void setFraisScolarite(Double fraisScolarite) {
 		this.fraisScolarite = fraisScolarite;
-	}
-
-	public Double getFraisInscription() {
-		return fraisInscription;
-	}
-
-	public void setFraisInscription(Double fraisInscription) {
-		this.fraisInscription = fraisInscription;
-	}
-
-	public Double getPremierVersement() {
-		return premierVersement;
-	}
-
-	public void setPremierVersement(Double premierVersement) {
-		this.premierVersement = premierVersement;
-	}
-
-	public Double getDeuxiemeVersement() {
-		return deuxiemeVersement;
-	}
-
-	public void setDeuxiemeVersement(Double deuxiemeVersement) {
-		this.deuxiemeVersement = deuxiemeVersement;
 	}
 
 	public String getDescription() {

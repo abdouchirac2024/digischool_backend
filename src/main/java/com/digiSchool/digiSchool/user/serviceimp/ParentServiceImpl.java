@@ -7,11 +7,9 @@ import java.util.Random;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.digiSchool.digiSchool.Exceptionconfig.model.Quartier;
 import com.digiSchool.digiSchool.Exceptionconfig.service.TenantContext;
 import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
 import com.digiSchool.digiSchool.academic.organisation.repository.EcoleRepository;
-import com.digiSchool.digiSchool.academic.organisation.repository.QuartierRepository;
 import com.digiSchool.digiSchool.auth.model.RoleType;
 import com.digiSchool.digiSchool.auth.model.User;
 import com.digiSchool.digiSchool.auth.model.UserStatus;
@@ -19,7 +17,6 @@ import com.digiSchool.digiSchool.auth.repository.UserRepository;
 import com.digiSchool.digiSchool.user.dto.ParentDto;
 import com.digiSchool.digiSchool.user.model.Parent;
 import com.digiSchool.digiSchool.user.repository.ParentRepository;
-import com.digiSchool.digiSchool.user.service.IdentifierGeneratorService;
 import com.digiSchool.digiSchool.user.service.ParentService;
 
 import jakarta.transaction.Transactional;
@@ -29,21 +26,18 @@ import jakarta.transaction.Transactional;
 public class ParentServiceImpl implements ParentService {
 
     private final ParentRepository parentRepository;
-    private final QuartierRepository quartierRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EcoleRepository ecoleRepository;
-    private final IdentifierGeneratorService identifierGeneratorService;
 
-    public ParentServiceImpl(ParentRepository parentRepository, QuartierRepository quartierRepository,
-            UserRepository userRepository, PasswordEncoder passwordEncoder,
-            EcoleRepository ecoleRepository, IdentifierGeneratorService identifierGeneratorService) {
+    public ParentServiceImpl(ParentRepository parentRepository,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            EcoleRepository ecoleRepository) {
         this.parentRepository = parentRepository;
-        this.quartierRepository = quartierRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.ecoleRepository = ecoleRepository;
-        this.identifierGeneratorService = identifierGeneratorService;
     }
 
     @Override
@@ -72,11 +66,7 @@ public class ParentServiceImpl implements ParentService {
 
         Parent parent = toEntity(dto);
         parent.setTenant(tenant);
-
-        Ecole ecole = ecoleRepository.findByTenant(tenant)
-                .orElseThrow(() -> new RuntimeException("Ecole introuvable pour ce tenant"));
-
-        parent.setMatriculeParent(identifierGeneratorService.generateParentMatricule(ecole, dto.getTelephone()));
+        parent.setMatriculeParent(generateMatricule(tenant));
         parent.setActif(true);
 
         Parent saved = parentRepository.save(parent);
@@ -105,7 +95,6 @@ public class ParentServiceImpl implements ParentService {
         user.setTelephone(dto.getTelephone());
         user.setRole(RoleType.PARENT);
         user.setStatus(UserStatus.ACTIVE);
-        user.setUsernameField(dto.getTelephone());
         user.setTenantId(tenant);
 
         // Associer l'école du tenant
@@ -115,9 +104,6 @@ public class ParentServiceImpl implements ParentService {
         }
 
         // Associer le quartier si renseigné
-        if (parent.getQuartier() != null) {
-            user.setQuartier(parent.getQuartier());
-        }
 
         userRepository.save(user);
     }
@@ -156,12 +142,6 @@ public class ParentServiceImpl implements ParentService {
 
         if (dto.getActif() != null) {
             parent.setActif(dto.getActif());
-        }
-
-        if (dto.getQuartierId() != null) {
-            Quartier quartier = quartierRepository.findById(dto.getQuartierId())
-                    .orElseThrow(() -> new RuntimeException("Quartier introuvable"));
-            parent.setQuartier(quartier);
         }
 
         return toDto(parentRepository.save(parent));
@@ -215,6 +195,18 @@ public class ParentServiceImpl implements ParentService {
     }
 
     // =====================
+    // Génération du matricule
+    // =====================
+
+    private String generateMatricule(String tenant) {
+        // Générer un matricule unique globalement en utilisant le tenant comme préfixe
+        Integer maxNumber = parentRepository.findMaxMatriculeNumber(tenant);
+        int nextNumber = (maxNumber != null ? maxNumber : 0) + 1;
+        // Format: {TENANT}-PAR-{NUMBER} pour garantir l'unicité globale
+        return String.format("%s-PAR-%05d", tenant, nextNumber);
+    }
+
+    // =====================
     // Mapping DTO <-> Entity
     // =====================
 
@@ -231,12 +223,6 @@ public class ParentServiceImpl implements ParentService {
         parent.setPhotoUrl(dto.getPhotoUrl());
         parent.setPieceIdentiteType(dto.getPieceIdentiteType());
         parent.setPieceIdentiteNumero(dto.getPieceIdentiteNumero());
-
-        if (dto.getQuartierId() != null) {
-            Quartier quartier = quartierRepository.findById(dto.getQuartierId())
-                    .orElseThrow(() -> new RuntimeException("Quartier introuvable"));
-            parent.setQuartier(quartier);
-        }
 
         return parent;
     }
@@ -260,11 +246,6 @@ public class ParentServiceImpl implements ParentService {
         dto.setCreatedAt(parent.getCreatedAt());
         dto.setUpdatedAt(parent.getUpdatedAt());
         dto.setDeletedAt(parent.getDeletedAt());
-
-        if (parent.getQuartier() != null) {
-            dto.setQuartierId(parent.getQuartier().getId());
-            dto.setQuartierNom(parent.getQuartier().getNom());
-        }
 
         return dto;
     }

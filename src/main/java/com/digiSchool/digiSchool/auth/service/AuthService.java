@@ -33,6 +33,7 @@ public class AuthService {
     private final JwtTokenService jwtTokenService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final PresenceService presenceService;
 
     @Value("${auth.max-login-attempts:5}")
     private int maxLoginAttempts;
@@ -51,13 +52,15 @@ public class AuthService {
             LoginAttemptRepository loginAttemptRepository,
             JwtTokenService jwtTokenService,
             PasswordEncoder passwordEncoder,
-            EmailService emailService) {
+            EmailService emailService,
+            PresenceService presenceService) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.loginAttemptRepository = loginAttemptRepository;
         this.jwtTokenService = jwtTokenService;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.presenceService = presenceService;
     }
 
     public AuthResponse login(LoginRequest request, String ipAddress) {
@@ -66,14 +69,24 @@ public class AuthService {
         // Vérifier le rate limiting
         checkRateLimit(login, ipAddress);
 
-        // Trouver l'utilisateur (Email, Téléphone ou Matricule/Username)
-        User user = userRepository.findByEmail(login.toLowerCase())
-                .orElseGet(() -> userRepository.findByTelephone(login)
-                        .orElseGet(() -> userRepository.findByUsername(login)
-                                .orElseThrow(() -> {
-                                    logFailedAttempt(login, ipAddress, "Utilisateur non trouvé");
-                                    return new AuthenticationException("Identifiant ou mot de passe incorrect");
-                                })));
+        // Détecter si c'est un email (contient @) ou un téléphone
+        boolean isEmail = login.contains("@");
+
+        // Trouver l'utilisateur
+        User user;
+        if (isEmail) {
+            user = userRepository.findByEmail(login.toLowerCase())
+                    .orElseThrow(() -> {
+                        logFailedAttempt(login, ipAddress, "Utilisateur non trouvé");
+                        return new AuthenticationException("Identifiant ou mot de passe incorrect");
+                    });
+        } else {
+            user = userRepository.findByTelephone(login)
+                    .orElseThrow(() -> {
+                        logFailedAttempt(login, ipAddress, "Utilisateur non trouvé");
+                        return new AuthenticationException("Identifiant ou mot de passe incorrect");
+                    });
+        }
 
         // Vérifier si le compte est verrouillé
         if (user.getStatus() == UserStatus.LOCKED) {
@@ -214,6 +227,10 @@ public class AuthService {
                 .ifPresent(token -> {
                     token.setRevoked(true);
                     refreshTokenRepository.save(token);
+
+                    // Force disconnect user from WebSocket presence
+                    Long userId = token.getUser().getId();
+                    presenceService.forceDisconnectUser(userId);
                 });
     }
 
@@ -221,6 +238,9 @@ public class AuthService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AuthenticationException("Utilisateur non trouvé"));
         refreshTokenRepository.revokeAllByUser(user);
+
+        // Force disconnect user from WebSocket presence
+        presenceService.forceDisconnectUser(userId);
     }
 
     public void forgotPassword(ForgotPasswordRequest request) {
@@ -274,6 +294,11 @@ public class AuthService {
                 .orElseThrow(() -> new AuthenticationException("Utilisateur non trouvé"));
     }
 
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new AuthenticationException("Utilisateur non trouvé"));
+    }
+
     private void logFailedAttempt(String email, String ipAddress, String reason) {
         LoginAttempt attempt = new LoginAttempt(email, ipAddress, false, reason);
         loginAttemptRepository.save(attempt);
@@ -295,6 +320,12 @@ public class AuthService {
                 user.getTenantId(),
                 user.getEcole() != null ? user.getEcole().getIdEcole() : null,
                 user.getEcole() != null ? user.getEcole().getNom() : null,
-                user.getEcole() != null ? user.getEcole().getCodeEcole() : null);
+                user.getEcole() != null ? user.getEcole().getCodeEcole() : null,
+                user.getEcole() != null && user.getEcole().getStatutEcole() != null
+                        ? user.getEcole().getStatutEcole().name() : null,
+                user.getStatus() != null ? user.getStatus().name() : null,
+                user.getLastLogin(),
+                user.getCreatedAt(),
+                user.getAvatarUrl());
     }
 }

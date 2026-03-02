@@ -23,7 +23,7 @@ import io.jsonwebtoken.security.SignatureException;
 @Service
 public class JwtTokenService {
 
-    @Value("${jwt.secret:DigiSchoolSecretKey256BitsMinimumForHS256Algorithm!}")
+    @Value("${jwt.secret}")
     private String secretKey;
 
     @Value("${jwt.access-token-expiration:1800000}")  // 30 minutes par défaut
@@ -53,6 +53,20 @@ public class JwtTokenService {
         claims.put("type", "refresh");
 
         return createToken(claims, user.getEmail(), refreshTokenExpiration);
+    }
+
+    /**
+     * Génère un token d'accès court (pour WebSocket) avec une durée personnalisée.
+     * Non stocké en cookie HttpOnly — transmis uniquement en mémoire React.
+     */
+    public String generateShortLivedToken(User user, long expirationMs) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", user.getRole().name());
+        claims.put("tenantId", user.getTenantId());
+        claims.put("userId", user.getId());
+        claims.put("type", "access");
+
+        return createToken(claims, user.getEmail(), expirationMs);
     }
 
     private String createToken(Map<String, Object> claims, String subject, Long expiration) {

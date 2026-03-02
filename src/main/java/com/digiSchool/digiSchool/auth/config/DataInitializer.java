@@ -10,7 +10,8 @@ import com.digiSchool.digiSchool.academic.organisation.model.Classe;
 import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
 import com.digiSchool.digiSchool.academic.organisation.model.Niveau;
 import com.digiSchool.digiSchool.academic.organisation.model.StatutClasse;
-import com.digiSchool.digiSchool.academic.organisation.repository.AnneescolaireRepository;
+import com.digiSchool.digiSchool.academic.organisation.model.StatutEcole;
+import com.digiSchool.digiSchool.academic.organisation.repository.AnneeScolaireRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.ClasseRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.EcoleRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.QuartierRepository;
@@ -43,7 +44,7 @@ public class DataInitializer implements CommandLineRunner {
     private final EleveParentRepository eleveParentRepository;
     private final QuartierRepository quartierRepository;
     private final ClasseRepository classeRepository;
-    private final AnneescolaireRepository anneescolaireRepository;
+    private final AnneeScolaireRepository anneescolaireRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(UserRepository userRepository,
@@ -53,7 +54,7 @@ public class DataInitializer implements CommandLineRunner {
             EleveParentRepository eleveParentRepository,
             QuartierRepository quartierRepository,
             ClasseRepository classeRepository,
-            AnneescolaireRepository anneescolaireRepository,
+            AnneeScolaireRepository anneescolaireRepository,
             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.ecoleRepository = ecoleRepository;
@@ -150,37 +151,39 @@ public class DataInitializer implements CommandLineRunner {
 
         // --- 5. PARENTS (tenant = ecole.getTenant()) ---
 
-        createParentIfNotExists("PAR-DIGI-001-677112233", "Mbianda", "Guy",
+        createParentIfNotExists("P001-001", "Mbianda", "Guy",
                 "guy.mbianda@email.com", "677112233", "Bastos, YDE",
                 "QBS", "Ingénieur", ecole1);
-        createParentIfNotExists("PAR-DIGI-001-699554433", "Ngassa", "Alice",
+        createParentIfNotExists("P001-002", "Ngassa", "Alice",
                 "alice.ngassa@email.com", "699554433", "Nlongkak, YDE",
                 "QNL", "Commerçante", ecole1);
 
-        createParentIfNotExists("PAR-DIGI-002-688001122", "Kamga", "Jean",
+        createParentIfNotExists("P002-001", "Kamga", "Jean",
                 "jean.kamga@email.com", "688001122", "Essos, YDE",
                 "QES", "Avocat", ecole2);
 
-        createParentIfNotExists("PAR-DIGI-003-655778899", "Wabo", "Claude",
+        createParentIfNotExists("P003-001", "Wabo", "Claude",
                 "claude.wabo@email.com", "655778899", "Tamdja, BFS",
                 "QTD", "Médecin", ecole3);
 
         // --- 6. ÉLÈVES (tenant = ecole.getTenant()) ---
 
-        createEleveIfNotExists("ELV-DIGI-002-2024-0001", "Biya", "Samuel",
+        createEleveIfNotExists("ELV-2024-006", "Biya", "Samuel",
                 "2012-08-20", "QES", ecole2);
-        createEleveIfNotExists("ELV-DIGI-002-2024-0002", "Etoa", "Stéphanie",
+        createEleveIfNotExists("ELV-2024-007", "Etoa", "Stéphanie",
                 "2013-02-15", "QES", ecole2);
 
-        createEleveIfNotExists("ELV-DIGI-003-2024-0001", "Tchouta", "Rodrigue",
+        createEleveIfNotExists("ELV-2024-008", "Tchouta", "Rodrigue",
                 "2006-11-10", "QTD", ecole3);
-        createEleveIfNotExists("ELV-DIGI-003-2024-0002", "Djeukam", "Patricia",
+        createEleveIfNotExists("ELV-2024-009", "Djeukam", "Patricia",
                 "2007-04-05", "QTD", ecole3);
 
         // --- 7. RELATIONS ÉLÈVE-PARENT (tenant = eleve.getTenant()) ---
 
-        createEleveParentIfNotExists("ELV-DIGI-002-2024-0001", "PAR-DIGI-002-688001122", TypeRelation.PERE, true);
-        createEleveParentIfNotExists("ELV-DIGI-003-2024-0001", "PAR-DIGI-003-655778899", TypeRelation.PERE, true);
+        createEleveParentIfNotExists("ELV-2024-001", "P001-001", TypeRelation.PERE, true);
+        createEleveParentIfNotExists("ELV-2024-002", "P001-002", TypeRelation.MERE, true);
+        createEleveParentIfNotExists("ELV-2024-006", "P002-001", TypeRelation.PERE, true);
+        createEleveParentIfNotExists("ELV-2024-008", "P003-001", TypeRelation.PERE, true);
 
         System.out.println("\n=================================================");
         System.out.println("   INITIALISATION TERMINÉE");
@@ -200,7 +203,7 @@ public class DataInitializer implements CommandLineRunner {
             ecole.setAdresse(adresse);
             ecole.setTelephone(tel);
             ecole.setEmail(email);
-            ecole.setStatut(true);
+            ecole.setStatutEcole(StatutEcole.VALIDEE);
 
             var quartier = quartierRepository.findByCode(quartierCode).orElse(null);
             if (quartier != null) {
@@ -343,7 +346,7 @@ public class DataInitializer implements CommandLineRunner {
             parent.setAdresse(adresse);
             parent.setProfession(profession);
             parent.setActif(true);
-            parent.setQuartier(quartier);
+            // parent.setQuartier(quartier);
             parent.setTenant(ecole.getTenant());
 
             parentRepository.save(parent);

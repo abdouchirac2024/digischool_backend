@@ -36,15 +36,6 @@ public class ClasseDto {
     @Schema(description = "Frais de scolarite annuels en FCFA", example = "75000.0")
     private Double fraisScolarite;
 
-    @Schema(description = "Frais d'inscription en FCFA", example = "10000.0")
-    private Double fraisInscription;
-
-    @Schema(description = "1er versement trimestriel en FCFA", example = "30000.0")
-    private Double premierVersement;
-
-    @Schema(description = "2eme versement trimestriel en FCFA", example = "30000.0")
-    private Double deuxiemeVersement;
-
     @Schema(description = "Description de la classe")
     private String description;
 
@@ -139,30 +130,6 @@ public class ClasseDto {
 
     public void setFraisScolarite(Double fraisScolarite) {
         this.fraisScolarite = fraisScolarite;
-    }
-
-    public Double getFraisInscription() {
-        return fraisInscription;
-    }
-
-    public void setFraisInscription(Double fraisInscription) {
-        this.fraisInscription = fraisInscription;
-    }
-
-    public Double getPremierVersement() {
-        return premierVersement;
-    }
-
-    public void setPremierVersement(Double premierVersement) {
-        this.premierVersement = premierVersement;
-    }
-
-    public Double getDeuxiemeVersement() {
-        return deuxiemeVersement;
-    }
-
-    public void setDeuxiemeVersement(Double deuxiemeVersement) {
-        this.deuxiemeVersement = deuxiemeVersement;
     }
 
     public String getDescription() {

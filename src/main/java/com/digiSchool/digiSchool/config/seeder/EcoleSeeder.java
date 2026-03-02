@@ -1,13 +1,19 @@
 package com.digiSchool.digiSchool.config.seeder;
 
+import java.text.Normalizer;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.stereotype.Component;
 
 import com.digiSchool.digiSchool.Exceptionconfig.model.Quartier;
 import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
+import com.digiSchool.digiSchool.academic.organisation.model.SousSysteme;
+import com.digiSchool.digiSchool.academic.organisation.model.StatutEcole;
+import com.digiSchool.digiSchool.academic.organisation.model.TypeEtablissement;
+import com.digiSchool.digiSchool.academic.organisation.model.TypeSecteur;
 import com.digiSchool.digiSchool.academic.organisation.repository.EcoleRepository;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Seeder pour les ecoles.
@@ -53,7 +59,10 @@ public class EcoleSeeder {
                 "+237 677 123 456",
                 "contact@lavictoire.cm",
                 true,
-                bastos);
+                bastos,
+                TypeSecteur.PRIVE_LAIC,
+                TypeEtablissement.COMPLEXE_SCOLAIRE,
+                SousSysteme.BILINGUE);
         ecolesMap.put("ECB-001", ecoleBilingue);
 
         // Ecole Anglophone a Douala (Bonamoussadi)
@@ -65,7 +74,10 @@ public class EcoleSeeder {
                 "+237 699 987 654",
                 "info@progressive.cm",
                 true,
-                bonamoussadi);
+                bonamoussadi,
+                TypeSecteur.PRIVE_CONFESSIONNEL,
+                TypeEtablissement.SECONDAIRE_GENERAL,
+                SousSysteme.ANGLOPHONE);
         ecolesMap.put("ECA-001", ecoleAnglo);
 
         // Ecole Francophone a Bafoussam (Tamdja)
@@ -77,7 +89,10 @@ public class EcoleSeeder {
                 "+237 655 456 789",
                 "direction@leschampions.cm",
                 true,
-                tamdja);
+                tamdja,
+                TypeSecteur.PUBLIC,
+                TypeEtablissement.PRIMAIRE,
+                SousSysteme.FRANCOPHONE);
         ecolesMap.put("ECF-001", ecoleFranco);
 
         System.out.println("  -> Ecoles : 3 ecoles creees");
@@ -87,21 +102,10 @@ public class EcoleSeeder {
     }
 
     /**
-     * Recupere une ecole par son code.
-     * Tente d'abord dans la map, puis en base de données.
+     * Recupere une ecole par son code
      */
     public Ecole getEcole(String codeEcole) {
-        if (ecolesMap.containsKey(codeEcole)) {
-            return ecolesMap.get(codeEcole);
-        }
-
-        // Fallback: Recherche en base si non présent dans la map
-        return ecoleRepository.findByCodeEcole(codeEcole)
-                .map(e -> {
-                    ecolesMap.put(codeEcole, e);
-                    return e;
-                })
-                .orElse(null);
+        return ecolesMap.get(codeEcole);
     }
 
     private void loadExistingEcoles() {
@@ -109,15 +113,23 @@ public class EcoleSeeder {
     }
 
     private Ecole createEcole(String codeEcole, String nom, String adresse,
-            String telephone, String email, Boolean statut, Quartier quartier) {
+            String telephone, String email, Boolean statut, Quartier quartier,
+            TypeSecteur typeSecteur, TypeEtablissement typeEtablissement, SousSysteme sousSysteme) {
         Ecole e = new Ecole();
         e.setCodeEcole(codeEcole);
         e.setNom(nom);
         e.setAdresse(adresse);
         e.setTelephone(telephone);
         e.setEmail(email);
-        e.setStatut(statut);
         e.setQuartier(quartier);
+        e.setTypeSecteur(typeSecteur);
+        e.setTypeEtablissement(typeEtablissement);
+        e.setSousSysteme(sousSysteme);
+        e.setStatutEcole(StatutEcole.VALIDEE);
+        e.setSlug(generateSlug(nom));
+        e.setCouleurPrimaire("#2302B3");
+        e.setCouleurSecondaire("#4318FF");
+        e.setDateValidation(LocalDateTime.now());
 
         // Set a temporary tenant to satisfy NOT NULL constraint, will be updated after
         // save
@@ -166,5 +178,27 @@ public class EcoleSeeder {
         // Format: CM-{REGION}-ECOLE-{ID with 3-digit padding}
         String paddedId = String.format("%03d", id);
         return "CM-" + region + "-ECOLE-" + paddedId;
+    }
+
+    /**
+     * Generate a URL-friendly slug from a school name.
+     * Lowercases, replaces accents and spaces with hyphens, removes
+     * non-alphanumeric chars.
+     */
+    private String generateSlug(String nom) {
+        if (nom == null)
+            return "";
+        // Normalize accents
+        String normalized = Normalizer.normalize(nom, Normalizer.Form.NFD);
+        normalized = normalized.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+        // Lowercase
+        normalized = normalized.toLowerCase();
+        // Replace spaces and special chars with hyphens
+        normalized = normalized.replaceAll("[^a-z0-9]", "-");
+        // Remove consecutive hyphens
+        normalized = normalized.replaceAll("-+", "-");
+        // Remove leading/trailing hyphens
+        normalized = normalized.replaceAll("^-|-$", "");
+        return normalized;
     }
 }

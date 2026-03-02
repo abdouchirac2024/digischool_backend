@@ -1,4 +1,4 @@
-version: "3.9"
+#version: "3.9"
 
 services:
 
@@ -55,7 +55,7 @@ services:
       - backend
     command: redis-server --appendonly yes
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -79,19 +79,52 @@ services:
       - "service=redis-commander"
       - "environment=backend"
 
+  minio:
+    image: minio/minio:latest
+    container_name: digischool-minio
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - backend
+      - traefik
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minio-console.rule=Host(`minio.localhost`)"
+      - "traefik.http.routers.minio-console.entrypoints=web"
+      - "traefik.http.services.minio-console.loadbalancer.server.port=9001"
+      - "service=digischool-minio"
+      - "environment=backend"
+
   backend:
     build: .
-    container_name: digischool-backend
     restart: always
     depends_on:
       mysql-db:
         condition: service_started
       redis:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
-    ports:
-      - "8080:8080"
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL:-http://localhost:9000}
     networks:
       - backend
       - traefik
@@ -102,6 +135,8 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+    deploy:
+      replicas: ${BACKEND_REPLICAS:-3}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.digischool-backend.rule=Host(`api.helpdigischool.localhost`)"
@@ -109,6 +144,56 @@ services:
       - "traefik.http.services.digischool-backend.loadbalancer.server.port=8080"
       - "service=digischool-backend"
       - "environment=backend"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: always
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    networks:
+      - backend
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.localhost`)"
+      - "traefik.http.routers.prometheus.entrypoints=web"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+      - "service=prometheus"
+      - "environment=monitoring"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: always
+    depends_on:
+      - prometheus
+    ports:
+      - "4000:4000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    networks:
+      - backend
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.localhost`)"
+      - "traefik.http.routers.grafana.entrypoints=web"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+      - "service=grafana"
+      - "environment=monitoring"
 
 networks:
   backend:
@@ -124,3 +209,6 @@ networks:
 volumes:
   mysql_data:
   redis_data:
+  minio_data:
+  prometheus_data:
+  grafana_data:

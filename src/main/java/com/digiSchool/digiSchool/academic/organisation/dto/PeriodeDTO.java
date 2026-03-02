@@ -7,6 +7,17 @@ public class PeriodeDTO {
     private String name;
     private LocalDate start;
     private LocalDate end;
+    
+    public PeriodeDTO() {
+    	
+    }
+    
+	public PeriodeDTO(String name, LocalDate start, LocalDate end) {
+		super();
+		this.name = name;
+		this.start = start;
+		this.end = end;
+	}
 	public String getName() {
 		return name;
 	}

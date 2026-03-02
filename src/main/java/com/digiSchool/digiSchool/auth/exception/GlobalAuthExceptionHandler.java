@@ -16,15 +16,24 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalAuthExceptionHandler {
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage());
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleConflictException(ConflictException ex) {
+        return buildResponse(HttpStatus.CONFLICT, "Conflict", ex.getMessage());
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Map<String, Object>> handleForbiddenException(ForbiddenException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Forbidden", ex.getMessage());
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, Object>> handleAuthenticationException(AuthenticationException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now().toString());
-        body.put("status", HttpStatus.UNAUTHORIZED.value());
-        body.put("error", "Unauthorized");
-        body.put("message", ex.getMessage());
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -45,69 +54,45 @@ public class GlobalAuthExceptionHandler {
         return ResponseEntity.badRequest().body(body);
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now().toString());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "Bad Request");
-
-        String message = "Erreur de validation des données";
-        String detailedMessage = ex.getMostSpecificCause().getMessage();
-
-        if (detailedMessage != null) {
-            if (detailedMessage.contains("cannot be null")) {
-                message = "Un champ obligatoire est manquant";
-            } else if (detailedMessage.contains("Duplicate entry")) {
-                // Essayer d'extraire la valeur et la clé (ex: Duplicate entry 'test@gmail.com'
-                // for key 'users.UK_6dotkott26782v78n8yyf7v59')
-                try {
-                    String[] parts = detailedMessage.split("'");
-                    if (parts.length >= 4) {
-                        String value = parts[1];
-                        String keyName = parts[3];
-
-                        if (keyName.contains("email")) {
-                            message = "L'adresse email '" + value + "' est déjà utilisée";
-                        } else if (keyName.contains("telephone") || keyName.contains("phone")) {
-                            message = "Le numéro de téléphone '" + value + "' est déjà utilisé";
-                        } else if (keyName.contains("username") || keyName.contains("matricule")) {
-                            message = "L'identifiant ou matricule '" + value + "' existe déjà";
-                        } else {
-                            message = "La valeur '" + value + "' existe déjà pour le champ " + keyName;
-                        }
-                    } else {
-                        message = "Cette donnée existe déjà dans le système";
-                    }
-                } catch (Exception e) {
-                    message = "Cette donnée existe déjà";
-                }
-            }
-        }
-        body.put("message", message);
-
-        return ResponseEntity.badRequest().body(body);
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(
+            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex) {
+        String message = String.format("Le parametre '%s' doit etre de type %s. Valeur reçue: '%s'",
+                ex.getName(),
+                ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "inconnu",
+                ex.getValue());
+        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", message);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now().toString());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "Bad Request");
-        body.put("message", ex.getMessage());
-
-        return ResponseEntity.badRequest().body(body);
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        String message = "Erreur de validation des donnees";
+        if (ex.getMessage() != null) {
+            if (ex.getMessage().contains("cannot be null")) {
+                message = "Un champ obligatoire est manquant";
+            } else if (ex.getMessage().contains("Duplicate entry")) {
+                message = "Cette donnee existe deja";
+            }
+        }
+        return buildResponse(HttpStatus.CONFLICT, "Conflict", message);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDeniedException(AccessDeniedException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Forbidden", ex.getMessage());
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", ex.getMessage());
+    }
+
+    private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String error, String message) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now().toString());
-        body.put("status", HttpStatus.FORBIDDEN.value());
-        body.put("error", "Forbidden");
-        body.put("message", ex.getMessage());
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+        body.put("status", status.value());
+        body.put("error", error);
+        body.put("message", message);
+        return ResponseEntity.status(status).body(body);
     }
 }

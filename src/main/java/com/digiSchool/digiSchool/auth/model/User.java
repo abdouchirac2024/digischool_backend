@@ -10,9 +10,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import com.digiSchool.digiSchool.Exceptionconfig.model.Quartier;
 import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
+import com.digiSchool.digiSchool.user.model.Employee;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,6 +23,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -31,12 +31,10 @@ import jakarta.persistence.UniqueConstraint;
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenant")
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "email"),
-        @UniqueConstraint(columnNames = "telephone"),
-        @UniqueConstraint(columnNames = "username")
+        @UniqueConstraint(columnNames = "telephone")
 }, indexes = {
         @Index(name = "idx_user_email", columnList = "email"),
         @Index(name = "idx_user_telephone", columnList = "telephone"),
-        @Index(name = "idx_user_username", columnList = "username"),
         @Index(name = "idx_user_tenant", columnList = "tenant_id"),
         @Index(name = "idx_user_role", columnList = "role")
 })
@@ -64,19 +62,19 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String telephone;
 
-    @Column(unique = true)
-    private String username;
-
+    @Column(name = "avatar_url", length = 500)
+    private String avatarUrl;
     @ManyToOne
     @JoinColumn(name = "ecole_id")
     private Ecole ecole;
+    
+    @OneToOne
+    @JoinColumn(name = "employee_id")
+    private Employee employee;
 
-    @ManyToOne
-    @JoinColumn(name = "quartier_id")
-    private Quartier quartier;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false , length = 20)
     private RoleType role;
 
     @Enumerated(EnumType.STRING)
@@ -125,7 +123,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username != null ? username : email;
+        return email;
     }
 
     @Override
@@ -211,28 +209,12 @@ public class User implements UserDetails {
         this.telephone = telephone;
     }
 
-    public String getUsernameField() {
-        return username;
-    }
-
-    public void setUsernameField(String username) {
-        this.username = username;
-    }
-
     public Ecole getEcole() {
         return ecole;
     }
 
     public void setEcole(Ecole ecole) {
         this.ecole = ecole;
-    }
-
-    public Quartier getQuartier() {
-        return quartier;
-    }
-
-    public void setQuartier(Quartier quartier) {
-        this.quartier = quartier;
     }
 
     public RoleType getRole() {
@@ -314,4 +296,23 @@ public class User implements UserDetails {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
+
+	public Employee getEmployee() {
+		return employee;
+	}
+
+	public void setEmployee(Employee employee) {
+		this.employee = employee;
+	}
+
+	public String getAvatarUrl() {
+		return avatarUrl;
+	}
+
+	public void setAvatarUrl(String avatarUrl) {
+		this.avatarUrl = avatarUrl;
+	}
+	
+	
+    
 }

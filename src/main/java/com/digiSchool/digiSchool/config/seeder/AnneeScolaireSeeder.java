@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.digiSchool.digiSchool.academic.organisation.model.Anneescolaire;
 import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
-import com.digiSchool.digiSchool.academic.organisation.repository.AnneescolaireRepository;
+import com.digiSchool.digiSchool.academic.organisation.repository.AnneeScolaireRepository;
+
 
 /**
  * Seeder pour les annees scolaires.
@@ -17,13 +18,13 @@ import com.digiSchool.digiSchool.academic.organisation.repository.AnneescolaireR
 @Component
 public class AnneeScolaireSeeder {
 
-    private final AnneescolaireRepository anneescolaireRepository;
+    private final AnneeScolaireRepository anneescolaireRepository;
     private final EcoleSeeder ecoleSeeder;
 
     // Stockage des annees pour les autres seeders (cle = "libelle:codeEcole")
     private Map<String, Anneescolaire> anneesMap = new HashMap<>();
 
-    public AnneeScolaireSeeder(AnneescolaireRepository anneescolaireRepository, EcoleSeeder ecoleSeeder) {
+    public AnneeScolaireSeeder(AnneeScolaireRepository anneescolaireRepository, EcoleSeeder ecoleSeeder) {
         this.anneescolaireRepository = anneescolaireRepository;
         this.ecoleSeeder = ecoleSeeder;
     }

@@ -1,19 +1,18 @@
 package com.digiSchool.digiSchool.auth.filter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.digiSchool.digiSchool.Exceptionconfig.service.TenantContext;
+import com.digiSchool.digiSchool.auth.model.User;
+import com.digiSchool.digiSchool.auth.repository.UserRepository;
 import com.digiSchool.digiSchool.auth.service.JwtTokenService;
+import com.digiSchool.digiSchool.auth.util.CookieUtils;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,9 +28,11 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenService jwtService;
+    private final UserRepository userRepository;
 
-    public JwtAuthenticationFilter(JwtTokenService jwtService) {
+    public JwtAuthenticationFilter(JwtTokenService jwtService, UserRepository userRepository) {
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -40,33 +41,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Récupérer le header Authorization
-        String authHeader = request.getHeader("Authorization");
+        // 1. Priorité : cookie HttpOnly access_token
+        String token = CookieUtils.extractTokenFromCookie(request, CookieUtils.ACCESS_TOKEN_COOKIE);
+
+        // 2. Fallback : header Authorization: Bearer ... (compatibilité Swagger/mobile)
+        if (token == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
+            }
+        }
 
         // Si pas de token, continuer sans authentification
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        // Extraire le token (sans "Bearer ")
-        String token = authHeader.substring(7);
 
         try {
             // Valider le token
             if (jwtService.validateToken(token)) {
                 String username = jwtService.extractUsername(token);
-                String role = jwtService.extractRole(token);
 
-                // Créer les autorités basées sur le rôle
-                List<GrantedAuthority> authorities = new ArrayList<>();
-                if (role != null) {
-                    authorities.add(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
+                // Charger l'utilisateur depuis la DB (principal = User objet pour @CurrentUser)
+                User user = userRepository.findByEmail(username).orElse(null);
+                if (user == null) {
+                    filterChain.doFilter(request, response);
+                    return;
                 }
 
-                // Créer l'objet d'authentification
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,
-                        null, authorities);
+                // Créer l'objet d'authentification avec User comme principal
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        user, null, user.getAuthorities());
 
                 // Ajouter les détails de la requête
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -82,7 +88,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             // Token invalide - continuer sans authentification
-            // Le contrôleur gérera le cas non authentifié si nécessaire
             SecurityContextHolder.clearContext();
         }
 

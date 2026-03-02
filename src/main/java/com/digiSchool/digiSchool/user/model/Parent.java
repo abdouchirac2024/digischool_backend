@@ -7,7 +7,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.digiSchool.digiSchool.Exceptionconfig.model.Quartier;
 import com.digiSchool.digiSchool.Exceptionconfig.model.TenantEntity;
 
 import jakarta.persistence.CascadeType;
@@ -17,8 +16,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -51,7 +48,7 @@ public class Parent extends TenantEntity {
     @Column(nullable = false, length = 100)
     private String prenom;
 
-    @Column(nullable = true, unique = true, length = 255)
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
     @Column(nullable = false, unique = true, length = 20)
@@ -62,10 +59,6 @@ public class Parent extends TenantEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String adresse;
-
-    @ManyToOne
-    @JoinColumn(name = "quartier_id", nullable = false)
-    private Quartier quartier;
 
     @Column(length = 100)
     private String profession;
@@ -164,14 +157,6 @@ public class Parent extends TenantEntity {
         this.adresse = adresse;
     }
 
-    public Quartier getQuartier() {
-        return quartier;
-    }
-
-    public void setQuartier(Quartier quartier) {
-        this.quartier = quartier;
-    }
-
     public String getProfession() {
         return profession;
     }
@@ -252,11 +237,4 @@ public class Parent extends TenantEntity {
         this.deletedAt = deletedAt;
     }
 
-    public String getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(String tenant) {
-        this.tenant = tenant;
-    }
 }

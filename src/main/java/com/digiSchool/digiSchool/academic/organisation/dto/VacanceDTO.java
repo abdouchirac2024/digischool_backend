@@ -7,6 +7,17 @@ public class VacanceDTO {
     private String name;
     private LocalDate start;
     private LocalDate end;
+    
+    public VacanceDTO() {
+    	
+    }
+    
+	public VacanceDTO(String name, LocalDate start, LocalDate end) {
+		super();
+		this.name = name;
+		this.start = start;
+		this.end = end;
+	}
 	public String getName() {
 		return name;
 	}

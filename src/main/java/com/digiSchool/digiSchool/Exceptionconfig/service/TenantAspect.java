@@ -36,8 +36,7 @@ public class TenantAspect {
             "within(@org.springframework.stereotype.Service *)) && " +
             "!within(com.digiSchool.digiSchool.auth.service.AuthService) && " +
             "!within(com.digiSchool.digiSchool.auth.service.JwtTokenService) && " +
-            "!within(com.digiSchool.digiSchool.auth.service.CustomUserDetailsService) && " +
-            "!within(com.digiSchool.digiSchool.storage.service.MongoFileStorageServiceImpl)")
+            "!within(com.digiSchool.digiSchool.auth.service.CustomUserDetailsService)")
     public Object enableTenantFilter(ProceedingJoinPoint joinPoint) throws Throwable {
         String tenant = TenantContext.getTenant();
         String methodName = joinPoint.getSignature().toShortString();

@@ -10,9 +10,9 @@ import com.digiSchool.digiSchool.academic.organisation.model.Classe;
 import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
 import com.digiSchool.digiSchool.academic.organisation.model.Anneescolaire;
 import com.digiSchool.digiSchool.academic.organisation.model.StatutClasse;
+import com.digiSchool.digiSchool.academic.organisation.repository.AnneeScolaireRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.ClasseRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.EcoleRepository;
-import com.digiSchool.digiSchool.academic.organisation.repository.AnneescolaireRepository;
 import com.digiSchool.digiSchool.academic.organisation.service.ClasseService;
 import com.digiSchool.digiSchool.auth.model.User;
 import com.digiSchool.digiSchool.auth.repository.UserRepository;
@@ -25,13 +25,13 @@ public class ClasseServiceImpl implements ClasseService {
 
     private final ClasseRepository classeRepository;
     private final EcoleRepository ecoleRepository;
-    private final AnneescolaireRepository anneescolaireRepository;
+    private final AnneeScolaireRepository anneescolaireRepository;
     private final UserRepository userRepository;
 
     public ClasseServiceImpl(ClasseRepository classeRepository,
-            EcoleRepository ecoleRepository,
-            AnneescolaireRepository anneescolaireRepository,
-            UserRepository userRepository) {
+                             EcoleRepository ecoleRepository,
+                             AnneeScolaireRepository anneescolaireRepository,
+                             UserRepository userRepository) {
         this.classeRepository = classeRepository;
         this.ecoleRepository = ecoleRepository;
         this.anneescolaireRepository = anneescolaireRepository;
@@ -48,10 +48,6 @@ public class ClasseServiceImpl implements ClasseService {
     public ClasseDto create(ClasseDto dto, Long ecoleIdOverride) {
         Long ecoleId = ecoleIdOverride != null ? ecoleIdOverride : dto.getEcoleId();
 
-        if (ecoleId == null) {
-            throw new RuntimeException("Erreur d'identification de l'établissement. Veuillez vous reconnecter.");
-        }
-
         if (ecoleId != null && classeRepository.existsByNomClasseAndEcoleIdEcole(dto.getNomClasse(), ecoleId)) {
             throw new RuntimeException("Une classe avec ce nom existe deja dans cette ecole");
         }
@@ -63,9 +59,6 @@ public class ClasseServiceImpl implements ClasseService {
         classe.setSection(dto.getSection());
         classe.setCapacite(dto.getCapacite());
         classe.setFraisScolarite(dto.getFraisScolarite());
-        classe.setFraisInscription(dto.getFraisInscription());
-        classe.setPremierVersement(dto.getPremierVersement());
-        classe.setDeuxiemeVersement(dto.getDeuxiemeVersement());
         classe.setDescription(dto.getDescription());
         classe.setStatut(dto.getStatut() != null ? dto.getStatut() : StatutClasse.ACTIVE);
 
@@ -108,28 +101,14 @@ public class ClasseServiceImpl implements ClasseService {
             throw new RuntimeException("Acces non autorise a cette classe");
         }
 
-        if (dto.getNomClasse() != null)
-            classe.setNomClasse(dto.getNomClasse());
-        if (dto.getNiveau() != null)
-            classe.setNiveau(dto.getNiveau());
-        if (dto.getSousSysteme() != null)
-            classe.setSousSysteme(dto.getSousSysteme());
-        if (dto.getSection() != null)
-            classe.setSection(dto.getSection());
-        if (dto.getCapacite() != null)
-            classe.setCapacite(dto.getCapacite());
-        if (dto.getFraisScolarite() != null)
-            classe.setFraisScolarite(dto.getFraisScolarite());
-        if (dto.getFraisInscription() != null)
-            classe.setFraisInscription(dto.getFraisInscription());
-        if (dto.getPremierVersement() != null)
-            classe.setPremierVersement(dto.getPremierVersement());
-        if (dto.getDeuxiemeVersement() != null)
-            classe.setDeuxiemeVersement(dto.getDeuxiemeVersement());
-        if (dto.getDescription() != null)
-            classe.setDescription(dto.getDescription());
-        if (dto.getStatut() != null)
-            classe.setStatut(dto.getStatut());
+        if (dto.getNomClasse() != null) classe.setNomClasse(dto.getNomClasse());
+        if (dto.getNiveau() != null) classe.setNiveau(dto.getNiveau());
+        if (dto.getSousSysteme() != null) classe.setSousSysteme(dto.getSousSysteme());
+        if (dto.getSection() != null) classe.setSection(dto.getSection());
+        if (dto.getCapacite() != null) classe.setCapacite(dto.getCapacite());
+        if (dto.getFraisScolarite() != null) classe.setFraisScolarite(dto.getFraisScolarite());
+        if (dto.getDescription() != null) classe.setDescription(dto.getDescription());
+        if (dto.getStatut() != null) classe.setStatut(dto.getStatut());
 
         if (dto.getAnneeScolaireId() != null) {
             Anneescolaire annee = anneescolaireRepository.findById(dto.getAnneeScolaireId())
@@ -216,9 +195,6 @@ public class ClasseServiceImpl implements ClasseService {
         dto.setCapacite(classe.getCapacite());
         dto.setStatut(classe.getStatut());
         dto.setFraisScolarite(classe.getFraisScolarite());
-        dto.setFraisInscription(classe.getFraisInscription());
-        dto.setPremierVersement(classe.getPremierVersement());
-        dto.setDeuxiemeVersement(classe.getDeuxiemeVersement());
         dto.setDescription(classe.getDescription());
 
         int effectif = classe.getInscriptions() != null ? classe.getInscriptions().size() : 0;

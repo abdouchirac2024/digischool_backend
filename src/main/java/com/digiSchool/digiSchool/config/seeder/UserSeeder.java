@@ -116,13 +116,13 @@ public class UserSeeder {
                                 ecoleBilingue);
 
                 // ============ ÉLÈVES de test (pour tester le login élève) ============
-                // Eleve ecole bilingue (Yaounde) - matricule ELV-ECB-2025-0001
-                createUser("Paul", "Nkoulou", "elv-ecb-2025-0001@eleve.digischool.cm", null,
+                // Eleve ecole bilingue (Yaounde) - matricule ELV-ECB-001
+                createUser("Paul", "Nkoulou", "elv-ecb-001@eleve.digischool.cm", null,
                                 "Eleve@2025", RoleType.ELEVE, UserStatus.ACTIVE,
                                 ecoleBilingue);
 
-                // Eleve Progressive College (Douala) - matricule ELV-ECA-2025-0001
-                createUser("Samuel", "Ebogo", "elv-eca-2025-0001@eleve.digischool.cm", null,
+                // Eleve Progressive College (Douala) - matricule ELV-ECA-001
+                createUser("Samuel", "Ebogo", "elv-eca-001@eleve.digischool.cm", null,
                                 "Eleve@2025", RoleType.ELEVE, UserStatus.ACTIVE,
                                 ecoleAnglo);
 
@@ -133,8 +133,8 @@ public class UserSeeder {
                 System.out.println("     - Enseignant: jpkamga@lavictoire.cm / Enseignant@2025");
                 System.out.println("     - Secretaire: catangana@lavictoire.cm / Secretaire@2025");
                 System.out.println("     - Parent: fnkoulou@gmail.com / Parent@2025");
-                System.out.println("     - Eleve (Yaounde): elv-ecb-2025-0001@eleve.digischool.cm / Eleve@2025");
-                System.out.println("     - Eleve (Douala): elv-eca-2025-0001@eleve.digischool.cm / Eleve@2025");
+                System.out.println("     - Eleve (Yaounde): elv-ecb-001@eleve.digischool.cm / Eleve@2025");
+                System.out.println("     - Eleve (Douala): elv-eca-001@eleve.digischool.cm / Eleve@2025");
         }
 
         /**
@@ -190,13 +190,6 @@ public class UserSeeder {
                 user.setStatus(status);
                 user.setEcole(ecole);
                 user.setTenantId(ecole.getTenant());
-
-                // Peupler le username (Matricule pour élève, Téléphone pour parent)
-                if (role == RoleType.ELEVE) {
-                        user.setUsernameField(email.split("@")[0].toUpperCase());
-                } else if (role == RoleType.PARENT && telephone != null) {
-                        user.setUsernameField(telephone);
-                }
 
                 return userRepository.save(user);
         }

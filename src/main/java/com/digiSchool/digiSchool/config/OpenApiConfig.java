@@ -91,9 +91,13 @@ public class OpenApiConfig {
             // Tag definitions – order here controls display order in Swagger UI
             .tags(List.of(
                 new Tag().name("Authentification")
-                    .description("Login, logout, refresh token, mot de passe oublie. Supporte email et telephone."),
+                    .description("Login, logout, refresh token, mot de passe oublie. Supporte email et telephone. Tokens stockes en cookies HttpOnly."),
+                new Tag().name("Écoles")
+                    .description("Inscription, validation et gestion des ecoles. POST /register est public (sans auth). Validation reservee au SUPER_ADMIN."),
                 new Tag().name("Utilisateurs")
                     .description("Gestion des comptes utilisateurs (CRUD). Reserve aux Super Admin et Admin Ecole."),
+                new Tag().name("Années Scolaires")
+                    .description("Gestion des annees scolaires par ecole (tenant). Chaque ecole gere ses propres annees scolaires."),
                 new Tag().name("Classes")
                     .description("Gestion des classes scolaires. Filtrage automatique par ecole via le JWT."),
                 new Tag().name("Eleves")
@@ -104,6 +108,10 @@ public class OpenApiConfig {
                     .description("Gestion des parents d'eleves."),
                 new Tag().name("Relations Eleve-Parent")
                     .description("Association entre eleves et parents : responsable legal, contact d'urgence, principal."),
+                new Tag().name("Notifications")
+                    .description("Notifications in-app de l'utilisateur connecte : lecture, comptage, marquage comme lue."),
+                new Tag().name("Présence")
+                    .description("Suivi de presence en temps reel via WebSocket/Redis. Indique les utilisateurs connectes."),
                 new Tag().name("Roles")
                     .description("Liste des roles disponibles dans le systeme."),
                 new Tag().name("Regions")

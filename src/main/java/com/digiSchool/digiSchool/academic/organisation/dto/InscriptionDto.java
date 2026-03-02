@@ -11,42 +11,11 @@ public class InscriptionDto {
     private String statutInscription;
     private String motifAnnulation;
 
-    // Fichiers MongoDB GridFS (IDs ObjectId stockés en MySQL)
-    private String photoEleveMongoId;
-    private String acteNaissanceMongoId;
-    private String certificatMedicalMongoId;
-    private String bulletinAncienMongoId;
-
-    // URLs de téléchargement générées dynamiquement
-    private String photoEleveUrl;
-    private String acteNaissanceUrl;
-    private String certificatMedicalUrl;
-    private String bulletinAncienUrl;
-
-    // Finances
-    private Double remise;
-    private Double fraisTransport;
-    private Double fraisCantine;
-    private Double fraisAssurance;
-
     // Eleve
     private Long eleveId;
     private String eleveMatricule;
     private String eleveNom;
     private String elevePrenom;
-    private String elevePhotoUrl;
-    private String eleveActeNaissanceUrl;
-    private String eleveCertificatMedicalUrl;
-    private String eleveBulletinUrl;
-    private LocalDate eleveDateNaissance;
-    private String eleveLieuNaissance;
-    private String eleveNationalite;
-    private String eleveSexe;
-    private String eleveQuartier;
-    private String eleveVille;
-
-    // Parents
-    private List<ParentSummaryDto> parents;
 
     // Classe
     private Long classeId;
@@ -64,32 +33,6 @@ public class InscriptionDto {
     // Identifiants generes (retournes uniquement lors de la creation)
     private String generatedPassword;
     private String generatedEmail;
-
-    // Getters & Setters - Fichiers MongoDB
-
-    public String getPhotoEleveMongoId() { return photoEleveMongoId; }
-    public void setPhotoEleveMongoId(String photoEleveMongoId) { this.photoEleveMongoId = photoEleveMongoId; }
-
-    public String getActeNaissanceMongoId() { return acteNaissanceMongoId; }
-    public void setActeNaissanceMongoId(String acteNaissanceMongoId) { this.acteNaissanceMongoId = acteNaissanceMongoId; }
-
-    public String getCertificatMedicalMongoId() { return certificatMedicalMongoId; }
-    public void setCertificatMedicalMongoId(String certificatMedicalMongoId) { this.certificatMedicalMongoId = certificatMedicalMongoId; }
-
-    public String getBulletinAncienMongoId() { return bulletinAncienMongoId; }
-    public void setBulletinAncienMongoId(String bulletinAncienMongoId) { this.bulletinAncienMongoId = bulletinAncienMongoId; }
-
-    public String getPhotoEleveUrl() { return photoEleveUrl; }
-    public void setPhotoEleveUrl(String photoEleveUrl) { this.photoEleveUrl = photoEleveUrl; }
-
-    public String getActeNaissanceUrl() { return acteNaissanceUrl; }
-    public void setActeNaissanceUrl(String acteNaissanceUrl) { this.acteNaissanceUrl = acteNaissanceUrl; }
-
-    public String getCertificatMedicalUrl() { return certificatMedicalUrl; }
-    public void setCertificatMedicalUrl(String certificatMedicalUrl) { this.certificatMedicalUrl = certificatMedicalUrl; }
-
-    public String getBulletinAncienUrl() { return bulletinAncienUrl; }
-    public void setBulletinAncienUrl(String bulletinAncienUrl) { this.bulletinAncienUrl = bulletinAncienUrl; }
 
     // Getters & Setters
 
@@ -243,125 +186,5 @@ public class InscriptionDto {
 
     public void setGeneratedEmail(String generatedEmail) {
         this.generatedEmail = generatedEmail;
-    }
-
-    public Double getRemise() {
-        return remise;
-    }
-
-    public void setRemise(Double remise) {
-        this.remise = remise;
-    }
-
-    public Double getFraisTransport() {
-        return fraisTransport;
-    }
-
-    public void setFraisTransport(Double fraisTransport) {
-        this.fraisTransport = fraisTransport;
-    }
-
-    public Double getFraisCantine() {
-        return fraisCantine;
-    }
-
-    public void setFraisCantine(Double fraisCantine) {
-        this.fraisCantine = fraisCantine;
-    }
-
-    public Double getFraisAssurance() {
-        return fraisAssurance;
-    }
-
-    public void setFraisAssurance(Double fraisAssurance) {
-        this.fraisAssurance = fraisAssurance;
-    }
-
-    public String getElevePhotoUrl() {
-        return elevePhotoUrl;
-    }
-
-    public void setElevePhotoUrl(String elevePhotoUrl) {
-        this.elevePhotoUrl = elevePhotoUrl;
-    }
-
-    public String getEleveActeNaissanceUrl() {
-        return eleveActeNaissanceUrl;
-    }
-
-    public void setEleveActeNaissanceUrl(String eleveActeNaissanceUrl) {
-        this.eleveActeNaissanceUrl = eleveActeNaissanceUrl;
-    }
-
-    public String getEleveCertificatMedicalUrl() {
-        return eleveCertificatMedicalUrl;
-    }
-
-    public void setEleveCertificatMedicalUrl(String eleveCertificatMedicalUrl) {
-        this.eleveCertificatMedicalUrl = eleveCertificatMedicalUrl;
-    }
-
-    public String getEleveBulletinUrl() {
-        return eleveBulletinUrl;
-    }
-
-    public void setEleveBulletinUrl(String eleveBulletinUrl) {
-        this.eleveBulletinUrl = eleveBulletinUrl;
-    }
-
-    public LocalDate getEleveDateNaissance() {
-        return eleveDateNaissance;
-    }
-
-    public void setEleveDateNaissance(LocalDate eleveDateNaissance) {
-        this.eleveDateNaissance = eleveDateNaissance;
-    }
-
-    public String getEleveLieuNaissance() {
-        return eleveLieuNaissance;
-    }
-
-    public void setEleveLieuNaissance(String eleveLieuNaissance) {
-        this.eleveLieuNaissance = eleveLieuNaissance;
-    }
-
-    public String getEleveNationalite() {
-        return eleveNationalite;
-    }
-
-    public void setEleveNationalite(String eleveNationalite) {
-        this.eleveNationalite = eleveNationalite;
-    }
-
-    public String getEleveSexe() {
-        return eleveSexe;
-    }
-
-    public void setEleveSexe(String eleveSexe) {
-        this.eleveSexe = eleveSexe;
-    }
-
-    public String getEleveQuartier() {
-        return eleveQuartier;
-    }
-
-    public void setEleveQuartier(String eleveQuartier) {
-        this.eleveQuartier = eleveQuartier;
-    }
-
-    public String getEleveVille() {
-        return eleveVille;
-    }
-
-    public void setEleveVille(String eleveVille) {
-        this.eleveVille = eleveVille;
-    }
-
-    public List<ParentSummaryDto> getParents() {
-        return parents;
-    }
-
-    public void setParents(List<ParentSummaryDto> parents) {
-        this.parents = parents;
     }
 }

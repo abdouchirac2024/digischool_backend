@@ -34,11 +34,6 @@ public class Inscription extends TenantEntity {
     private LocalDate dateInscription;
     private Double montantTotal;
 
-    private Double remise = 0.0;
-    private Double fraisTransport = 0.0;
-    private Double fraisCantine = 0.0;
-    private Double fraisAssurance = 0.0;
-
     // Ancien champ garde pour compatibilite
     private Boolean statut;
 
@@ -46,21 +41,6 @@ public class Inscription extends TenantEntity {
     private StatutInscription statutInscription;
 
     private String motifAnnulation;
-
-    // -------------------------------------------------------
-    // Fichiers stockés dans MongoDB GridFS (IDs ObjectId)
-    // -------------------------------------------------------
-    @Column(name = "photo_eleve_mongo_id", length = 50)
-    private String photoEleveMongoId;
-
-    @Column(name = "acte_naissance_mongo_id", length = 50)
-    private String acteNaissanceMongoId;
-
-    @Column(name = "certificat_medical_mongo_id", length = 50)
-    private String certificatMedicalMongoId;
-
-    @Column(name = "bulletin_ancien_mongo_id", length = 50)
-    private String bulletinAncienMongoId;
 
     @ManyToOne
     @JoinColumn(name = "eleve_id")
@@ -181,49 +161,5 @@ public class Inscription extends TenantEntity {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
-    }
-
-    public String getPhotoEleveMongoId() { return photoEleveMongoId; }
-    public void setPhotoEleveMongoId(String photoEleveMongoId) { this.photoEleveMongoId = photoEleveMongoId; }
-
-    public String getActeNaissanceMongoId() { return acteNaissanceMongoId; }
-    public void setActeNaissanceMongoId(String acteNaissanceMongoId) { this.acteNaissanceMongoId = acteNaissanceMongoId; }
-
-    public String getCertificatMedicalMongoId() { return certificatMedicalMongoId; }
-    public void setCertificatMedicalMongoId(String certificatMedicalMongoId) { this.certificatMedicalMongoId = certificatMedicalMongoId; }
-
-    public String getBulletinAncienMongoId() { return bulletinAncienMongoId; }
-    public void setBulletinAncienMongoId(String bulletinAncienMongoId) { this.bulletinAncienMongoId = bulletinAncienMongoId; }
-
-    public Double getRemise() {
-        return remise;
-    }
-
-    public void setRemise(Double remise) {
-        this.remise = remise;
-    }
-
-    public Double getFraisTransport() {
-        return fraisTransport;
-    }
-
-    public void setFraisTransport(Double fraisTransport) {
-        this.fraisTransport = fraisTransport;
-    }
-
-    public Double getFraisCantine() {
-        return fraisCantine;
-    }
-
-    public void setFraisCantine(Double fraisCantine) {
-        this.fraisCantine = fraisCantine;
-    }
-
-    public Double getFraisAssurance() {
-        return fraisAssurance;
-    }
-
-    public void setFraisAssurance(Double fraisAssurance) {
-        this.fraisAssurance = fraisAssurance;
     }
 }

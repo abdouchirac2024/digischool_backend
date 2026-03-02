@@ -19,10 +19,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByTelephone(String telephone);
 
-    Optional<User> findByUsername(String username);
-
-    boolean existsByUsername(String username);
-
     Optional<User> findByEmailAndTenantId(String email, String tenantId);
 
     boolean existsByEmail(String email);
@@ -41,4 +37,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByTenantId(String tenantId);
 
     long countByTenantIdAndRole(String tenantId, RoleType role);
+
+    List<User> findByRole(RoleType role);
+
+    long countByStatus(UserStatus status);
+
+    List<User> findAllByOrderByCreatedAtDesc();
+
+    Optional<User> findByTelephoneAndIdNot(String telephone, Long id);
+
+    Optional<User> findFirstByEcoleIdEcoleAndRole(Long ecoleId, RoleType role);
 }

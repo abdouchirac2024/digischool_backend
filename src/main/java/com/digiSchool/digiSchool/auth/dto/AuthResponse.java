@@ -1,5 +1,7 @@
 package com.digiSchool.digiSchool.auth.dto;
 
+import java.time.LocalDateTime;
+
 import com.digiSchool.digiSchool.auth.model.RoleType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -103,10 +105,27 @@ public class AuthResponse {
         @Schema(description = "Code unique de l'ecole", example = "ECB-001")
         private String codeEcole;
 
+        @Schema(description = "Statut de l'ecole", example = "VALIDEE")
+        private String statutEcole;
+
+        @Schema(description = "Statut du compte utilisateur", example = "ACTIVE")
+        private String status;
+
+        @Schema(description = "Date de derniere connexion")
+        private LocalDateTime lastLogin;
+
+        @Schema(description = "Date de creation du compte")
+        private LocalDateTime createdAt;
+
+        @Schema(description = "URL de la photo de profil")
+        private String avatarUrl;
+
         public UserInfo() {}
 
         public UserInfo(Long id, String email, String nom, String prenom, String telephone,
-                        RoleType role, String tenantId, Long ecoleId, String ecoleNom, String codeEcole) {
+                        RoleType role, String tenantId, Long ecoleId, String ecoleNom, String codeEcole,
+                        String statutEcole, String status, LocalDateTime lastLogin, LocalDateTime createdAt,
+                        String avatarUrl) {
             this.id = id;
             this.email = email;
             this.nom = nom;
@@ -117,6 +136,11 @@ public class AuthResponse {
             this.ecoleId = ecoleId;
             this.ecoleNom = ecoleNom;
             this.codeEcole = codeEcole;
+            this.statutEcole = statutEcole;
+            this.status = status;
+            this.lastLogin = lastLogin;
+            this.createdAt = createdAt;
+            this.avatarUrl = avatarUrl;
         }
 
         public Long getId() {
@@ -197,6 +221,46 @@ public class AuthResponse {
 
         public void setCodeEcole(String codeEcole) {
             this.codeEcole = codeEcole;
+        }
+
+        public String getStatutEcole() {
+            return statutEcole;
+        }
+
+        public void setStatutEcole(String statutEcole) {
+            this.statutEcole = statutEcole;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public LocalDateTime getLastLogin() {
+            return lastLogin;
+        }
+
+        public void setLastLogin(LocalDateTime lastLogin) {
+            this.lastLogin = lastLogin;
+        }
+
+        public LocalDateTime getCreatedAt() {
+            return createdAt;
+        }
+
+        public void setCreatedAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+        }
+
+        public String getAvatarUrl() {
+            return avatarUrl;
+        }
+
+        public void setAvatarUrl(String avatarUrl) {
+            this.avatarUrl = avatarUrl;
         }
     }
 }

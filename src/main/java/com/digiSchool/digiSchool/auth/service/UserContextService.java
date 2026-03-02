@@ -58,26 +58,25 @@ public class UserContextService {
 
         String token = authHeader.substring(7);
         try {
-            // 1. Essayer d'extraire le username (subject) du token
+            // D'abord essayer d'extraire directement des claims
+            String tenantIdStr = jwtService.extractTenantId(token);
+            if (tenantIdStr != null) {
+                return Long.parseLong(tenantIdStr);
+            }
+
+            // Si pas d'ecoleId dans le token, chercher l'utilisateur en base
             String username = jwtService.extractUsername(token);
             if (username != null) {
                 User user = userRepository.findByEmail(username).orElse(null);
-                if (user != null && user.getEcole() != null) {
-                    return user.getEcole().getIdEcole();
+                if (user != null) {
+                    // Chercher l'école associée au tenant de l'utilisateur
+                    return ecoleRepository.findByTenant(user.getTenantId())
+                            .map(Ecole::getIdEcole)
+                            .orElse(null);
                 }
             }
-
-            // 2. Fallback: Si pas d'ecole directe sur le user, utiliser le tenantId
-            // (String)
-            // pour trouver l'école correspondante
-            String tenantIdStr = jwtService.extractTenantId(token);
-            if (tenantIdStr != null) {
-                return ecoleRepository.findByTenant(tenantIdStr)
-                        .map(Ecole::getIdEcole)
-                        .orElse(null);
-            }
         } catch (Exception e) {
-            // Token invalide ou erreur de lecture
+            // Token invalide
             return null;
         }
 

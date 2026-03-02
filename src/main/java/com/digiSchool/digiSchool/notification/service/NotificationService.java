@@ -1,20 +1,15 @@
 package com.digiSchool.digiSchool.notification.service;
 
 import java.util.List;
-
-import com.digiSchool.digiSchool.notification.model.Notification;
+import com.digiSchool.digiSchool.auth.model.User;
+import com.digiSchool.digiSchool.notification.dto.NotificationDto;
+import com.digiSchool.digiSchool.notification.model.TypeNotification;
 
 public interface NotificationService {
-
-    void creerNotification(Long destinataireId, String tenantId, String titre, String message, String type);
-
-    List<Notification> getNotifications(Long userId);
-
-    List<Notification> getUnreadNotifications(Long userId);
-
-    void marquerLue(Long notificationId);
-
-    void marquerToutesLues(Long userId);
-
-    long countUnread(Long userId);
+    void envoyerNotification(User destinataire, String titre, String message, TypeNotification type);
+    List<NotificationDto> getNotificationsNonLues(Long userId);
+    List<NotificationDto> getNotifications(Long userId);
+    void marquerCommeLue(Long notificationId);
+    void marquerToutesCommeLues(Long userId);
+    long compterNonLues(Long userId);
 }

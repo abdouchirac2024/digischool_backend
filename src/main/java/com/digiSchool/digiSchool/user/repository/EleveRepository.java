@@ -28,8 +28,4 @@ public interface EleveRepository extends JpaRepository<Eleve, Long> {
     Optional<Eleve> findByMatriculeAndTenant(@Param("matricule") String matricule, @Param("tenant") String tenant);
 
     List<Eleve> findByNomContainingIgnoreCaseOrPrenomContainingIgnoreCase(String nom, String prenom);
-
-    @Query("SELECT MAX(CAST(SUBSTRING(e.matricule, LENGTH(:prefix) + 1) AS integer)) " +
-            "FROM Eleve e WHERE e.tenant = :tenant AND e.matricule LIKE CONCAT(:prefix, '%')")
-    Integer findMaxMatriculeNumber(@Param("tenant") String tenant, @Param("prefix") String prefix);
 }

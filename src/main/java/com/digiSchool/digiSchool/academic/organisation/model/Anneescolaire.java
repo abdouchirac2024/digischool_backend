@@ -1,6 +1,7 @@
 package com.digiSchool.digiSchool.academic.organisation.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.digiSchool.digiSchool.Exceptionconfig.model.TenantEntity;
@@ -38,16 +39,16 @@ public class Anneescolaire extends TenantEntity{
     private List<Discipline> disciplines;
     
     @OneToMany(mappedBy = "anneeScolaire", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Periode> periodes;
+    private List<Periode> periodes = new ArrayList<>();
 
     @OneToMany(mappedBy = "anneeScolaire", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Examen> examens;
+    private List<Examen> examens = new ArrayList<>();;
 
     @OneToMany(mappedBy = "anneeScolaire", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Vacance> vacances;
+    private List<Vacance> vacances = new ArrayList<>();;
 
     @OneToMany(mappedBy = "anneeScolaire", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<JourFerie> joursFeries;
+    private List<JourFerie> joursFeries = new ArrayList<>();;
 
 	public String getLibelle() {
 		return libelle;

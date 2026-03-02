@@ -7,13 +7,8 @@ import com.digiSchool.digiSchool.academic.organisation.dto.AnneeScolaireResponse
 import com.digiSchool.digiSchool.academic.organisation.model.Anneescolaire;
 
 public interface AnneeScolaireService {
-	List<AnneeScolaireResponseDTO> getAll(String tenant);
-//
-	AnneeScolaireResponseDTO findById(Long id, String tenant);
-
+	List<AnneeScolaireResponseDTO> getAll();
+	AnneeScolaireResponseDTO findById(Long id);
 	Anneescolaire create(AnneeScolaireDTO dto);
-
-//	AnneeScolaireDTO update(Long id, AnneeScolaireDTO dto);
-//
-//    void delete(Long id);
+	AnneeScolaireResponseDTO update(Long id, AnneeScolaireDTO dto);
 }

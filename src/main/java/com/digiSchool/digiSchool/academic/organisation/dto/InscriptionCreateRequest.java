@@ -20,12 +20,6 @@ public class InscriptionCreateRequest {
     /** Numeros des tranches a marquer comme payees (ex: [1], [1,2], [1,2,3]) */
     private List<Integer> tranchesPayees;
 
-    // Nouveaux champs financiers
-    private Double remise;
-    private Double fraisTransport;
-    private Double fraisCantine;
-    private Double fraisAssurance;
-
     public Long getEleveId() {
         return eleveId;
     }
@@ -64,37 +58,5 @@ public class InscriptionCreateRequest {
 
     public void setTranchesPayees(List<Integer> tranchesPayees) {
         this.tranchesPayees = tranchesPayees;
-    }
-
-    public Double getRemise() {
-        return remise;
-    }
-
-    public void setRemise(Double remise) {
-        this.remise = remise;
-    }
-
-    public Double getFraisTransport() {
-        return fraisTransport;
-    }
-
-    public void setFraisTransport(Double fraisTransport) {
-        this.fraisTransport = fraisTransport;
-    }
-
-    public Double getFraisCantine() {
-        return fraisCantine;
-    }
-
-    public void setFraisCantine(Double fraisCantine) {
-        this.fraisCantine = fraisCantine;
-    }
-
-    public Double getFraisAssurance() {
-        return fraisAssurance;
-    }
-
-    public void setFraisAssurance(Double fraisAssurance) {
-        this.fraisAssurance = fraisAssurance;
     }
 }

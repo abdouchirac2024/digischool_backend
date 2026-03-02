@@ -4,98 +4,58 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.digiSchool.digiSchool.auth.model.User;
+
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "notification")
 public class Notification {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idNotification;
-
+    private Long id;
+    
     @Column(name = "tenant_id", nullable = false)
     private String tenantId;
 
-    @Column(nullable = false)
-    private Long destinataireId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User destinataire;
 
-    @Column(nullable = false)
     private String titre;
 
     @Column(columnDefinition = "TEXT")
     private String message;
 
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private TypeNotification type;
 
-    @Column(nullable = false)
-    private Boolean lue = false;
+    private Boolean lu = false;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     // Getters & Setters
-
-    public Long getIdNotification() {
-        return idNotification;
-    }
-
-    public void setIdNotification(Long idNotification) {
-        this.idNotification = idNotification;
-    }
-
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public Long getDestinataireId() {
-        return destinataireId;
-    }
-
-    public void setDestinataireId(Long destinataireId) {
-        this.destinataireId = destinataireId;
-    }
-
-    public String getTitre() {
-        return titre;
-    }
-
-    public void setTitre(String titre) {
-        this.titre = titre;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Boolean getLue() {
-        return lue;
-    }
-
-    public void setLue(Boolean lue) {
-        this.lue = lue;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public User getDestinataire() { return destinataire; }
+    public void setDestinataire(User destinataire) { this.destinataire = destinataire; }
+    public String getTitre() { return titre; }
+    public void setTitre(String titre) { this.titre = titre; }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
+    public TypeNotification getType() { return type; }
+    public void setType(TypeNotification type) { this.type = type; }
+    public Boolean getLu() { return lu; }
+    public void setLu(Boolean lu) { this.lu = lu; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+	public String getTenantId() {
+		return tenantId;
+	}
+	public void setTenantId(String tenantId) {
+		this.tenantId = tenantId;
+	}
+    
 }

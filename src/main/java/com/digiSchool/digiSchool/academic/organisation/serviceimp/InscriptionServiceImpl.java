@@ -14,7 +14,6 @@ import com.digiSchool.digiSchool.academic.organisation.dto.AnnulationRequest;
 import com.digiSchool.digiSchool.academic.organisation.dto.EcheanceDto;
 import com.digiSchool.digiSchool.academic.organisation.dto.InscriptionCreateRequest;
 import com.digiSchool.digiSchool.academic.organisation.dto.InscriptionDto;
-import com.digiSchool.digiSchool.academic.organisation.dto.ParentSummaryDto;
 import com.digiSchool.digiSchool.academic.organisation.model.Anneescolaire;
 import com.digiSchool.digiSchool.academic.organisation.model.Classe;
 import com.digiSchool.digiSchool.academic.organisation.model.Echeance;
@@ -22,7 +21,7 @@ import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
 import com.digiSchool.digiSchool.academic.organisation.model.Inscription;
 import com.digiSchool.digiSchool.academic.organisation.model.StatutEcheance;
 import com.digiSchool.digiSchool.academic.organisation.model.StatutInscription;
-import com.digiSchool.digiSchool.academic.organisation.repository.AnneescolaireRepository;
+import com.digiSchool.digiSchool.academic.organisation.repository.AnneeScolaireRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.ClasseRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.EcheanceRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.EcoleRepository;
@@ -33,14 +32,11 @@ import com.digiSchool.digiSchool.auth.model.RoleType;
 import com.digiSchool.digiSchool.auth.model.User;
 import com.digiSchool.digiSchool.auth.model.UserStatus;
 import com.digiSchool.digiSchool.auth.repository.UserRepository;
-import com.digiSchool.digiSchool.notification.model.Notification;
-import com.digiSchool.digiSchool.notification.repository.NotificationRepository;
 import com.digiSchool.digiSchool.user.model.Eleve;
 import com.digiSchool.digiSchool.user.model.EleveParent;
 import com.digiSchool.digiSchool.user.model.StatutEleve;
 import com.digiSchool.digiSchool.user.repository.EleveParentRepository;
 import com.digiSchool.digiSchool.user.repository.EleveRepository;
-import com.digiSchool.digiSchool.user.service.SmsService;
 
 import jakarta.transaction.Transactional;
 
@@ -52,28 +48,24 @@ public class InscriptionServiceImpl implements InscriptionService {
     private final EcheanceRepository echeanceRepository;
     private final EleveRepository eleveRepository;
     private final ClasseRepository classeRepository;
-    private final AnneescolaireRepository anneescolaireRepository;
+    private final AnneeScolaireRepository anneescolaireRepository;
     private final EleveParentRepository eleveParentRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EcoleRepository ecoleRepository;
-    private final NotificationRepository notificationRepository;
     private final ClasseService classeService;
-    private final SmsService smsService;
 
     public InscriptionServiceImpl(
             InscriptionRepository inscriptionRepository,
             EcheanceRepository echeanceRepository,
             EleveRepository eleveRepository,
             ClasseRepository classeRepository,
-            AnneescolaireRepository anneescolaireRepository,
+            AnneeScolaireRepository anneescolaireRepository,
             EleveParentRepository eleveParentRepository,
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             EcoleRepository ecoleRepository,
-            NotificationRepository notificationRepository,
-            ClasseService classeService,
-            SmsService smsService) {
+            ClasseService classeService) {
         this.inscriptionRepository = inscriptionRepository;
         this.echeanceRepository = echeanceRepository;
         this.eleveRepository = eleveRepository;
@@ -83,9 +75,7 @@ public class InscriptionServiceImpl implements InscriptionService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.ecoleRepository = ecoleRepository;
-        this.notificationRepository = notificationRepository;
         this.classeService = classeService;
-        this.smsService = smsService;
     }
 
     @Override
@@ -132,22 +122,12 @@ public class InscriptionServiceImpl implements InscriptionService {
                 : LocalDate.now();
 
         // 8. Creer l'inscription
-        Double fraisScolarite = classe.getFraisScolarite() != null ? classe.getFraisScolarite() : 0.0;
-        Double remise = request.getRemise() != null ? request.getRemise() : 0.0;
-        Double transport = request.getFraisTransport() != null ? request.getFraisTransport() : 0.0;
-        Double cantine = request.getFraisCantine() != null ? request.getFraisCantine() : 0.0;
-        Double assurance = request.getFraisAssurance() != null ? request.getFraisAssurance() : 0.0;
-
-        Double montantTotal = (fraisScolarite - remise) + transport + cantine + assurance;
+        Double montantTotal = classe.getFraisScolarite() != null ? classe.getFraisScolarite() : 0.0;
 
         Inscription inscription = new Inscription();
         inscription.setNumeroInscription(numeroInscription);
         inscription.setDateInscription(dateInscription);
         inscription.setMontantTotal(montantTotal);
-        inscription.setRemise(remise);
-        inscription.setFraisTransport(transport);
-        inscription.setFraisCantine(cantine);
-        inscription.setFraisAssurance(assurance);
         inscription.setStatut(true);
         inscription.setStatutInscription(StatutInscription.VALIDEE);
         inscription.setEleve(eleve);
@@ -176,16 +156,7 @@ public class InscriptionServiceImpl implements InscriptionService {
         eleveRepository.save(eleve);
 
         // 11. Creer compte User ELEVE
-        if (userRepository.existsByUsername(eleve.getMatricule())) {
-            throw new RuntimeException("Un compte utilisateur existe déjà pour le matricule " + eleve.getMatricule());
-        }
-
         String generatedEmail = eleve.getMatricule().toLowerCase() + "@eleve.digischool.cm";
-        if (userRepository.existsByEmail(generatedEmail)) {
-            throw new RuntimeException(
-                    "L'adresse email '" + generatedEmail + "' est déjà utilisée par un autre compte");
-        }
-
         String generatedPassword = generatePassword();
         createUserAccount(eleve, tenant, generatedEmail, generatedPassword);
 
@@ -342,16 +313,15 @@ public class InscriptionServiceImpl implements InscriptionService {
         user.setPrenom(eleve.getPrenom());
         user.setRole(RoleType.ELEVE);
         user.setStatus(UserStatus.ACTIVE);
-        user.setUsernameField(eleve.getMatricule());
         user.setTenantId(tenant);
 
         Ecole ecole = ecoleRepository.findByTenant(tenant).orElse(null);
         if (ecole != null) {
             user.setEcole(ecole);
         }
-        if (eleve.getQuartier() != null) {
-            user.setQuartier(eleve.getQuartier());
-        }
+        // if (eleve.getQuartier() != null) {
+        // user.setQuartier(eleve.getQuartier());
+        // }
 
         userRepository.save(user);
     }
@@ -395,23 +365,15 @@ public class InscriptionServiceImpl implements InscriptionService {
                     .append(e.getDateEcheance()).append(")\n");
         }
 
-        Notification notification = new Notification();
-        notification.setTenantId(tenant);
-        notification.setDestinataireId(parentUser.getId());
-        notification.setTitre("Inscription de votre enfant " + eleve.getPrenom() + " " + eleve.getNom());
-        notification.setMessage(msg.toString());
-        notification.setType("INSCRIPTION");
-        notification.setLue(false);
-        notificationRepository.save(notification);
-
-        // Envoi SMS Mock
-        String parentPhone = parentPrincipal.getParent().getTelephone();
-        if (parentPhone != null && !parentPhone.isEmpty()) {
-            String smsText = "DigiSchool: Inscription confirmee pour " + eleve.getPrenom() + " " + eleve.getNom() +
-                    " en classe de " + classe.getNomClasse() + ". Montant: " + String.format("%.0f", montantTotal)
-                    + " FCFA.";
-            smsService.sendSms(parentPhone, smsText);
-        }
+        // Notification notification = new Notification();
+        // notification.setTenantId(tenant);
+        // notification.setDestinataireId(parentUser.getId());
+        // notification.setTitre("Inscription de votre enfant " + eleve.getPrenom() + "
+        // " + eleve.getNom());
+        // notification.setMessage(msg.toString());
+        // notification.setType("INSCRIPTION");
+        // notification.setLue(false);
+        // notificationRepository.save(notification);
     }
 
     // =====================
@@ -424,30 +386,11 @@ public class InscriptionServiceImpl implements InscriptionService {
         dto.setNumeroInscription(inscription.getNumeroInscription());
         dto.setDateInscription(inscription.getDateInscription());
         dto.setMontantTotal(inscription.getMontantTotal());
-        dto.setRemise(inscription.getRemise());
-        dto.setFraisTransport(inscription.getFraisTransport());
-        dto.setFraisCantine(inscription.getFraisCantine());
-        dto.setFraisAssurance(inscription.getFraisAssurance());
         dto.setMotifAnnulation(inscription.getMotifAnnulation());
 
         if (inscription.getStatutInscription() != null) {
             dto.setStatutInscription(inscription.getStatutInscription().name());
         }
-
-        // Fichiers MongoDB GridFS
-        dto.setPhotoEleveMongoId(inscription.getPhotoEleveMongoId());
-        dto.setActeNaissanceMongoId(inscription.getActeNaissanceMongoId());
-        dto.setCertificatMedicalMongoId(inscription.getCertificatMedicalMongoId());
-        dto.setBulletinAncienMongoId(inscription.getBulletinAncienMongoId());
-
-        if (inscription.getPhotoEleveMongoId() != null)
-            dto.setPhotoEleveUrl("/api/files/" + inscription.getPhotoEleveMongoId());
-        if (inscription.getActeNaissanceMongoId() != null)
-            dto.setActeNaissanceUrl("/api/files/" + inscription.getActeNaissanceMongoId());
-        if (inscription.getCertificatMedicalMongoId() != null)
-            dto.setCertificatMedicalUrl("/api/files/" + inscription.getCertificatMedicalMongoId());
-        if (inscription.getBulletinAncienMongoId() != null)
-            dto.setBulletinAncienUrl("/api/files/" + inscription.getBulletinAncienMongoId());
 
         Eleve eleve = inscription.getEleve();
         if (eleve != null) {
@@ -455,10 +398,6 @@ public class InscriptionServiceImpl implements InscriptionService {
             dto.setEleveMatricule(eleve.getMatricule());
             dto.setEleveNom(eleve.getNom());
             dto.setElevePrenom(eleve.getPrenom());
-            dto.setElevePhotoUrl(eleve.getPhotoUrl());
-            dto.setEleveActeNaissanceUrl(eleve.getActeNaissanceUrl());
-            dto.setEleveCertificatMedicalUrl(eleve.getCertificatMedicalUrl());
-            dto.setEleveBulletinUrl(eleve.getBulletinUrl());
         }
 
         Classe classe = inscription.getClasse();
@@ -475,44 +414,6 @@ public class InscriptionServiceImpl implements InscriptionService {
         if (annee != null) {
             dto.setAnneeScolaireId(annee.getIdAnnee());
             dto.setAnneeScolaireLibelle(annee.getLibelle());
-        }
-
-        // Bio & Location
-        if (eleve != null) {
-            dto.setEleveDateNaissance(eleve.getDateNaissance());
-            dto.setEleveLieuNaissance(eleve.getLieuNaissance());
-            dto.setEleveNationalite(eleve.getNationalite());
-            if (eleve.getSexe() != null) {
-                dto.setEleveSexe(eleve.getSexe().name());
-            }
-            if (eleve.getQuartier() != null) {
-                dto.setEleveQuartier(eleve.getQuartier().getNom());
-                if (eleve.getQuartier().getVille() != null) {
-                    dto.setEleveVille(eleve.getQuartier().getVille().getNom());
-                }
-            }
-
-            // Parents
-            if (eleve.getEleveParents() != null) {
-                List<ParentSummaryDto> parentDtos = eleve.getEleveParents().stream()
-                        .map(ep -> {
-                            ParentSummaryDto pDto = new ParentSummaryDto();
-                            if (ep.getParent() != null) {
-                                pDto.setMatricule(ep.getParent().getMatriculeParent());
-                                pDto.setNom(ep.getParent().getNom());
-                                pDto.setPrenom(ep.getParent().getPrenom());
-                                pDto.setEmail(ep.getParent().getEmail());
-                                pDto.setTelephone(ep.getParent().getTelephone());
-                            }
-                            if (ep.getTypeRelation() != null) {
-                                pDto.setRelation(ep.getTypeRelation().name());
-                            }
-                            pDto.setPrincipal(ep.getEstPrincipal() != null && ep.getEstPrincipal());
-                            return pDto;
-                        })
-                        .collect(Collectors.toList());
-                dto.setParents(parentDtos);
-            }
         }
 
         return dto;

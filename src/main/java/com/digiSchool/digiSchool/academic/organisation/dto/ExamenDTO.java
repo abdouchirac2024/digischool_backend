@@ -7,6 +7,16 @@ public class ExamenDTO {
     private String name;
     private LocalDate start;
     private LocalDate end;
+    
+    public ExamenDTO() {
+        // constructeur vide pour frameworks
+    }
+
+    public ExamenDTO(String name, LocalDate start, LocalDate end) {
+        this.name = name;
+        this.start = start;
+        this.end = end;
+    }
 	public String getName() {
 		return name;
 	}

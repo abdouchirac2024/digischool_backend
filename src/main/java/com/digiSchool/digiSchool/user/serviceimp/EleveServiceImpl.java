@@ -1,24 +1,17 @@
 package com.digiSchool.digiSchool.user.serviceimp;
 
-import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import com.digiSchool.digiSchool.Exceptionconfig.model.Quartier;
 import com.digiSchool.digiSchool.Exceptionconfig.service.TenantContext;
-import com.digiSchool.digiSchool.academic.organisation.model.StatutInscription;
-import com.digiSchool.digiSchool.academic.organisation.model.Anneescolaire;
-import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
-import com.digiSchool.digiSchool.academic.organisation.repository.AnneescolaireRepository;
-import com.digiSchool.digiSchool.academic.organisation.repository.EcoleRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.QuartierRepository;
 import com.digiSchool.digiSchool.user.dto.EleveDto;
 import com.digiSchool.digiSchool.user.model.Eleve;
 import com.digiSchool.digiSchool.user.model.Sexe;
 import com.digiSchool.digiSchool.user.repository.EleveRepository;
 import com.digiSchool.digiSchool.user.service.EleveService;
-import com.digiSchool.digiSchool.user.service.IdentifierGeneratorService;
 
 import jakarta.transaction.Transactional;
 
@@ -28,20 +21,10 @@ public class EleveServiceImpl implements EleveService {
 
     private final EleveRepository eleveRepository;
     private final QuartierRepository quartierRepository;
-    private final IdentifierGeneratorService identifierGeneratorService;
-    private final EcoleRepository ecoleRepository;
-    private final AnneescolaireRepository anneescolaireRepository;
 
-    public EleveServiceImpl(EleveRepository eleveRepository,
-            QuartierRepository quartierRepository,
-            IdentifierGeneratorService identifierGeneratorService,
-            EcoleRepository ecoleRepository,
-            AnneescolaireRepository anneescolaireRepository) {
+    public EleveServiceImpl(EleveRepository eleveRepository, QuartierRepository quartierRepository) {
         this.eleveRepository = eleveRepository;
         this.quartierRepository = quartierRepository;
-        this.identifierGeneratorService = identifierGeneratorService;
-        this.ecoleRepository = ecoleRepository;
-        this.anneescolaireRepository = anneescolaireRepository;
     }
 
     @Override
@@ -93,25 +76,14 @@ public class EleveServiceImpl implements EleveService {
             eleve.setSexe(Sexe.valueOf(dto.getSexe()));
         }
         eleve.setPhotoUrl(dto.getPhotoUrl());
-        eleve.setActeNaissanceUrl(dto.getActeNaissanceUrl());
-        eleve.setCertificatMedicalUrl(dto.getCertificatMedicalUrl());
-        eleve.setBulletinUrl(dto.getBulletinUrl());
         if (dto.getQuartierId() != null) {
             Quartier quartier = quartierRepository.findById(dto.getQuartierId())
                     .orElseThrow(() -> new RuntimeException("Quartier introuvable"));
             eleve.setQuartier(quartier);
         }
 
-        // Generation matricule professionnel
-        String libelleAnnee = anneescolaireRepository.findFirstByStatutTrue()
-                .map(Anneescolaire::getLibelle)
-                .orElse(String.valueOf(java.time.LocalDate.now().getYear()));
-
-        Ecole ecole = ecoleRepository.findByTenant(tenant)
-                .orElseThrow(() -> new RuntimeException(
-                        "Ecole introuvable pour ce tenant. Impossible de générer le matricule."));
-
-        String matricule = identifierGeneratorService.generateEleveMatricule(ecole, libelleAnnee);
+        // Generation matricule simple
+        String matricule = "E" + System.currentTimeMillis();
         eleve.setMatricule(matricule);
 
         eleve.setTenant(tenant);
@@ -146,15 +118,6 @@ public class EleveServiceImpl implements EleveService {
         }
         if (dto.getPhotoUrl() != null) {
             eleve.setPhotoUrl(dto.getPhotoUrl());
-        }
-        if (dto.getActeNaissanceUrl() != null) {
-            eleve.setActeNaissanceUrl(dto.getActeNaissanceUrl());
-        }
-        if (dto.getCertificatMedicalUrl() != null) {
-            eleve.setCertificatMedicalUrl(dto.getCertificatMedicalUrl());
-        }
-        if (dto.getBulletinUrl() != null) {
-            eleve.setBulletinUrl(dto.getBulletinUrl());
         }
         if (dto.getQuartierId() != null) {
             Quartier quartier = quartierRepository.findById(dto.getQuartierId())
@@ -192,28 +155,10 @@ public class EleveServiceImpl implements EleveService {
         dto.setTenant(eleve.getTenant());
         dto.setNationalite(eleve.getNationalite());
         dto.setPhotoUrl(eleve.getPhotoUrl());
-        dto.setActeNaissanceUrl(eleve.getActeNaissanceUrl());
-        dto.setCertificatMedicalUrl(eleve.getCertificatMedicalUrl());
-        dto.setBulletinUrl(eleve.getBulletinUrl());
 
         if (eleve.getQuartier() != null) {
             dto.setQuartierId(eleve.getQuartier().getId());
             dto.setQuartierNom(eleve.getQuartier().getNom());
-        }
-
-        if (eleve.getStatut() != null) {
-            dto.setStatut(eleve.getStatut().name());
-        }
-
-        if (eleve.getInscriptions() != null) {
-            eleve.getInscriptions().stream()
-                .filter(i -> StatutInscription.VALIDEE.equals(i.getStatutInscription())
-                        && i.getClasse() != null)
-                .max(Comparator.comparingLong(i -> i.getIdInscription() != null ? i.getIdInscription() : 0L))
-                .ifPresent(ins -> {
-                    dto.setClasseActuelle(ins.getClasse().getNomClasse());
-                    dto.setClasseId(ins.getClasse().getIdClasse());
-                });
         }
 
         return dto;
