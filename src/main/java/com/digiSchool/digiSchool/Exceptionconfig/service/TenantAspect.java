@@ -54,9 +54,9 @@ public class TenantAspect {
                 log.error("[TenantAspect] ✗ Failed to enable filter: {}", e.getMessage());
             }
         } else {
-            // Bloquer l'exécution si aucun tenant n'est défini (sécurité multi-tenant)
-            log.error("[TenantAspect] ✗ BLOCKED - No tenant in context for method: {}", methodName);
-            throw new SecurityException("Accès refusé : aucun tenant identifié. Authentification requise.");
+            // Pas de tenant : endpoint public (ex: inscription école) - procéder sans filtre
+            // La sécurité est gérée par Spring Security (@RequireRole) pour les endpoints protégés
+            log.warn("[TenantAspect] ⚠ No tenant in context for method: {} - proceeding without filter (public endpoint)", methodName);
         }
 
         return joinPoint.proceed();
