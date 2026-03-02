@@ -46,5 +46,4 @@ ENTRYPOINT ["java", \
   "-XX:+ExplicitGCInvokesConcurrent", \
   "-Djava.security.egd=file:/dev/./urandom", \
   "-Dfile.encoding=UTF-8", \
-  "-Dspring.profiles.active=docker", \
   "-jar", "app.jar"]
