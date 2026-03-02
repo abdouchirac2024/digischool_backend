@@ -56,13 +56,13 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<NotificationDto> getNotificationsNonLues(Long userId) {
-        return notificationRepository.findByDestinataire_IdAndLuFalseOrderByCreatedAtDesc(userId)
+        return notificationRepository.findUnreadByDestinaireId(userId)
                 .stream().map(this::toDto).collect(Collectors.toList());
     }
 
     @Override
     public List<NotificationDto> getNotifications(Long userId) {
-        return notificationRepository.findByDestinataire_IdOrderByCreatedAtDesc(userId)
+        return notificationRepository.findByDestinaireId(userId)
                 .stream().map(this::toDto).collect(Collectors.toList());
     }
 
@@ -76,14 +76,14 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void marquerToutesCommeLues(Long userId) {
-        List<Notification> unread = notificationRepository.findByDestinataire_IdAndLuFalseOrderByCreatedAtDesc(userId);
+        List<Notification> unread = notificationRepository.findUnreadByDestinaireId(userId);
         unread.forEach(n -> n.setLu(true));
         notificationRepository.saveAll(unread);
     }
 
     @Override
     public long compterNonLues(Long userId) {
-        return notificationRepository.countByDestinataire_IdAndLuFalse(userId);
+        return notificationRepository.countUnreadByDestinaireId(userId);
     }
 
     private NotificationDto toDto(Notification notification) {
