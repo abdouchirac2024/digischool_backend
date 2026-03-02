@@ -31,6 +31,7 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     private TypeNotification type;
 
+    @Column(name = "lue")
     private Boolean lu = false;
 
     @CreationTimestamp
