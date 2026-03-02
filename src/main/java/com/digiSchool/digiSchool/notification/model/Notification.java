@@ -23,6 +23,10 @@ public class Notification {
     @JoinColumn(name = "destinataire_id", nullable = false)
     private User destinataire;
 
+    // Colonne legacy ajoutée par DDL update - synchronisée avec destinataire
+    @Column(name = "user_id")
+    private Long userId;
+
     private String titre;
 
     @Column(columnDefinition = "TEXT")
@@ -43,6 +47,8 @@ public class Notification {
     public void setId(Long id) { this.id = id; }
     public User getDestinataire() { return destinataire; }
     public void setDestinataire(User destinataire) { this.destinataire = destinataire; }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
     public String getTitre() { return titre; }
     public void setTitre(String titre) { this.titre = titre; }
     public String getMessage() { return message; }

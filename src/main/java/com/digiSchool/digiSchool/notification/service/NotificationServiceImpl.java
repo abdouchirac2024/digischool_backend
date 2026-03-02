@@ -39,6 +39,7 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setType(type);
         notification.setLu(false);
         notification.setTenantId(destinataire.getTenantId());
+        notification.setUserId(destinataire.getId());
         Notification saved = notificationRepository.save(notification);
 
         // Push WebSocket temps réel — non bloquant si WebSocket indisponible
