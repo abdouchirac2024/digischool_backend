@@ -19,6 +19,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Query("SELECT n FROM Notification n WHERE n.destinataire.id = :userId AND n.lu = false ORDER BY n.createdAt DESC")
     List<Notification> findUnreadByDestinaireId(@Param("userId") Long userId);
 
-    @Query("SELECT COUNT(n) FROM Notification n WHERE n.destinataire.id = :userId AND n.lu = false")
+    // Native query COUNT(*) pour éviter count(n.id) qui échoue si la colonne PK est nommée différemment
+    @Query(value = "SELECT COUNT(*) FROM notification WHERE destinataire_id = :userId AND lue = 0", nativeQuery = true)
     long countUnreadByDestinaireId(@Param("userId") Long userId);
 }
