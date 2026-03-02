@@ -14,14 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.digiSchool.digiSchool.user.dto.EmployeeDTO;
-import com.digiSchool.digiSchool.user.dto.EmployeeResponseDTO;
 import com.digiSchool.digiSchool.user.model.Employee;
 import com.digiSchool.digiSchool.user.service.EmployeeService;
-import com.digiSchool.digiSchool.auth.model.User;
-import com.digiSchool.digiSchool.auth.security.CurrentUser;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
@@ -54,8 +49,7 @@ public class EmployeeController {
     @PutMapping("/{id}")
     public ResponseEntity<EmployeeDTO> update(
             @PathVariable Long id,
-            @RequestBody EmployeeDTO dto,
-            @Parameter(hidden = true) @CurrentUser User currentUser) {
+            @RequestBody EmployeeDTO dto) {
         return ResponseEntity.ok(service.update(id, dto));
     }
 

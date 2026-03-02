@@ -121,7 +121,6 @@ public class EcoleSeeder {
         e.setAdresse(adresse);
         e.setTelephone(telephone);
         e.setEmail(email);
-        e.setStatut(statut);
         e.setQuartier(quartier);
         e.setTypeSecteur(typeSecteur);
         e.setTypeEtablissement(typeEtablissement);
@@ -132,7 +131,8 @@ public class EcoleSeeder {
         e.setCouleurSecondaire("#4318FF");
         e.setDateValidation(LocalDateTime.now());
 
-        // Set a temporary tenant to satisfy NOT NULL constraint, will be updated after save
+        // Set a temporary tenant to satisfy NOT NULL constraint, will be updated after
+        // save
         e.setTenant("TEMP");
         Ecole saved = ecoleRepository.save(e);
 
@@ -182,10 +182,12 @@ public class EcoleSeeder {
 
     /**
      * Generate a URL-friendly slug from a school name.
-     * Lowercases, replaces accents and spaces with hyphens, removes non-alphanumeric chars.
+     * Lowercases, replaces accents and spaces with hyphens, removes
+     * non-alphanumeric chars.
      */
     private String generateSlug(String nom) {
-        if (nom == null) return "";
+        if (nom == null)
+            return "";
         // Normalize accents
         String normalized = Normalizer.normalize(nom, Normalizer.Form.NFD);
         normalized = normalized.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");

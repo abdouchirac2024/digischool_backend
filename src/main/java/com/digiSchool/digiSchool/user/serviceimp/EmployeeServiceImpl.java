@@ -1,7 +1,6 @@
 package com.digiSchool.digiSchool.user.serviceimp;
 
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +19,6 @@ import com.digiSchool.digiSchool.user.service.EmployeeService;
 
 import jakarta.persistence.EntityManager;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.Session;
 
 @Service
@@ -34,9 +32,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     // 🔹 Injection par constructeur
     public EmployeeServiceImpl(EmployeeRepository repository,
-                               PasswordEncoder passwordEncoder,
-                               UserRepository userRepository,
-                               EntityManager entityManager) {
+            PasswordEncoder passwordEncoder,
+            UserRepository userRepository,
+            EntityManager entityManager) {
         this.employeeRepository = repository;
         this.passwordEncoder = passwordEncoder;
         this.entityManager = entityManager;
@@ -45,16 +43,16 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public List<EmployeeDTO> getAll() {
-    	String tenant = TenantContext.getTenant();
+        String tenant = TenantContext.getTenant();
 
         Session session = entityManager.unwrap(Session.class);
         session.enableFilter("tenantFilter")
-               .setParameter("tenant", tenant);
+                .setParameter("tenant", tenant);
 
         return employeeRepository.findAll()
-                         .stream()
-                         .map(this::mapToDTO)
-                         .toList();
+                .stream()
+                .map(this::mapToDTO)
+                .toList();
     }
 
     @Override
@@ -64,26 +62,25 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Session session = entityManager.unwrap(Session.class);
         session.enableFilter("tenantFilter")
-               .setParameter("tenant", tenant);
+                .setParameter("tenant", tenant);
 
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee introuvable"));
 
         return mapToDTO(employee);
     }
-    
+
     @Override
     @Transactional
     public Employee create(EmployeeDTO dto) {
         // Génération du matricule
-//        long count = employeeRepository.countByRoleAndHireDate(dto.getHireDate()) + 1;
+        // long count = employeeRepository.countByRoleAndHireDate(dto.getHireDate()) +
+        // 1;
         String matricule = dto.getRole() + "_" + dto.getHireDate() + "_";
         String tenant = TenantContext.getTenant();
         Session session = entityManager.unwrap(Session.class);
         session.enableFilter("tenantFilter")
-               .setParameter("tenant", tenant);
-        
-        
+                .setParameter("tenant", tenant);
 
         // Création de l'employé
         Employee employee = new Employee();
@@ -107,8 +104,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         User user = new User();
         user.setEmail(dto.getEmail());
         String rawPassword = generateRandomPassword();
-        
-        System.out.println("==>>>> Mot de passe <<<====="+rawPassword);
+
+        System.out.println("==>>>> Mot de passe <<<=====" + rawPassword);
         user.setPasswordHash(passwordEncoder.encode(rawPassword));
         user.setRole(dto.getRole());
         user.setEmployee(employee);
@@ -130,7 +127,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 🔹 Activation du filtre multi-tenant
         Session session = entityManager.unwrap(Session.class);
         session.enableFilter("tenantFilter")
-               .setParameter("tenant", tenant);
+                .setParameter("tenant", tenant);
 
         // 🔹 Recherche simple par ID (le filtre fait le travail)
         Employee employee = employeeRepository.findById(id)
@@ -138,8 +135,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         // 🔹 Sauvegarde anciennes valeurs pour historique
         EmployeeStatus ancienStatus = employee.getStatus();
-        Integer ancienneExperience = employee.getExperience();
-        String ancienGrade = employee.getGrade();
 
         // 🔹 Exemple règle métier
         if ((ancienStatus == EmployeeStatus.RETRAITE
@@ -169,7 +164,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (dto.getStatus() != null)
             employee.setStatus(dto.getStatus());
 
-//        employee.setUpdatedBy(dto.getUpdatedBy());
+        // employee.setUpdatedBy(dto.getUpdatedBy());
 
         // 🔹 Sécurité tenant
         if (employee.getTenant() == null) {
@@ -179,32 +174,34 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee saved = employeeRepository.save(employee);
 
         // 🔹 Historique (optionnel)
-//        saveHistory(
-//                saved,
-//                "UPDATE",
-//                ancienStatus,
-//                dto.getStatus(),
-//                ancienneExperience,
-//                dto.getExperience(),
-//                ancienGrade,
-//                dto.getGrade(),
-//                dto.getUpdatedBy() != null ? dto.getUpdatedBy() : 1L,
-//                "Mise à jour des informations employé"
-//        );
+        // saveHistory(
+        // saved,
+        // "UPDATE",
+        // ancienStatus,
+        // dto.getStatus(),
+        // ancienneExperience,
+        // dto.getExperience(),
+        // ancienGrade,
+        // dto.getGrade(),
+        // dto.getUpdatedBy() != null ? dto.getUpdatedBy() : 1L,
+        // "Mise à jour des informations employé"
+        // );
 
         return mapToDTO(saved);
     }
+
     @Override
     public void delete(Long id) {
-//        String tenant = TenantContext.getTenant();
-//        Employee employee = employeeRepository.findByIdAndTenant(id, tenant)
-//                .orElseThrow(() -> new RuntimeException("Employee not found"));
-//        employeeRepository.delete(employee);
+        // String tenant = TenantContext.getTenant();
+        // Employee employee = employeeRepository.findByIdAndTenant(id, tenant)
+        // .orElseThrow(() -> new RuntimeException("Employee not found"));
+        // employeeRepository.delete(employee);
     }
 
     // ================= UTILS =================
     private EmployeeDTO mapToDTO(Employee e) {
-        if (e == null) return null;
+        if (e == null)
+            return null;
 
         EmployeeDTO dto = new EmployeeDTO();
         dto.setId(e.getId());
@@ -221,36 +218,29 @@ public class EmployeeServiceImpl implements EmployeeService {
         dto.setMatricule(e.getMatricule());
         dto.setSpeciality(e.getSpeciality());
         dto.setSalary(e.getSalary());
-//        dto.setTenant(e.getTenant());
+        // dto.setTenant(e.getTenant());
         return dto;
-    }
-
-    private String formatRole(String role) {
-        return role.substring(0, 1).toUpperCase() + role.substring(1).toLowerCase();
-    }
-
-    private String random3Digits() {
-        return String.format("%03d", new Random().nextInt(1000));
     }
 
     // 🔹 Méthode pour mapper des collections futures (exemple)
     /*
-    private void mapCollections(EmployeeDTO dto, Employee entity) {
-        if (entity.getCertificats() == null) entity.setCertificats(new ArrayList<>());
-        if (dto.getCertificats() != null) {
-            entity.getCertificats().clear();
-            dto.getCertificats().forEach(c -> {
-                Certificat cert = new Certificat();
-                cert.setNom(c.getNom());
-                cert.setDate(c.getDate());
-                cert.setEmployee(entity);
-                entity.getCertificats().add(cert);
-            });
-        }
-    }
-    */
-    
+     * private void mapCollections(EmployeeDTO dto, Employee entity) {
+     * if (entity.getCertificats() == null) entity.setCertificats(new
+     * ArrayList<>());
+     * if (dto.getCertificats() != null) {
+     * entity.getCertificats().clear();
+     * dto.getCertificats().forEach(c -> {
+     * Certificat cert = new Certificat();
+     * cert.setNom(c.getNom());
+     * cert.setDate(c.getDate());
+     * cert.setEmployee(entity);
+     * entity.getCertificats().add(cert);
+     * });
+     * }
+     * }
+     */
+
     private String generateRandomPassword() {
-    	 return UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+        return UUID.randomUUID().toString().replace("-", "").substring(0, 8);
     }
 }

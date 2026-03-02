@@ -1,6 +1,5 @@
 package com.digiSchool.digiSchool.auth.controller;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -162,8 +161,7 @@ public class UserController {
 
         if (user.getId().equals(currentUser.getId())) {
             throw new com.digiSchool.digiSchool.auth.exception.ForbiddenException(
-                "Vous ne pouvez pas modifier votre propre statut"
-            );
+                    "Vous ne pouvez pas modifier votre propre statut");
         }
 
         return ResponseEntity.ok(toUserInfo(userService.updateUserStatus(id, status)));

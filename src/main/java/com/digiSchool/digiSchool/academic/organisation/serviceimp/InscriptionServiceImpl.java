@@ -32,8 +32,6 @@ import com.digiSchool.digiSchool.auth.model.RoleType;
 import com.digiSchool.digiSchool.auth.model.User;
 import com.digiSchool.digiSchool.auth.model.UserStatus;
 import com.digiSchool.digiSchool.auth.repository.UserRepository;
-import com.digiSchool.digiSchool.notification.model.Notification;
-import com.digiSchool.digiSchool.notification.repository.NotificationRepository;
 import com.digiSchool.digiSchool.user.model.Eleve;
 import com.digiSchool.digiSchool.user.model.EleveParent;
 import com.digiSchool.digiSchool.user.model.StatutEleve;
@@ -55,7 +53,6 @@ public class InscriptionServiceImpl implements InscriptionService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EcoleRepository ecoleRepository;
-    private final NotificationRepository notificationRepository;
     private final ClasseService classeService;
 
     public InscriptionServiceImpl(
@@ -68,7 +65,6 @@ public class InscriptionServiceImpl implements InscriptionService {
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             EcoleRepository ecoleRepository,
-            NotificationRepository notificationRepository,
             ClasseService classeService) {
         this.inscriptionRepository = inscriptionRepository;
         this.echeanceRepository = echeanceRepository;
@@ -79,7 +75,6 @@ public class InscriptionServiceImpl implements InscriptionService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.ecoleRepository = ecoleRepository;
-        this.notificationRepository = notificationRepository;
         this.classeService = classeService;
     }
 
@@ -230,7 +225,8 @@ public class InscriptionServiceImpl implements InscriptionService {
         return inscriptionRepository.findAllByTenant(tenant).stream()
                 .map(inscription -> {
                     InscriptionDto dto = toDto(inscription);
-                    List<Echeance> echeances = echeanceRepository.findByInscriptionIdInscription(inscription.getIdInscription());
+                    List<Echeance> echeances = echeanceRepository
+                            .findByInscriptionIdInscription(inscription.getIdInscription());
                     dto.setEcheances(echeances.stream().map(this::toEcheanceDto).collect(Collectors.toList()));
                     return dto;
                 })
@@ -249,7 +245,8 @@ public class InscriptionServiceImpl implements InscriptionService {
     private String generateNumeroInscription(String tenant, String anneeLibelle) {
         // Format: INS-{TENANT}-{ANNEE}-{NUMERO}
         // ex: INS-DIGI-001-2025-2026-00001
-        String anneeShort = anneeLibelle != null ? anneeLibelle.replace("/", "-") : String.valueOf(LocalDate.now().getYear());
+        String anneeShort = anneeLibelle != null ? anneeLibelle.replace("/", "-")
+                : String.valueOf(LocalDate.now().getYear());
         String prefix = "INS-" + tenant + "-" + anneeShort + "-";
 
         Integer maxNum = inscriptionRepository.findMaxNumeroByTenantAndPrefix(tenant, prefix);
@@ -257,7 +254,8 @@ public class InscriptionServiceImpl implements InscriptionService {
         return prefix + String.format("%05d", nextNum);
     }
 
-    private List<Echeance> creerEcheances(Inscription inscription, Double montantTotal, LocalDate dateInscription, String tenant) {
+    private List<Echeance> creerEcheances(Inscription inscription, Double montantTotal, LocalDate dateInscription,
+            String tenant) {
         List<Echeance> echeances = new ArrayList<>();
 
         // Tranche 1: 40% - Frais d'inscription (a la date d'inscription)
@@ -321,15 +319,15 @@ public class InscriptionServiceImpl implements InscriptionService {
         if (ecole != null) {
             user.setEcole(ecole);
         }
-//        if (eleve.getQuartier() != null) {
-//            user.setQuartier(eleve.getQuartier());
-//        }
+        // if (eleve.getQuartier() != null) {
+        // user.setQuartier(eleve.getQuartier());
+        // }
 
         userRepository.save(user);
     }
 
     private void notifyParentPrincipal(Eleve eleve, Classe classe, Anneescolaire annee,
-                                        Double montantTotal, List<Echeance> echeances, String tenant) {
+            Double montantTotal, List<Echeance> echeances, String tenant) {
         // Trouver le parent principal
         EleveParent parentPrincipal = eleveParentRepository.findPrincipalByEleve(eleve.getIdEleve())
                 .orElse(null);
@@ -363,18 +361,19 @@ public class InscriptionServiceImpl implements InscriptionService {
         msg.append(".\n\nEcheancier de paiement (").append(String.format("%.0f", montantTotal)).append(" FCFA):\n");
         for (Echeance e : echeances) {
             msg.append("- ").append(e.getLibelle()).append(": ")
-               .append(String.format("%.0f", e.getMontant())).append(" FCFA (echeance: ")
-               .append(e.getDateEcheance()).append(")\n");
+                    .append(String.format("%.0f", e.getMontant())).append(" FCFA (echeance: ")
+                    .append(e.getDateEcheance()).append(")\n");
         }
 
-//        Notification notification = new Notification();
-//        notification.setTenantId(tenant);
-//        notification.setDestinataireId(parentUser.getId());
-//        notification.setTitre("Inscription de votre enfant " + eleve.getPrenom() + " " + eleve.getNom());
-//        notification.setMessage(msg.toString());
-//        notification.setType("INSCRIPTION");
-//        notification.setLue(false);
-//        notificationRepository.save(notification);
+        // Notification notification = new Notification();
+        // notification.setTenantId(tenant);
+        // notification.setDestinataireId(parentUser.getId());
+        // notification.setTitre("Inscription de votre enfant " + eleve.getPrenom() + "
+        // " + eleve.getNom());
+        // notification.setMessage(msg.toString());
+        // notification.setType("INSCRIPTION");
+        // notification.setLue(false);
+        // notificationRepository.save(notification);
     }
 
     // =====================

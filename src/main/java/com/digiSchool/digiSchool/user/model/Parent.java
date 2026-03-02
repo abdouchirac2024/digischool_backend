@@ -7,7 +7,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.digiSchool.digiSchool.Exceptionconfig.model.Quartier;
 import com.digiSchool.digiSchool.Exceptionconfig.model.TenantEntity;
 
 import jakarta.persistence.CascadeType;
@@ -17,29 +16,23 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Filter(name = "tenantFilter", condition = "tenant = :tenant")
-@Table(
-    name = "parent",
-    uniqueConstraints = {
+@Table(name = "parent", uniqueConstraints = {
         @UniqueConstraint(columnNames = "matricule_parent"),
-        @UniqueConstraint(columnNames = {"email", "tenant"}),
-        @UniqueConstraint(columnNames = {"telephone", "tenant"})
-    },
-    indexes = {
+        @UniqueConstraint(columnNames = { "email", "tenant" }),
+        @UniqueConstraint(columnNames = { "telephone", "tenant" })
+}, indexes = {
         @Index(name = "idx_parent_matricule", columnList = "matricule_parent"),
         @Index(name = "idx_parent_email", columnList = "email"),
         @Index(name = "idx_parent_telephone", columnList = "telephone"),
         @Index(name = "idx_parent_quartier", columnList = "quartier_id"),
         @Index(name = "idx_parent_tenant", columnList = "tenant")
-    }
-)
+})
 public class Parent extends TenantEntity {
 
     @Id
@@ -66,10 +59,6 @@ public class Parent extends TenantEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String adresse;
-
-//    @ManyToOne
-//    @JoinColumn(name = "quartier_id", nullable = false)
-//    private Quartier quartier;
 
     @Column(length = 100)
     private String profession;
@@ -168,14 +157,6 @@ public class Parent extends TenantEntity {
         this.adresse = adresse;
     }
 
-//    public Quartier getQuartier() {
-//        return quartier;
-//    }
-//
-//    public void setQuartier(Quartier quartier) {
-//        this.quartier = quartier;
-//    }
-
     public String getProfession() {
         return profession;
     }
@@ -256,11 +237,4 @@ public class Parent extends TenantEntity {
         this.deletedAt = deletedAt;
     }
 
-    public String getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(String tenant) {
-        this.tenant = tenant;
-    }
 }

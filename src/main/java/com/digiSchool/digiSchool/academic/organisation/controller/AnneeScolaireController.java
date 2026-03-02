@@ -4,14 +4,12 @@ import java.util.List;
 
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.digiSchool.digiSchool.academic.organisation.dto.AnneeScolaireDTO;
@@ -20,10 +18,7 @@ import com.digiSchool.digiSchool.academic.organisation.model.Anneescolaire;
 import com.digiSchool.digiSchool.academic.organisation.service.AnneeScolaireService;
 import com.digiSchool.digiSchool.auth.model.User;
 import com.digiSchool.digiSchool.auth.security.CurrentUser;
-
 import io.swagger.v3.oas.annotations.Parameter;
-import lombok.RequiredArgsConstructor;
-
 
 @RestController
 @CrossOrigin
@@ -61,7 +56,7 @@ public class AnneeScolaireController {
             @PathVariable Long id,
             @RequestBody @Validated AnneeScolaireDTO dto,
             @Parameter(hidden = true) @CurrentUser User currentUser) {
-    	System.out.println("====== UPDATE CONTROLLER ======");
+        System.out.println("====== UPDATE CONTROLLER ======");
         dto.setTenantId(currentUser.getTenantId());
         return service.update(id, dto);
     }

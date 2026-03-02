@@ -7,11 +7,9 @@ import java.util.Random;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.digiSchool.digiSchool.Exceptionconfig.model.Quartier;
 import com.digiSchool.digiSchool.Exceptionconfig.service.TenantContext;
 import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
 import com.digiSchool.digiSchool.academic.organisation.repository.EcoleRepository;
-import com.digiSchool.digiSchool.academic.organisation.repository.QuartierRepository;
 import com.digiSchool.digiSchool.auth.model.RoleType;
 import com.digiSchool.digiSchool.auth.model.User;
 import com.digiSchool.digiSchool.auth.model.UserStatus;
@@ -28,15 +26,15 @@ import jakarta.transaction.Transactional;
 public class ParentServiceImpl implements ParentService {
 
     private final ParentRepository parentRepository;
-    private final QuartierRepository quartierRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EcoleRepository ecoleRepository;
 
-    public ParentServiceImpl(ParentRepository parentRepository, QuartierRepository quartierRepository,
-            UserRepository userRepository, PasswordEncoder passwordEncoder, EcoleRepository ecoleRepository) {
+    public ParentServiceImpl(ParentRepository parentRepository,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            EcoleRepository ecoleRepository) {
         this.parentRepository = parentRepository;
-        this.quartierRepository = quartierRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.ecoleRepository = ecoleRepository;
@@ -106,7 +104,6 @@ public class ParentServiceImpl implements ParentService {
         }
 
         // Associer le quartier si renseigné
-    
 
         userRepository.save(user);
     }
@@ -146,12 +143,6 @@ public class ParentServiceImpl implements ParentService {
         if (dto.getActif() != null) {
             parent.setActif(dto.getActif());
         }
-
-//        if (dto.getQuartierId() != null) {
-//            Quartier quartier = quartierRepository.findById(dto.getQuartierId())
-//                    .orElseThrow(() -> new RuntimeException("Quartier introuvable"));
-//            parent.setQuartier(quartier);
-//        }
 
         return toDto(parentRepository.save(parent));
     }
@@ -233,12 +224,6 @@ public class ParentServiceImpl implements ParentService {
         parent.setPieceIdentiteType(dto.getPieceIdentiteType());
         parent.setPieceIdentiteNumero(dto.getPieceIdentiteNumero());
 
-//        if (dto.getQuartierId() != null) {
-//            Quartier quartier = quartierRepository.findById(dto.getQuartierId())
-//                    .orElseThrow(() -> new RuntimeException("Quartier introuvable"));
-//            parent.setQuartier(quartier);
-//        }
-
         return parent;
     }
 
@@ -261,11 +246,6 @@ public class ParentServiceImpl implements ParentService {
         dto.setCreatedAt(parent.getCreatedAt());
         dto.setUpdatedAt(parent.getUpdatedAt());
         dto.setDeletedAt(parent.getDeletedAt());
-
-//        if (parent.getQuartier() != null) {
-//            dto.setQuartierId(parent.getQuartier().getId());
-//            dto.setQuartierNom(parent.getQuartier().getNom());
-//        }
 
         return dto;
     }

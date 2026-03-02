@@ -18,7 +18,6 @@ import com.digiSchool.digiSchool.auth.exception.AuthenticationException;
 import com.digiSchool.digiSchool.auth.model.RoleType;
 import com.digiSchool.digiSchool.auth.model.User;
 import com.digiSchool.digiSchool.auth.model.UserStatus;
-import com.digiSchool.digiSchool.auth.repository.RefreshTokenRepository;
 import com.digiSchool.digiSchool.auth.repository.UserRepository;
 import com.digiSchool.digiSchool.storage.MinioStorageService;
 import com.digiSchool.digiSchool.storage.StorageException;
@@ -28,18 +27,15 @@ import com.digiSchool.digiSchool.storage.StorageException;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final PresenceService presenceService;
     private final MinioStorageService storageService;
 
     public UserService(UserRepository userRepository,
-            RefreshTokenRepository refreshTokenRepository,
             PasswordEncoder passwordEncoder,
             PresenceService presenceService,
             MinioStorageService storageService) {
         this.userRepository = userRepository;
-        this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.presenceService = presenceService;
         this.storageService = storageService;

@@ -10,6 +10,7 @@ import com.digiSchool.digiSchool.academic.organisation.model.Classe;
 import com.digiSchool.digiSchool.academic.organisation.model.Ecole;
 import com.digiSchool.digiSchool.academic.organisation.model.Niveau;
 import com.digiSchool.digiSchool.academic.organisation.model.StatutClasse;
+import com.digiSchool.digiSchool.academic.organisation.model.StatutEcole;
 import com.digiSchool.digiSchool.academic.organisation.repository.AnneeScolaireRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.ClasseRepository;
 import com.digiSchool.digiSchool.academic.organisation.repository.EcoleRepository;
@@ -202,7 +203,7 @@ public class DataInitializer implements CommandLineRunner {
             ecole.setAdresse(adresse);
             ecole.setTelephone(tel);
             ecole.setEmail(email);
-            ecole.setStatut(true);
+            ecole.setStatutEcole(StatutEcole.VALIDEE);
 
             var quartier = quartierRepository.findByCode(quartierCode).orElse(null);
             if (quartier != null) {
@@ -345,7 +346,7 @@ public class DataInitializer implements CommandLineRunner {
             parent.setAdresse(adresse);
             parent.setProfession(profession);
             parent.setActif(true);
-//            parent.setQuartier(quartier);
+            // parent.setQuartier(quartier);
             parent.setTenant(ecole.getTenant());
 
             parentRepository.save(parent);
