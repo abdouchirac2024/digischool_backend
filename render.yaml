@@ -30,4 +30,4 @@ databases:
   - name: digischool-db
     plan: free # Free for 90 days on Render
     databaseName: digischool
-    user: postgres
+    user: digischool
