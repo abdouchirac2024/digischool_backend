@@ -2,24 +2,32 @@ services:
   - type: web
     name: digischool-backend
     env: docker
-    plan: free # Change to starter if RAM > 512MB is needed
-    region: frankfurt # Or your preferred region
+    plan: free
+    region: frankfurt
     dockerContext: .
     dockerfilePath: ./Dockerfile
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      - key: DB_URL
+      - key: DB_HOST
         fromDatabase:
-          name: digischool-db
-          property: connectionString
+          name: db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: db
+          property: databaseName
       - key: DB_USERNAME
         fromDatabase:
-          name: digischool-db
+          name: db
           property: user
       - key: DB_PASSWORD
         fromDatabase:
-          name: digischool-db
+          name: db
           property: password
       - key: JWT_SECRET
         generateValue: true
@@ -27,7 +35,7 @@ services:
         value: update
 
 databases:
-  - name: digischool-db
-    plan: free # Free for 90 days on Render
+  - name: db
+    plan: free
     databaseName: digischool
     user: digischool
