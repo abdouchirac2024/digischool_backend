@@ -9,18 +9,10 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      - key: DB_HOST
+      - key: DB_URL
         fromDatabase:
           name: digischool-db
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: digischool-db
-          property: port
-      - key: DB_NAME
-        fromDatabase:
-          name: digischool-db
-          property: databaseName
+          property: connectionString
       - key: DB_USERNAME
         fromDatabase:
           name: digischool-db
