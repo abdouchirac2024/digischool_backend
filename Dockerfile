@@ -40,10 +40,8 @@ HEALTHCHECK --interval=30s --timeout=10s --retries=5 --start-period=90s \
 #   -Dfile.encoding=UTF-8        → s'assurer que l'encodage est correct
 ENTRYPOINT ["java", \
   "-XX:+UseContainerSupport", \
-  "-XX:MaxRAMPercentage=75.0", \
-  "-XX:+UseG1GC", \
-  "-XX:G1HeapRegionSize=16m", \
-  "-XX:+ExplicitGCInvokesConcurrent", \
+  "-XX:MaxRAMPercentage=50.0", \
+  "-XX:+UseSerialGC", \
   "-Djava.security.egd=file:/dev/./urandom", \
   "-Dfile.encoding=UTF-8", \
   "-jar", "app.jar"]
