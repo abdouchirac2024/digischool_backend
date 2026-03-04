@@ -3,7 +3,7 @@ services:
     name: digischool-backend
     env: docker
     plan: free
-    region: frankfurt
+    region: oregon
     dockerContext: .
     dockerfilePath: ./Dockerfile
     envVars:
@@ -11,23 +11,23 @@ services:
         value: prod
       - key: DB_HOST
         fromDatabase:
-          name: db
+          name: digischool-db
           property: host
       - key: DB_PORT
         fromDatabase:
-          name: db
+          name: digischool-db
           property: port
       - key: DB_NAME
         fromDatabase:
-          name: db
+          name: digischool-db
           property: databaseName
       - key: DB_USERNAME
         fromDatabase:
-          name: db
+          name: digischool-db
           property: user
       - key: DB_PASSWORD
         fromDatabase:
-          name: db
+          name: digischool-db
           property: password
       - key: JWT_SECRET
         generateValue: true
@@ -35,7 +35,8 @@ services:
         value: update
 
 databases:
-  - name: db
+  - name: digischool-db
     plan: free
-    databaseName: digischool
+    databaseName: digischool_ak4h
     user: digischool
+    region: oregon
